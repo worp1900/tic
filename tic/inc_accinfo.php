@@ -1,10 +1,23 @@
 <!-- START: inc_accountinfo -->
 <table width="100%" cellspacing="6" border="0" cellpadding="1" style="border:1px #000000 solid;background-color:#ffffff;">
 	<colgroup>
-		<col width="85%" />
-		<col width="15%" />
+		<col width="100"/>
+		<col/>
+		<col width="250" />
 	</colgroup>
 	<tr>
+		<td rowspan="2" align=left" valign="middle" style="width: 150px">
+			<form action="main.php" method="get">
+				<input type="hidden" name="modul" value="showgalascans" />
+				<b>Scanabruf:</b><br/>
+				<input type="text" name="xgala" style="width: 40px" />:<input type="text" name="xplanet" style="width: 40px" onchange="javascript:document.getElementById('myselect').selectedIndex=1;"/><br/>
+				<select size="1" name="displaytype" id="myselect">
+					<option selected="selected" value="1">Galaxie</option>
+					<option value="0">Planet</option>
+				</select>
+				<input type="submit" value="go!"/>
+			</form>
+		</td>
 		<td valign="middle" rowspan="2" align="center">
 <?php
 	include( "./inc_summary.php" );
