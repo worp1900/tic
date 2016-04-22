@@ -151,6 +151,35 @@
 	$SQL_Result = tic_mysql_query( $sql, $SQL_DBConn );
 	$count =  mysql_num_rows($SQL_Result);
 	if ( $count == 0 ) {
+		$sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($_GET['xgala']) . "' AND p = '" . mysql_real_escape_string($_GET['xplanet']) . "'";
+		$SQL_Result = tic_mysql_query($sql, $SQL_DBConn);
+		if(mysql_num_rows($SQL_Result) > 0) {
+			$svs = mysql_result($SQL_Result, 0, 'svs');
+			$type = mysql_result($SQL_Result, 0, 'typ');
+			
+			switch($type) {
+				case 0:
+					$type = 'Sektor';
+					break;
+				case 1:
+					$type = 'Einheiten';
+					break;
+				case 2:
+					$type = 'Milit&auml;r';
+					break;
+				case 3:
+					$type = 'Gesch&uuml;schtze';
+					break;
+				case 4:
+					$type = 'Nachrichten';
+					break;
+				default:
+					$type = '<i>unbekannt</i>';
+			}
+
+			echo '<b><font color="red">Scanblock ' . $type . ' mit ' . $svs . ' SVS!</font></b><br/>';
+		}
+
 		echo '<font color="#800000" size="-1"><b>Sorry - Keine Scans vorhanden.</b></font>';
 		return;
 	} else {
