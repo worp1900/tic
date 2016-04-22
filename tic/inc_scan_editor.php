@@ -1,5 +1,40 @@
 <?php
 
+function block_edit() {
+	global $Benutzer;
+?>
+<form name="form1" method="post" action="./main.php?modul=scans">
+<input type="hidden" name="action" value="scan_edit" />
+<input type="hidden" name="galakoord" value="<?=$_POST['galakoord']?>" />
+<input type="hidden" name="planetkoord" value="<?=$_POST['planetkoord']?>" />
+<input type="hidden" name="scanart" value="block">
+<table align="center">
+    <tr>
+      <td class="datatablehead" colspan="2">Scanblock (<?echo $_POST['galakoord'].':'.$_POST['planetkoord']; ?>)</td>
+    </tr>
+    <tr class="fieldnormaldark">
+      <td align="left">SVS:</td><td><input type="text" name="svs" value="<?=ZahlZuText($Benutzer['svs']);?>" style="width: 150px; text-align: right;" /></td>
+    </tr>
+    <tr class="fieldnormallight">
+      <td align="left">Typ:</td>
+      <td>
+        <select name="blocktype" size="5" style="width: 150px">
+	  <option value="0" selected="selected">Sektor</option>
+	  <option value="1">Einheiten</option>
+	  <option value="2">Milit&auml;r</option>
+	  <option value="3">Gesch&uuml;tze</option>
+	  <option value="4">Nachrichten</option>
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="datatablefoot"><input type="submit" name="Abschicken" value="&Auml;nderungen speichern"  /></td>
+    </tr>
+  </table>
+</form>
+<?
+}
+
 function sek_edit() {
 	global $SQL_DBConn;
 

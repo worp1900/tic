@@ -35,7 +35,7 @@
           <tr>
             <td valign="top" width="33%" rowspan="2">
               <table border="0" cellspacing="2" cellpadding="0" align="center" width="100%">
-                <tr>
+<!--                <tr>
                   <td class="datatablehead">Planetenscan abfragen</td>
                 </tr>
                 <tr>
@@ -60,7 +60,21 @@
                       <input type="submit" value="Anzeigen" name="submit" />
                     </form>
                   </td>
+                </tr> //-->
+                <tr>
+                  <td class="datatablehead" align="center">Scanblock-Eingabe &quot;von Hand&quot;</td>
                 </tr>
+                <tr>
+                  <td class="fieldnormallight" align="center">
+                    <form method="post" action="./main.php?modul=scan_editor">
+                        <input type="hidden" name="scanart" value="block">
+                      <br />
+                      <input type="text" name="galakoord" size="4" maxlength="4" value="<?=$coords_gala?>" />
+                      :
+                      <input type="text" name="planetkoord" size="2" maxlength="2" value="<?=$coords_planet?>" />
+                      <input type="submit" name="manuell" value="Manuell erfassen" />
+                    </form>
+                  </td>
                 <tr>
                   <td class="datatablehead" align="center">Sektor-Eingabe &quot;von Hand&quot;</td>
                 </tr>

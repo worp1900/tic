@@ -155,6 +155,11 @@
 		return;
 	} else {
 		// all
+		$svs_s = 0;
+		$svs_g = 0;
+		$svs_e = 0;
+		$svs_m = 0;
+
 		// sektor
 		$pts = 0; $me  = 0; $ke  = 0; $sgen=0; $szeit='-'; $s=0; $d=0; $a=0;
 		// unit init
@@ -189,6 +194,7 @@
 					$s	= mysql_result($SQL_Result, $i, 's' );
 					$d	= mysql_result($SQL_Result, $i, 'd' );
 					$a	= mysql_result($SQL_Result, $i, 'a' );
+					$svs_s  = mysql_result($SQL_Result, $i, 'erfasser_svs');
 					break;
 				case 1: // unit
 					$uzeit	= mysql_result($SQL_Result, $i, 'zeit' );
@@ -202,6 +208,7 @@
 					$tr	= mysql_result($SQL_Result, $i, 'sft' );
 					$ka	= mysql_result($SQL_Result, $i, 'sfka' );
 					$ca	= mysql_result($SQL_Result, $i, 'sfsu' );
+					$svs_e  = mysql_result($SQL_Result, $i, 'erfasser_svs');
 					break;
 				case 2: // mili-scan
 					$mzeit	= mysql_result($SQL_Result, $i, 'zeit' );
@@ -233,7 +240,7 @@
 					$tr2	= mysql_result($SQL_Result, $i, 'sf2t' );
 					$ka2	= mysql_result($SQL_Result, $i, 'sf2ka' );
 					$ca2	= mysql_result($SQL_Result, $i, 'sf2su' );
-
+					$svs_m  = mysql_result($SQL_Result, $i, 'erfasser_svs');
 					break;
 				case 3: // geschtz
 					$gzeit	= mysql_result($SQL_Result, $i, 'zeit' );
@@ -243,6 +250,7 @@
 					$mr	= mysql_result($SQL_Result, $i, 'gmr' );
 					$sr	= mysql_result($SQL_Result, $i, 'gsr' );
 					$aj	= mysql_result($SQL_Result, $i, 'ga' );
+					$svs_g  = mysql_result($SQL_Result, $i, 'erfasser_svs');
 					break;
 				default:
 					echo '????huh?!??? - Ohooooh';
@@ -253,7 +261,7 @@
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="12" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?></td>
+			<td colspan="13" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=urlencode($rname);?>" target="_blank">... Punkteverlauf</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -266,6 +274,7 @@
 			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for IRC</b></td>
 			<td>&nbsp;</td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
+			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
 		</tr>
 		<tr>
@@ -287,6 +296,7 @@
 			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$sektor.'\', STICKY, CAPTION,\'Sektorscan\', CENTER);" onmouseout="nd();">Sektorscan</a>';?></td>
 			<td>&nbsp;</td>
 			<td class="fieldnormallight"><?=$sgen;?></td>
+			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
 		</tr>
 		<tr>
@@ -306,6 +316,7 @@
 			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$gscan.'\', STICKY, CAPTION,\'Geschützscan\', CENTER);" onmouseout="nd();">Geschützscan</a>';?></td>
 			<td>&nbsp;</td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
+			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
 		</tr>
 		<tr>
@@ -326,6 +337,7 @@
 			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF.'\', STICKY, CAPTION,\'Militärscan\', CENTER);" onmouseout="nd();">Kompleter Militärscan</a>';?></td>
 			<td>&nbsp;</td>
 			<td class="fieldnormallight"><?php echo $ggen; ?></td>
+			<td class="fieldnormallight"><?=$svs_g;?></td>
 			<td class="fieldnormallight"><?php echo $gzeit; ?></td>
 		</tr>
 		<tr>
@@ -340,6 +352,7 @@
 			<td class="fieldnormaldark"><b>Kleps</b></td>
 			<td class="fieldnormaldark"><b>Schutzies</b></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
+			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
 		</tr>
 		<tr bgcolor="#ddddfd">
@@ -361,6 +374,7 @@
 			<td><b><?php echo $ka; ?></b></td>
 			<td><b><?php echo $ca; ?></b></td>
 			<td><b><?php echo $ugen; ?></b></td>
+			<td><b><?=$svs_e;?></td>
 			<td><b><?php echo $uzeit; ?></b></td>
 		</tr>
 		<tr class="fieldnormallight">
@@ -375,6 +389,7 @@
 			<td><?php echo $ka0; ?></td>
 			<td><?php echo $ca0; ?></td>
 			<td rowspan="3"><?php echo $mgen; ?></td>
+			<td rowspan="3"><?=$svs_m;?></td>
 			<td rowspan="3"><?php echo $mzeit; ?></td>
 		</tr>
 		<tr class="fieldnormallight">
