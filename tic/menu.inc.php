@@ -25,6 +25,9 @@
 			<tr>
 				<td class="menu"><a href="./main.php?modul=taktikbildschirm&amp;mode=5"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Galaxie <?=$Benutzer['galaxie']?></a></td>
 			</tr>
+			<tr>
+				<td class="menu"><a href="./main.php?modul=statistikmod"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Statistiken</a></td>
+			</tr>
 		</table>
 	</td></tr>
 	<tr>
