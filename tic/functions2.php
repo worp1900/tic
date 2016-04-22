@@ -307,10 +307,10 @@ class scan_speichern {
 			print_r($scan);
 			print_r($sek);
 		} else {
-			$query[0] = 'DELETE FROM gn4gnuser WHERE gala="'.$gala.'" AND planet="'.$planet.'"';
-			$query[1] = 'INSERT INTO gn4gnuser (gala, planet, name, erfasst) '.
-				'VALUES ("'.$gala.'", "'.$planet.'", "'.$name.'", "'.time().'")';
-			mysql_multi_query($query);
+			//$query[0] = 'DELETE FROM gn4gnuser WHERE gala="'.$gala.'" AND planet="'.$planet.'"';
+			//$query[1] = 'INSERT INTO gn4gnuser (gala, planet, name, erfasst) '.
+			//	'VALUES ("'.$gala.'", "'.$planet.'", "'.$name.'", "'.time().'")';
+			//mysql_multi_query($query);
 		}
 	}
 	function log($fehler) {

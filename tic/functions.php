@@ -188,9 +188,9 @@ function GetUserInfos($id) {
     {
         if ($name != "" && is_numeric($planet) && $planet != '' && is_numeric($gala)&& $gala != '')
         {
-            tic_mysql_query("DELETE FROM gn4gnuser WHERE name='".$name."'") or die(tic_mysql_error(__FILE__,__LINE__));
-            tic_mysql_query("DELETE FROM gn4gnuser WHERE gala='".$gala."' AND planet='".$planet."'") or die(tic_mysql_error(__FILE__,__LINE__));
-            tic_mysql_query("INSERT INTO gn4gnuser (gala, planet, name, kommentare, erfasst) VALUES ('".$gala."', '".$planet."', '".$name."', '".$kommentare."', '".time()."')") or die(tic_mysql_error(__FILE__,__LINE__));
+//            tic_mysql_query("DELETE FROM gn4gnuser WHERE name='".$name."'") or die(tic_mysql_error(__FILE__,__LINE__));
+//            tic_mysql_query("DELETE FROM gn4gnuser WHERE gala='".$gala."' AND planet='".$planet."'") or die(tic_mysql_error(__FILE__,__LINE__));
+//            tic_mysql_query("INSERT INTO gn4gnuser (gala, planet, name, kommentare, erfasst) VALUES ('".$gala."', '".$planet."', '".$name."', '".$kommentare."', '".time()."')") or die(tic_mysql_error(__FILE__,__LINE__));
         }
     }
 
