@@ -41,7 +41,7 @@
 	$mtime = $mtime[1] + $mtime[0];
 	$start_time = $mtime;
 
-	$version = "1.36.3";
+	$version = "1.45.0dev";
 
 	include("./accdata.php");
 	include("./globalvars.php");
@@ -247,7 +247,6 @@
 			<table width="100%"><tr>
 				<td align="left" valign="top">
 					<font size="-1">T.I.C. v<?=$version?></font><br />
-					<a href="http://www.galaxy-network.de/game/login.php" target="_blank"><img style="border:0px" src="http://www.galaxy-network.de/banner_images/gn-button.gif" alt="Galax-Network" /></a>
 				</td>
 				<td align="center" style="white-space:nowrap;">
 					erstellt in
@@ -256,16 +255,13 @@
 	$mtime = explode(" ", $mtime);
 	$mtime = $mtime[1] + $mtime[0];
 	$end_time = $mtime;
-	echo sprintf("%01.3f", $end_time - $start_time)." sek.";
+	echo sprintf("%01.3f", $end_time - $start_time)."s";
 	if (isset($mid_time) && $mid_time != 0)
 	{
-		echo " (".sprintf("%01.3f", $mid_time - $start_time)." sek.)<br />\n";
+		echo " (".sprintf("%01.3f", $mid_time - $start_time)."s)\n";
 	}
 	echo "<br />".count_querys(false)." Datenbankabfragen\n";
 ?>
-				</td>
-				<td align="right" valign="top">
-					<a href="irc://irc.quakenet.org/tic-progger" target="_blank"><img style="border:0px" src="./bilder/TICELogo.jpg" alt="Tic-Entwickler" /></a>
 				</td>
 			</tr></table>
 		</div></div></div></div>
