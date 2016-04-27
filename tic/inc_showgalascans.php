@@ -79,7 +79,7 @@
 		return;
 	}
 ?>
-	<h2>Scans, Scans, Scans - Scanausgaben</h2>
+	<h2>Scanausgaben</h2>
 	<table width="100%" cellspacing="0" cellpadding="0">
 		<tr><td class="datatablehead">Scanausgaben</td></tr>
 		<tr><td>
@@ -147,11 +147,11 @@
 	</form>
 	<br />
 <?php
-//	echo "sql=".$sql;
+	//echo "sql=".$sql;
 	$SQL_Result = tic_mysql_query( $sql, $SQL_DBConn );
 	$count =  mysql_num_rows($SQL_Result);
 	if ( $count == 0 ) {
-		$sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($_GET['xgala']) . "' AND p = '" . mysql_real_escape_string($_GET['xplanet']) . "'";
+		$sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($_GET['xgala']) . "' AND p = '" . mysql_real_escape_string($_GET['xplanet']) . "' ORDER BY t DESC LIMIT 1";
 		$SQL_Result = tic_mysql_query($sql, $SQL_DBConn);
 		if(mysql_num_rows($SQL_Result) > 0) {
 			$svs = mysql_result($SQL_Result, 0, 'svs');
@@ -184,21 +184,20 @@
 		return;
 	} else {
 		// all
-		$svs_s = 0;
-		$svs_g = 0;
-		$svs_e = 0;
-		$svs_m = 0;
-
+		$svs_s = '-';
+		$svs_g = '-';
+		$svs_e = '-';
+		$svs_m = '-';
 		// sektor
-		$pts = 0; $me  = 0; $ke  = 0; $sgen=0; $szeit='-'; $s=0; $d=0; $a=0;
+		$pts = '-'; $me  = '-'; $ke  = '-'; $sgen='-'; $szeit='-'; $s='-'; $d='-'; $a='-';
 		// unit init
-		$ja   = 0; $bo   = 0; $fr   = 0; $ze   = 0; $kr   = 0; $sl   = 0; $tr   = 0; $ka   = 0; $ca   = 0; $ugen=0; $uzeit='-';
+		$ja   = '-'; $bo   = '-'; $fr   = '-'; $ze   = '-'; $kr   = '-'; $sl   = '-'; $tr   = '-'; $ka   = '-'; $ca   = '-'; $ugen='-'; $uzeit='-';
 		// mili init
-		$ja0  = 0; $bo0  = 0; $fr0  = 0; $ze0  = 0; $kr0  = 0; $sl0  = 0; $tr0  = 0; $ka0  = 0; $ca0  = 0; $mgen=0; $mzeit='-';
-		$ja1  = 0; $bo1  = 0; $fr1  = 0; $ze1  = 0; $kr1  = 0; $sl1  = 0; $tr1  = 0; $ka1  = 0; $ca1  = 0;
-		$ja2  = 0; $bo2  = 0; $fr2  = 0; $ze2  = 0; $kr2  = 0; $sl2  = 0; $tr2  = 0; $ka2  = 0; $ca2  = 0;
+		$ja0  = '-'; $bo0  = '-'; $fr0  = '-'; $ze0  = '-'; $kr0  = '-'; $sl0  = '-'; $tr0  = '-'; $ka0  = '-'; $ca0  = '-'; $mgen='-'; $mzeit='-';
+		$ja1  = '-'; $bo1  = '-'; $fr1  = '-'; $ze1  = '-'; $kr1  = '-'; $sl1  = '-'; $tr1  = '-'; $ka1  = '-'; $ca1  = '-';
+		$ja2  = '-'; $bo2  = '-'; $fr2  = '-'; $ze2  = '-'; $kr2  = '-'; $sl2  = '-'; $tr2  = '-'; $ka2  = '-'; $ca2  = '-';
 		// gscan
-		$lo = 0; $lr = 0; $mr = 0; $sr = 0; $aj = 0; $ggen=0; $gzeit='-';
+		$lo = '-'; $lr = '-'; $mr = '-'; $sr = '-'; $aj = '-'; $ggen='-'; $gzeit='-';
 		$rscans = '';
 
 		for ( $i=0; $i<$count; $i++ ) {
@@ -290,7 +289,7 @@
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="13" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=urlencode($rname);?>" target="_blank">... Punkteverlauf</a></td>
+			<td colspan="13" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -448,16 +447,20 @@
 	</table>
 <?php
 				// all
+				$svs_s = '-';
+				$svs_g = '-';
+				$svs_e = '-';
+				$svs_m = '-';
 				// sektor
-				$pts = 0; $me  = 0; $ke  = 0; $sgen=0; $szeit='-'; $s=0; $d=0; $a=0;
+				$pts = '-'; $me  = '-'; $ke  = '-'; $sgen='-'; $szeit='-'; $s='-'; $d='-'; $a='-';
 				// unit init
-				$ja   = 0; $bo   = 0; $fr   = 0; $ze   = 0; $kr   = 0; $sl   = 0; $tr   = 0; $ka   = 0; $ca   = 0; $ugen=0; $uzeit='-';
+				$ja   = '-'; $bo   = '-'; $fr   = '-'; $ze   = '-'; $kr   = '-'; $sl   = '-'; $tr   = '-'; $ka   = '-'; $ca   = '-'; $ugen='-'; $uzeit='-';
 				// mili init
-				$ja0  = 0; $bo0  = 0; $fr0  = 0; $ze0  = 0; $kr0  = 0; $sl0  = 0; $tr0  = 0; $ka0  = 0; $ca0  = 0; $mgen=0; $mzeit='-';
-				$ja1  = 0; $bo1  = 0; $fr1  = 0; $ze1  = 0; $kr1  = 0; $sl1  = 0; $tr1  = 0; $ka1  = 0; $ca1  = 0;
-				$ja2  = 0; $bo2  = 0; $fr2  = 0; $ze2  = 0; $kr2  = 0; $sl2  = 0; $tr2  = 0; $ka2  = 0; $ca2  = 0;
+				$ja0  = '-'; $bo0  = '-'; $fr0  = '-'; $ze0  = '-'; $kr0  = '-'; $sl0  = '-'; $tr0  = '-'; $ka0  = '-'; $ca0  = '-'; $mgen='-'; $mzeit='-';
+				$ja1  = '-'; $bo1  = '-'; $fr1  = '-'; $ze1  = '-'; $kr1  = '-'; $sl1  = '-'; $tr1  = '-'; $ka1  = '-'; $ca1  = '-';
+				$ja2  = '-'; $bo2  = '-'; $fr2  = '-'; $ze2  = '-'; $kr2  = '-'; $sl2  = '-'; $tr2  = '-'; $ka2  = '-'; $ca2  = '-';
 				// gscan
-				$lo = 0; $ro = 0; $mr = 0; $sr = 0; $aj = 0; $ggen=0; $gzeit='-';
+				$lo = '-'; $lr = '-'; $mr = '-'; $sr = '-'; $aj = '-'; $ggen='-'; $gzeit='-';
 				$rscans = '';
 			} // end of if (rp != rpnext)
 		} // end of for
