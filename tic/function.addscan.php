@@ -1,4 +1,5 @@
 <?PHP
+//this script by far uses too much memory!
 class bewegung {
 	var $ag, $ap, $vg, $vp, $modus, $safe, $eta, $flottennr, $erfasser, $erfasst_am, $aname, $vname;
 };
@@ -734,7 +735,7 @@ function parseLine( $line_in) {
                 } // 4
             } else {    // sec, mili, unit, news, gscan // 3
                 $scan_gen = trim($daten[count($daten) - 1]);
-		$scan_gen = preg_replace('/[^0-9]/', '', $scan_gen);
+				$scan_gen = preg_replace('/[^0-9]/', '', $scan_gen);
                 $daten = parseLine( $zeilen[1]);            // Name: FedEx
                 $scan_rn = trim($daten[1]);
                 $daten = parseLine( $zeilen[2]);            // Koordinaten: 233:20
@@ -960,7 +961,79 @@ function parseLine( $line_in) {
                 $insert_names = 'glo, glr, gmr, gsr, ga';
                 $insert_values = '"'.$scan_glo.'", "'.$scan_glr.'", "'.$scan_gmr.'", "'.$scan_gsr.'", "'.$scan_ga.'"';
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
-            } // 2
+            } // 2 scantyp geschütze
+
+			if($scan_typ == 'Newsscan') {
+				unset($text_in);
+				function aprint($var) {
+					echo '<pre></code>';
+					print_r($var);
+					echo '</code></pre>';
+				}
+
+				//prepare data
+				$to_insert = array(	'erfasser_name'	=> $Benutzer['name'],
+							'erfasser_g' 	=> $Benutzer['galaxie'],
+							'erfasser_p' 	=> $Benutzer['planet'],
+							'erfasser_svs' 	=> $Benutzer['svs'],
+							'ziel_g' 	=> $scan_rg,
+							'ziel_p' 	=> $scan_rp,
+							'entries'	=> array());
+
+				$datum = NULL;
+				$titel = NULL;
+				$inhalt = NULL;
+				$quit = false;
+				for($i = 0; $i < count($zeilen); $i++) {
+					if($zeilen[$i]{0} == '[') {	
+						//store last one
+						if($titel) {
+							$to_insert['entries'][] = array('datum' => $datum,
+											'titel' => $titel,
+											'inhalt' => trim($inhalt));
+						}
+
+						//[21/04-2016 08:30:13]
+						$tmp = explode(']', $zeilen[$i]);
+						$datum = trim($tmp[0] . ']');
+						$titel = trim($tmp[1]);
+						$inhalt = '';
+					} else if(trim($zeilen[$i]) != 'ENDE') {
+						$inhalt .= $zeilen[$i];
+					} else {
+						$quit = true;
+					}
+				}//for
+				
+				//aprint($to_insert);
+
+				//insert into mysql
+				$sql = "INSERT INTO `gn`.`gn4scans_news` (`id`, `t`, `ziel_g`, `ziel_p`, `erfasser_g`, `erfasser_p`, `erfasser_name`, `erfasser_svs`) 
+						VALUES (NULL, 
+							UNIX_TIMESTAMP(NOW()), 
+							'" . mysql_real_escape_string($to_insert['ziel_g']) . "', 
+							'" . mysql_real_escape_string($to_insert['ziel_p']) . "', 
+							'" . mysql_real_escape_string($to_insert['erfasser_g']) . "', 
+							'" . mysql_real_escape_string($to_insert['erfasser_p']) . "', 
+							'" . mysql_real_escape_string($to_insert['erfasser_name']) . "', 
+							'" . mysql_real_escape_string($to_insert['erfasser_svs']) . "');";
+				//aprint($sql);
+				tic_mysql_query($sql, $SQL_DBConn);
+				$id = mysql_insert_id($SQL_DBConn);
+				aprint($id);
+				
+				foreach($to_insert['entries'] as $value) {
+					$sql = "INSERT INTO `gn`.`gn4scans_news_entries` (`id`, `news_id`, `t`, `t_txt`, `typ`, `inhalt`) 
+						VALUES (NULL, 
+							'" . $id . "', 
+							0, 
+							'" . mysql_real_escape_string($value['datum']) . "', 
+							'" . mysql_real_escape_string($value['titel']) . "', 
+							'" . mysql_real_escape_string($value['inhalt']) . "')";
+					tic_mysql_query($sql, $SQL_DBConn);
+				}
+			}//scantyp NEWS		
+
             CountScans($Benutzer['id']);
             $modul = 'scans';
             $txtScanGalaxie = $scan_rg;
