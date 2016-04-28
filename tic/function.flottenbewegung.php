@@ -30,6 +30,11 @@
 		if (!isset($txt_Verteidiger_Planet)) $txt_Verteidiger_Planet = $_POST['txt_Verteidiger_Planet'];
 		if (!isset($txt_Verteidiger_Name)) $txt_Verteidiger_Name = isset($_POST['txt_Verteidiger_Name'])?$_POST['txt_Verteidiger_Name']:"";
 		if (!isset($txt_not_safe) || ($txt_not_safe != 0 && $txt_not_safe != 1)) $txt_not_safe = 1;
+		if (!isset($txt_reported_to_slack) || strlen($txt_reported_to_slack) == 0) {
+			$txt_reported_to_slack = "NULL";
+		} else {
+			$txt_reported_to_slack = "'1'";
+		}
 
 		if (strlen($modus )< 2) {
 			if ($modus == 0) $modus = "rueckflug";
@@ -110,7 +115,7 @@
 			$SQL_values = '"'.$Benutzer['ticid'].'", "'.$txt_Angreifer_Galaxie.'", "'.$txt_Angreifer_Planet.'", "'.$txt_Verteidiger_Galaxie.'", "'.$txt_Verteidiger_Planet.'", "'.$lst_ETA.'", "'.$lst_Flugzeit.'", "'.$lst_Flotte.'","'.$_ankunft.'", "'.$_flugzeit.'", "'.$_ruckflug.'", "'.$erfasser.'", "'.date("H").':'.date("i").' Uhr am '.date("d").'.'.date("m").'.'.date("Y").'"';
 
 			if ($modus == 'angreifen') {
-				$SQL_Result = tic_mysql_query('INSERT INTO `gn4flottenbewegungen` ('.$SQL_names.', tparser, save)	VALUES ("1", '.$SQL_values.', '.$tparser.', '.$txt_not_safe.');', $SQL_DBConn) or $error_code = 7;
+				$SQL_Result = tic_mysql_query('INSERT INTO `gn4flottenbewegungen` ('.$SQL_names.', tparser, save, reported_to_slack)	VALUES ("1", '.$SQL_values.', '.$tparser.', '.$txt_not_safe.', ' . $txt_reported_to_slack . ');', $SQL_DBConn) or $error_code = 7;
 			} elseif ($modus == 'verteidigen') {
 				$SQL_Result = tic_mysql_query('INSERT INTO `gn4flottenbewegungen` ('.$SQL_names.', tparser)		VALUES ("2", '.$SQL_values.', '.$tparser.');', $SQL_DBConn) or $error_code = 7;
 			} elseif ($modus == 'rueckflug_angreifen') {

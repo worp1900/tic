@@ -394,6 +394,7 @@ function parseLine( $line_in) {
 							$flottenbewegungen[$ii]["mod"] = 1;
 							$flottenbewegungen[$ii]["fleet"] = mysql_result($SQL_Result, $i, 'flottennr');
 							$flottenbewegungen[$ii]["safe"] = 1 - mysql_result($SQL_Result, $i, 'save');
+							$flottenbewegungen[$ii]["reported_to_slack"] = mysql_result($SQL_Result, $i, 'reported_to_slack');
 							break;
 						} // 6
 					} // 5
@@ -428,6 +429,7 @@ function parseLine( $line_in) {
 					$txt_Verteidiger_Planet		= $flottenbewegungen[$i]["ziel_planet"];
 					$txt_Verteidiger_Name		= $flottenbewegungen[$i]["ziel_name"];
 					$txt_not_safe			= 1 - $flottenbewegungen[$i]["safe"];
+					$txt_reported_to_slack = $flottenbewegungen[$i]["reported_to_slack"];
 					$lst_ETA			= $flottenbewegungen[$i]["eta"];
 					$lst_Flotte			= $flottenbewegungen[$i]["fleet"];
 					$modus				= $flottenbewegungen[$i]["modus"];
