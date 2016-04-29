@@ -482,8 +482,9 @@ echo "\n";
 ?>
 <!-- Überreste der einzelnen Flotten
 <?
-reset($flug[angreifer]);
-while(list($key,$val) = each($flug[angreifer])){
+/*
+reset($flug['angreifer']);
+while(list($key,$val) = each($flug['angreifer'])){
  if(trim($key) != "") {
   echo "Angreifer ".$key.": ";
   for($cnt = 0; $cnt <= 8; $cnt++){
@@ -492,8 +493,8 @@ while(list($key,$val) = each($flug[angreifer])){
   echo "\n";
  }
 }
-reset($flug[verteidiger]);
-while(list($key,$val) = each($flug[verteidiger])){
+reset($flug['verteidiger']);
+while(list($key,$val) = each($flug['verteidiger'])){
  if(trim($key) != "") {
   echo "Verteidiger ".$key.": ";
   for($cnt = 0; $cnt <= 8; $cnt++){
@@ -502,8 +503,8 @@ while(list($key,$val) = each($flug[verteidiger])){
   echo "\n";
  }
 }
-reset($flug[eigene]);
-while(list($key,$val) = each($flug[eigene])){
+reset($flug['eigene']);
+while(list($key,$val) = each($flug['eigene'])){
  if(trim($key) != "") {
   echo "Eigene ".$key.": ";
   for($cnt = 0; $cnt <= 13; $cnt++){
@@ -514,7 +515,7 @@ while(list($key,$val) = each($flug[eigene])){
 }
 print_r($tick);
 print_r($kampf);
-
+*/
 ?>
 -->
 </center>
