@@ -306,7 +306,7 @@
 			<td class="fieldnormaldark"><b>Datum</b></td>
 		</tr>
 		<tr>
-			<td class="fieldnormallight"><?php echo number_format($pts, 0, ',', '.'); ?></td>
+			<td class="fieldnormallight"><?php echo ($pts != '-') ? number_format($pts, 0, ',', '.') : $pts; ?></td>
 			<td class="fieldnormallight"><?php echo $me; ?></td>
 			<td class="fieldnormallight"><?php echo $ke; ?></td>
 			<td class="fieldnormallight"><?php echo $s; ?></td>
@@ -315,7 +315,7 @@
 <?php
 	$sektor =		'Ab hier Kopieren:&lt;br /&gt;';
 	$sektor = $sektor.	'00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)&lt;br /&gt;';
-	$sektor = $sektor.	'00,01Punkte: 07,01'.number_format($pts, 0, ',', '.').' 00,01Astros: 07,01'.$a.'&lt;br /&gt;';
+	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a.'&lt;br /&gt;';
 	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Geschütze: 07,01'.$d.'&lt;br /&gt;';
 	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke.'&lt;br /&gt;';
 	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit.'';
