@@ -245,9 +245,10 @@
 		<div style="position:relative; width:100%; margin-top:10px;">
 			<hr />
 			<table width="100%"><tr>
-				<td align="left" valign="top">
-					<font size="-1">T.I.C. v<?=$version?></font><br />
+				<td align="left" valign="top" style="font-size: 6pt; text-align: right">
+					<a href="https://github.com/tuedelue/ticenter_tic" style="color: #555555;" target="_blank">T.I.C. v<?=$version?></a>
 				</td>
+<!--
 				<td align="center" style="white-space:nowrap;">
 					erstellt in
 <?php
@@ -264,6 +265,7 @@
 ?>
 				</td>
 			</tr></table>
+//-->
 		</div></div></div></div>
 <?
 	if ($_REQUEST['autoclose'] == "now") {
