@@ -348,6 +348,7 @@
                 $aklost  += $this->shipdata[$i]['cost'][1]*$geslostshipsa[$i];
                 $amlost  += $this->shipdata[$i]['cost'][0]*$geslostshipsa[$i];
             }
+
             echo "<br /><center><table bgcolor=#555555 cellspacing=1>";
             echo "<tr><td colspan=\"3\" class=\"datatablehead\" align=\"center\">Übersicht</td></tr>";
             echo "<tr bgcolor=#666666><td colspan=\"3\">Verlorene Schiffe/Gesch&uuml;tze</td></tr>";
@@ -995,6 +996,15 @@
         echo "<tr class=\"fieldnormaldark\"><td colspan=\"3\" style=\"font-weight:bold\">Gestohlene Extraktoren</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Metallextraktoren:</td><td> ".$this->gesstolenexenm."</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Kristallextraktoren:</td><td>   ".$this->gesstolenexenk."</td></tr>";
+        
+        $exenverlust_gesamt = $this->gesstolenexenm + $this->gesstolenexenk;
+        $exen_gesamt_jetzt = $this->mexen + $this->kexen;
+	$exen_vorher = $exen_gesamt_jetzt + $exenverlust_gesamt;
+	$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
+	//echo "gesamtverlust exen: " . $exenverlust_gesamt . " exen jetzt: " . $exen_gesamt_jetzt;
+
+	echo "<tr class=\"fieldnormallight\"><td>Kosten f&uuml;r Exen-Neubau:</td><td>" . ZahlZuText($kosten_neubau_exen) . "</td></tr>";
+
         echo "</table>";
        }
        function PrintOverView_ACE()
