@@ -993,6 +993,8 @@
         echo "<tr class=\"fieldnormaldark\"><td colspan=\"3\" style=\"font-weight:bold\">Kosten f&uuml;r Neubau</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Metall</td><td>".ZahlZuText($vmlost)."</td><td>".ZahlZuText($amlost)."</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Kristall</td><td>".ZahlZuText($vklost)."</td><td>".ZahlZuText($aklost)."</td></tr>";
+	echo "<tr class=\"fieldnormaldark\"><td>Summe</td><td>" . ZahlZuText($vmlost + $vklost) . "</td><td>" . ZahlZuText($amlost + $aklost) . "</td></tr>";
+
         echo "<tr class=\"fieldnormaldark\"><td colspan=\"3\" style=\"font-weight:bold\">Gestohlene Extraktoren</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Metallextraktoren:</td><td> ".$this->gesstolenexenm."</td></tr>";
         echo "<tr class=\"fieldnormallight\"><td>Kristallextraktoren:</td><td>   ".$this->gesstolenexenk."</td></tr>";
@@ -1003,7 +1005,12 @@
 	$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
 	//echo "gesamtverlust exen: " . $exenverlust_gesamt . " exen jetzt: " . $exen_gesamt_jetzt;
 
-	echo "<tr class=\"fieldnormallight\"><td>Kosten f&uuml;r Exen-Neubau:</td><td>" . ZahlZuText($kosten_neubau_exen) . "</td></tr>";
+	echo "<tr class=\"fieldnormallight\"><td>Kosten f&uuml;r Exen-Neubau (inkl. Extraktoren):</td><td>" . ZahlZuText($kosten_neubau_exen) . "</td></tr>";
+
+        echo "<tr class=\"fieldnormaldark\"><td colspan=\"3\" style=\"font-weight:bold\">Gesamtkosten Neubau</td></tr>";
+        echo "<tr class=\"fieldnormallight\"><td>Metall</td><td>".ZahlZuText($vmlost + $kosten_neubau_exen)."</td><td>".ZahlZuText($amlost)."</td></tr>";
+        echo "<tr class=\"fieldnormallight\"><td>Kristall</td><td>".ZahlZuText($vklost)."</td><td>".ZahlZuText($aklost)."</td></tr>";
+        echo "<tr class=\"fieldnormaldark\"><td>Summe</td><td>" . ZahlZuText($vmlost + $vklost + $kosten_neubau_exen) . "</td><td>" . ZahlZuText($amlost + $aklost) . "</td></tr>";
 
         echo "</table>";
        }
