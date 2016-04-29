@@ -22,7 +22,6 @@
           <li><b>Mithelfer:</b><br />
             Mein Dank gilt natürlich denjenigen die aktiv am T.I.C. mitgeholfen
             haben.<br />
-            <br />
             <ul>
               <li>Einen Dank an <i>El-Rocko</i> der in der Anfangsphase
                 des T.I.C.s die Kosten übernahnm. Ohne ihn wäre das T.I.C. wahrscheinlich
@@ -37,7 +36,6 @@
                 [M-F] MEDUSA-FIGHTER. Durch sie wurde das Projekt gestartet und
                 sie gaben mir immer wieder Ideen und Motivation weiterzumachen.</li>
             </ul>
-            <br />
             <br />
             Euer<br />
             NataS<br />
@@ -79,15 +77,30 @@
     <tr>
       <td> 
         <ul>
-          <li><b>TIC-Entwickler.de(>1.12.1:</b><br />
+          <li><b>TIC-Entwickler.de(>1.12.1):</b><br />
             Gleichzeitig hat auch die Ally GAS (German Alpha Squad) weiterentwicklet. Auf einen Forum Post
             von Pretoreaner hin hat sich AlbertLast bei ihm gemeldet und beide haben entschieden das es
-            doch im Prinziep nichts bring wenn jeder aleine an seinem eigenen TIC bastelt.<br />
+            doch im Prinzip nichts bringt wenn jeder alleine an seinem eigenen TIC bastelt.<br />
             So wurde das Team der TIC-Entwickler geboren, was jetzt die weitere Entwicklung
             des TIC voran treibt...
             <br />
             Gruß<br />
             das Team der TIC-Entwickler</li>
+        </ul>
+      </td>
+    </tr>
+   <tr>
+      <td>
+        <ul>
+          <li><b>Further Development (>1.35):</b><br />
+	    Nachdem sich am TIC nun lange Zeit nichts mehr getan an, die letzte Version allerdings freundlicherweise
+	    von <i>Albertlast</i> auf GitHub bereit gestellt wurde (Danke!), habe ich (<i>derVernichter aka bt</i>) mich daran gemacht einige
+	    Modifikationen vorzunenehmen. Diese sind teilweise optische &Auml;nderungen, teilweise mehr Funktionalit&auml;t
+	    oder auch Anpassungen an unsere Allianz-internen (<i>FunCity</i>) Bed&uuml;rfnisse wie bspw. eine Anbindung zu Slack.
+	    Ich bin jederzeit offen f&uuml;r Anregungen und Verbesserungsvorschl&auml;ge. Leider ist der Code des TIC ein
+	    wenig in die Jahre gekommen und die Pflege teilweise ein recht hoher Aufwand. Dennoch, &ouml;ffnet gerne Issue
+	    auf GitHub dazu. <a href="https://github.com/tuedelue/ticenter_tic">*click* https://github.com/tuedelue/ticenter_tic *click*</a>.<br/>
+	    Helge
         </ul>
       </td>
     </tr>

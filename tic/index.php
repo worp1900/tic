@@ -16,67 +16,6 @@ body {
 	margin-top: 10px;
 	margin-right: 10px;
 	margin-bottom: 10px;
-	scrollbar-track-color: #F0F0F0;
-    scrollbar-face-color: #3366CC;
-    scrollbar-base-color: #3366CC;
-    scrollbar-arrow-color: #FFFFFF;
-}
-
-.heading {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	font-weight: bold;
-	color: #741415;
-}
-.menu {
-	cursor: hand;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	font-weight: bold;
-	color: #FFFFFF;
-	text-decoration: none;
-}
-.table_h {
-	background-color: #741415;
-	font-weight: bold;
-	color: #FFFFFF;
-}
-.table_2 {
-	background-color: #D1D4DE;
-}
-.table_1 {
-	background-color: #A6ACBE;
-}
-
-
-
-
-.table_h a:link {
-	color: #FFA000;
-	text-decoration: NONE;
-	font-weight:bold;
-	font-family: Verdana;
-}
-
-.table_h a:hover {
-	color: #FFA000;
-	text-decoration:underlined;
-	font-weight:bold;
-	font-family: Verdana;
-}
-
-.table_h a:visited {
-	color: #FFA000;
-	text-decoration:none;
-	font-weight:bold;
-	font-family: Verdana;
-}
-
-.table_h a:visited:hover {
-	color: #FFA000;
-	text-decoration:underlined;
-	font-weight:bold;
-	font-family: Verdana;
 }
 
 INPUT {
@@ -95,20 +34,6 @@ INPUT.BUTTON {
     BORDER-TOP: #D6D9E1 1px solid;
     BORDER-BOTTOM: #6E7AA6 1px solid;
     height: 21px;
-}
-
-textarea {
-    background-color: #8E4243;
-    font-size: 11px;
-    color: #FFFFFF;
-    BORDER: #000000 1px solid;
-}
-
-select {
-    background-color:  #8E4243;
-    BORDER: #000000 1px solid;
-    font-size: 11px;
-    color: #FFFFFF;
 }
 -->
 </style>
