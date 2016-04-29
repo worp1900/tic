@@ -11,9 +11,7 @@ body,td,th {
 	font-size: 11px;
 }
 body {
-    background-color: #FFFFFF;
-	background-image: url(bilder/login/bgjuhe.jpg);
-	background-repeat: repeat-x;
+    background-color: #aaaaaa;
 	margin-left: 10px;
 	margin-top: 10px;
 	margin-right: 10px;
@@ -122,7 +120,7 @@ select {
 <body vlink="#FF0000" alink="#FF0000" text="#000000">
 <!-- ImageReady Slices (loginit.jpg) -->
 
-<h4><font color="white">Bei Problemen beim Login bitte an folgende Leute wenden:
+<h4>Bei Problemen beim Login bitte an folgende Leute wenden:
 <table border="0" bgcolor="black">
 <?php
 include("./accdata.php");
@@ -132,80 +130,30 @@ mysql_select_db($db_info['dbname'], $DBConn) or die(mysql_errno() . ": " . mysql
 $sql =  "SELECT gn4accounts.name username, galaxie, planet, rang, gn4allianzen.name allyname from gn4accounts, gn4allianzen where gn4allianzen.id = gn4accounts.allianz AND rang > 3"; 
 $Result = mysql_query($sql, $DBConn);
 while($row = mysql_fetch_object($Result)) {
-	printf ("<tr><td><a href=\"http://www.galaxy-network.de/game/comsys.php?action=sendmsg&toid1=%d&toid2=%d\" target=\"_blank\"><font color=\"#32cd32\">%s (%d:%d)</font></a></td><td><font color=\"white\">%s</font></td><td><font color=\"white\">%s</font></td></tr>", $row->galaxie, $row->planet, $row -> username, $row->galaxie, $row->planet, $row->rang == 4 ? "TIC-Techniker" : "TIC-Administrator", $row->allyname);
+	printf ("<tr><td><a href=\"http://www.galaxy-network.net/game/comsys.php?action=sendmsg&toid1=%d&toid2=%d\" target=\"_blank\"><font color=\"#32cd32\">%s (%d:%d)</font></a></td><td><font color=\"white\">%s</font></td><td><font color=\"white\">%s</font></td></tr>", $row->galaxie, $row->planet, $row -> username, $row->galaxie, $row->planet, $row->rang == 4 ? "TIC-Techniker" : "TIC-Administrator", $row->allyname);
 }
 mysql_close($DBConn);
 ?>
 </table>
-</font></h4>
+</h4>
 <form method="post" action="main.php">
 
-<table id="Table_01" width="951" height="575" border="0" cellpadding="0" cellspacing="0" align="center">
+<table id="Table_01" border="0" cellpadding="2" cellspacing="0" align="center">
 	<tr>
-		<td rowspan="7">
-			<img src="bilder/login/logbg_01.jpg" width="250" height="575" alt=""></td>
-		<td colspan="4">
-			<img src="bilder/login/logbg_02.jpg" width="700" height="183" alt=""></td>
-		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="183" alt=""></td>
+		<th>Login:</th>
 	</tr>
 	<tr>
-		<td rowspan="4">
-			<img src="bilder/login/logbg_03.jpg" width="85" height="126" alt=""></td>
-		<td colspan="2">
-			<img src="bilder/login/logbg_04.jpg" width="132" height="44" alt=""></td>
-		<td rowspan="6">
-			<img src="bilder/login/logbg_05.jpg" width="483" height="392" alt=""></td>
 		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="44" alt=""></td>
-	</tr>
-	<tr>
-		<td colspan="2" background="bilder/login/logbg_06.jpg" width="132" height="37" alt="">
-
                        <INPUT TYPE="text" NAME="username" SIZE=20 MAXLENGTH=30>
-
-
                         </td>
-		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="37" alt=""></td>
 	</tr>
 	<tr>
-		<td colspan="2" width="132" height="37" background="bilder/login/logbg_07.jpg">
-
+		<td>
                         <INPUT TYPE="password" NAME="userpass" id="userpass" SIZE=20 MAXLENGTH=30>
-
 			</td>
 		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="37" alt=""></td>
-	</tr>
-	<tr>
-		<td rowspan="2">
-			<img src="bilder/login/logbg_08.jpg" width="66" height="23" alt=""></td>
-
-
-		<td rowspan="2" background="bilder/login/logbg_09.jpg" width="66" height="23" alt="">
-
-
                        <INPUT TYPE="submit" NAME="login" id="login" VALUE="Login">
                 </td>
-
-
-
-		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="8" alt=""></td>
-	</tr>
-	<tr>
-		<td>
-			<img src="bilder/login/logbg_10.jpg" width="85" height="15" alt=""></td>
-		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="15" alt=""></td>
-	</tr>
-	<tr>
-		<td colspan="3">
-			<img src="bilder/login/logbg_11.jpg" width="217" height="251" alt=""></td>
-		<td>
-			<img src="bilder/login/spacer.gif" width="1" height="251" alt=""></td>
-	</tr>
 	</form>
 </table>
 </body>
