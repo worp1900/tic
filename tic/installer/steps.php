@@ -82,21 +82,29 @@
         $_SESSION['install']['tic_adress'] = $_POST['adress'];
 
         $tables = array("gn4accounts",
-                                  "gn4allianzen",
-                                  "gn4cron",
-                                  "gn4flottenbewegungen",
-                                  "gn4forum",
-                                  "gn4gnuser",
-                                  "gn4incplanets",
-                                  "gn4log",
-                                  "gn4nachrichten",
-                                  "gn4nachtwache",
-                                  "gn4meta",
-                                  "gn4scans",
-                                  "gn4attflotten",
-                                  "gn4attplanung",
-                                  "gn4vars",
-                                  "gn4channels");
+						"gn4allianzen",
+						"gn4cron",
+						"gn4flottenbewegungen",
+						"gn4forum",
+						"gn4gnuser",
+						"gn4incplanets",
+						"gn4log",
+						"gn4nachrichten",
+						"gn4nachtwache",
+						"gn4meta",
+						"gn4scans",
+						"gn4attflotten",
+						"gn4attplanung",
+						"gn4vars",
+						"gn4channels",
+
+						"gn4galfleetupdated",
+						"gn4scanblock",
+						"gn4scans_history",
+						"trigger_scan_hist_i",
+						"trigger_scan_hist_u",
+						"trigger_scan_svs_i",
+						"trigger_scan_svs_u");
 
         $mysql->query("SHOW TABLE STATUS") or die($mysql->error(__FILE__,__LINE__));
 
