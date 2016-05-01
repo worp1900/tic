@@ -76,7 +76,7 @@
 //-->
 </script>
 <?
-	if (@$MetaInfo['sysmsg'] !="") {
+	if (strlen($MetaInfo['sysmsg']) > 0) {
 		echo "<br /><div class=\"sysmessage\">\n";
 		echo nl2br(htmlentities($MetaInfo['sysmsg'] ))."\n";
 		echo "</div>\n";
