@@ -211,7 +211,7 @@
 	</head>
 	<body>
 		<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
-		<div style="position:absolute; z-index:10;background-image:url('bilder/skin/background.bmp');width:100%">
+		<div style="position:absolute; z-index:10;width:100%">
 		<!-- <div align="center" style="width:100%"><img src="bilder/skin/banner.jpg" alt="" align="middle" /></div> --> <!-- Banner -->
 <?php
 	include("./menu.inc.php");

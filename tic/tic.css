@@ -16,7 +16,6 @@
 body {
 	margin:0px;
 	padding:0px;
-	background-image:url('./bilder/skin/background.bmp');
 	scrollbar-DarkShadow-Color:#333333;
 	scrollbar-Track-Color:#F5F5F5;
 	scrollbar-Face-Color:#ffffff;
@@ -26,7 +25,7 @@ body {
 	scrollbar-Arrow-Color:#0000ff;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 9pt;
-	background-attachment:fixed;
+	background-color: #eeeeee;
 }
 
 table {
