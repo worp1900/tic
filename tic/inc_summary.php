@@ -7,6 +7,7 @@
 		$out_allis	= "		<th align=\"right\">&nbsp;Allianz:&nbsp;</th>\n";
 		$out_incs	= "		<th align=\"right\">&nbsp;Incomings:&nbsp;</th>\n";
 		$out_online	= "		<th align=\"right\">&nbsp;Online:&nbsp;</th>\n";
+		$gal_t		= "		<th align=\"right\">&nbsp;Taktik-Update:&nbsp;</th>\n";
 		$tsec = $Ticks['lange']*60;
 		$time_now = ((int)(time()/($tsec)))*($tsec);
 
@@ -31,6 +32,38 @@
 			}
 	
 			mysql_free_result($SQL_Result_alli_inc_fleets);
+	
+			//gal update timestamps
+			$thresh_red = 150 * 60;
+			$sql = 'SELECT s.galaxie, max(u.t) FROM gn4accounts s left join gn4galfleetupdated u on s.galaxie = u.gal WHERE s.allianz = ' . $alliid . ' group by s.galaxie order by s.galaxie';
+			$res = tic_mysql_query($sql);
+			$num = mysql_num_rows($res);
+			$oldest_t = -1;
+			$gal_t_hover = '<b>Letzte Flottenupdates:</b><br/>';
+			$gal_t_text = '';
+			for($i = 0; $i < $num; $i++) {
+				$row = mysql_fetch_row($res);
+				$dt_raw = (time() - $row[1]) / 60;
+				$dt = ZahlZuText(round($dt_raw, 0));
+				
+				if($i != 0)
+					$gal_t_text .= " / ";
+
+				if($dt_raw > $thresh_red) {
+					$gal_t_text .= "<span class=textincopen>" . $dt . "</span>";
+					$gal_t_hover .= "<span class=textincopen><b>" . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
+				} else {
+					$gal_t_text .= "<span class=textincsafe>" . $dt . "</span>";
+					$gal_t_hover .= "<span class=textincsafe><b>" . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
+				}
+				
+				if($row[1] < $oldest_t || $oldest_t == -1) {
+					$oldest_t = $row[1];
+				}
+			}
+			$gal_t	 .= "		<td align=\"center\" onmouseover=\"return overlib('" . $gal_t_hover . "');\" onmouseout=\"return nd();\">&nbsp;" . $gal_t_text . "&nbsp;</td>\n";
+			mysql_free_result($res);
+			
 	
 			$SQL_Query = "SELECT count(*) FROM gn4accounts WHERE allianz = ".$alliid.";";
 			$SQL_Result_alli_user = tic_mysql_query($SQL_Query) or $error_code = 43;
@@ -140,6 +173,11 @@
 	<tr>
 <?php
 	echo $out_incs;
+?>
+	</tr>
+	<tr>
+<?php
+	echo $gal_t;
 ?>
 	</tr>
 	<tr>

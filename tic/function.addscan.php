@@ -256,6 +256,8 @@ function parseLine( $line_in) {
 					} while (($break == false) && ($break_it < 25)); // 5
 
 	// Erstellen der einzelnen Flottenbewegungen
+					include("function.updatefleett.php");
+	
 					$this_galaxy = 0;
 					for ($i = 0; $i < sizeof($taktik); $i++) { // 5
 						if ($taktik[$i][0] == "Sektor-Kommandant") continue;
