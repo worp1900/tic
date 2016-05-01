@@ -30,7 +30,7 @@
 		} else {
 			$_SESSION['is_auth'] = 0;
 			$_SESSION['userid'] = -1;
-			die("Ihre Anmeldedaten waren nicht korrekt!");
+			die("Ihre Anmeldedaten waren nicht korrekt!<br/><a href='./' target='_self'>Zum Login</a>");
 		}
 	}
 

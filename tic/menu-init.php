@@ -8,7 +8,7 @@ if (isset($_POST['login']))
     if ($userid!=false)
         login($userid);
     else
-        echo 'Ihre Anmeldedaten waren nicht korrekt!';
+        echo 'Ihre Anmeldedaten waren nicht korrekt!<br/><a href='./' target='_self'>Zum Login</a>';
 }
 
 
