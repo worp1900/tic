@@ -34,7 +34,7 @@
 			mysql_free_result($SQL_Result_alli_inc_fleets);
 	
 			//gal update timestamps
-			$thresh_red = 150 * 60;
+			$thresh_red = 150;
 			$sql = 'SELECT s.galaxie, max(u.t) FROM gn4accounts s left join gn4galfleetupdated u on s.galaxie = u.gal WHERE s.allianz = ' . $alliid . ' group by s.galaxie order by s.galaxie';
 			$res = tic_mysql_query($sql);
 			$num = mysql_num_rows($res);
