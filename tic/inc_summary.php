@@ -51,10 +51,10 @@
 
 				if($dt_raw > $thresh_red) {
 					$gal_t_text .= "<span class=textincopen>" . $dt . "</span>";
-					$gal_t_hover .= "<span class=textincopen><b>" . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
+					$gal_t_hover .= "<span class=textincopen><b>Gal " . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
 				} else {
 					$gal_t_text .= "<span class=textincsafe>" . $dt . "</span>";
-					$gal_t_hover .= "<span class=textincsafe><b>" . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
+					$gal_t_hover .= "<span class=textincsafe><b>Gal " . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
 				}
 				
 				if($row[1] < $oldest_t || $oldest_t == -1) {
