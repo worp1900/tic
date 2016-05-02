@@ -101,18 +101,23 @@
 		<tr>
 		<td align="left">
 			<?
-				$sql = "select authnick, handy, messangerID, infotext from gn4accounts where id=".$Benutzer["id"].";";
+				$sql = "select authnick, handy, messangerID, infotext, slack_nickname from gn4accounts where id=".$Benutzer["id"].";";
 				$SQL_Result = tic_mysql_query($sql, $SQL_DBConn);
 				$pdaten = mysql_fetch_array($SQL_Result);
 				//echo mysql_error()."<br />".$sql;
 			?>
-			<form action="./main.php?module=profil" method="post">
+			<form action="./main.php?modul=profil" method="post">
 			<input type="hidden" name="action" value="personlich" />
 			<table class="fieldnormallight" width="100%">
+			<tr>
+				<td>Slack Nickname:</td><td><input name="slack_nickname" value="<?=$pdaten[4]?>" /></td>
+				<td>z.B. dervernichter</td>
+			</tr>
 			<tr><td>Handy-Nummer:</td><td><input name="handy" value="<?=$pdaten[1]?>" /></td></tr>
 			<tr><td>Messanger:</td><td><input name="icq" value="<?=$pdaten[2]?>" /></td><td>zB.: ICQ : 123 456 678</td></tr>
-			<tr><td>Zusatzinfos:</td><td><input name="infotext" value="<?=$pdaten[3]?>" /></td><td>
-	  Authnick:</td><td><input name="authnick" value="<?=$pdaten[0]?>" /></td></tr>
+			<tr>
+				<td>Zusatzinfos:</td><td><input name="infotext" value="<?=$pdaten[3]?>" /></td>
+				<td>Authnick:</td><td><input name="authnick" value="<?=$pdaten[0]?>" /></td></tr>
 			<tr>
 			  <td>Zeitformat:</td>
 			  <td>
@@ -164,7 +169,7 @@
 	</tr>
 	<tr>
 	  <td align="left">
-		<form action="./main.php?module=profil" method="post">
+		<form action="./main.php?modul=profil" method="post">
 		  <input type="hidden" name="action" value="umod" />
 		  <input type="hidden" name="UModID" value="<?=$Benutzer['id']?>" />
 		  <table class="fieldnormallight" width="100%">

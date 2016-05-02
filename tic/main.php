@@ -233,9 +233,9 @@
 		if (isset($_GET['auto']))
 			echo "Auto-Refresh...";
 		echo "<div class=\"main\" align=\"center\">";
-		if ($Benutzer['pwdandern'] != 1)
+		if ($Benutzer['pwdandern'] != 1) {
 			include("./inc_".$modul.".php");
-		else
+		} else
 			include("./inc_pwdandern.php");
 
 		if ($error_code != 0)
