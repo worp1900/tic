@@ -289,7 +289,7 @@
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="13" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
+			<td colspan="14" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -304,6 +304,7 @@
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
+			<td class="fieldnormaldark"><b>Scanblocks</b></td>
 		</tr>
 		<tr>
 			<td class="fieldnormallight"><?php echo ($pts != '-') ? number_format($pts, 0, ',', '.') : $pts; ?></td>
@@ -326,6 +327,47 @@
 			<td class="fieldnormallight"><?=$sgen;?></td>
 			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
+			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt"><pre>
+<?php
+	$sql_block = $sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 3";
+	$res_blocks = tic_mysql_query($sql_block);
+	$num_blocks = mysql_num_rows($res_blocks);
+	
+	if($num_blocks == 0) {
+		echo '-';
+	}
+	
+	for($j = 0; $j < $num_blocks; $j++) {
+		$t = mysql_result($res_blocks, $j, 't' );
+		$svs = mysql_result($res_blocks, $j, 'svs' );
+		$type = mysql_result($res_blocks, $j, 'typ' );
+		
+		echo date('y.m.d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
+		switch($typ) {
+			case 0:
+				echo 'S';
+				break;
+			case 1:
+				echo 'E';
+				break;
+			case 2:
+				echo 'M';
+				break;
+			case 3:
+				echo 'G';
+				break;
+			case 4:
+				echo 'N';
+				break;
+			default:
+			break;
+		}
+		echo "\n\n";
+	}
+	echo '</pre>';
+	mysql_free_result($res_blocks);
+?>
+			</td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>LO</b></td>
