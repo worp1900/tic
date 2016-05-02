@@ -7,6 +7,8 @@ function block_write_to_db() {
     $ttype = $_POST['blocktype'];
     $svs = $_POST['svs'];
     
+    $svs = str_replace('.', '', $svs);
+    
     $sql = 'INSERT INTO `gn4scanblock` (g, p, t, svs, sg, sp, sname, typ) VALUES ("'.$trg.'", "'.$trp.'", UNIX_TIMESTAMP(NOW()), "' . $svs . '", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$Benutzer['name'].'", "'.$ttype.'");';
 
     $SQL_Result = tic_mysql_query($sql, $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
