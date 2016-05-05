@@ -1012,7 +1012,7 @@ function parseLine( $line_in) {
 				//aprint($to_insert);
 
 				//insert into mysql
-				$sql = "INSERT INTO `gn`.`gn4scans_news` (`id`, `t`, `ziel_g`, `ziel_p`, `erfasser_g`, `erfasser_p`, `erfasser_name`, `erfasser_svs`) 
+				$sql = "INSERT INTO `gn`.`gn4scans_news` (`id`, `t`, `ziel_g`, `ziel_p`, `erfasser_g`, `erfasser_p`, `erfasser_name`, `erfasser_svs`, `genauigkeit`) 
 						VALUES (NULL, 
 							UNIX_TIMESTAMP(NOW()), 
 							'" . mysql_real_escape_string($to_insert['ziel_g']) . "', 
@@ -1020,21 +1020,22 @@ function parseLine( $line_in) {
 							'" . mysql_real_escape_string($to_insert['erfasser_g']) . "', 
 							'" . mysql_real_escape_string($to_insert['erfasser_p']) . "', 
 							'" . mysql_real_escape_string($to_insert['erfasser_name']) . "', 
-							'" . mysql_real_escape_string($to_insert['erfasser_svs']) . "');";
+							'" . mysql_real_escape_string($to_insert['erfasser_svs']) . "',
+							'" . mysql_real_escape_string($scan_gen) . "');";
 				//aprint($sql);
-				tic_mysql_query($sql, $SQL_DBConn);
+				$success = tic_mysql_query($sql, $SQL_DBConn);
 				$id = mysql_insert_id($SQL_DBConn);
-				aprint($id);
-				
-				foreach($to_insert['entries'] as $value) {
-					$sql = "INSERT INTO `gn`.`gn4scans_news_entries` (`id`, `news_id`, `t`, `t_txt`, `typ`, `inhalt`) 
-						VALUES (NULL, 
-							'" . $id . "', 
-							0, 
-							'" . mysql_real_escape_string($value['datum']) . "', 
-							'" . mysql_real_escape_string($value['titel']) . "', 
-							'" . mysql_real_escape_string($value['inhalt']) . "')";
-					tic_mysql_query($sql, $SQL_DBConn);
+				//aprint($id);
+				if($success) {
+					foreach($to_insert['entries'] as $value) {
+						$sql = "INSERT INTO `gn`.`gn4scans_news_entries` (`id`, `news_id`, `t`, `typ`, `inhalt`) 
+							VALUES (NULL, 
+								'" . $id . "', 
+								str_to_date('" .$value['datum'] . "', '%d/%m-%Y %H:%i:%s'), 
+								'" . mysql_real_escape_string($value['titel']) . "', 
+								'" . mysql_real_escape_string($value['inhalt']) . "')";
+						tic_mysql_query($sql, $SQL_DBConn);
+					}
 				}
 			}//scantyp NEWS		
 
