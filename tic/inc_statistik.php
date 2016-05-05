@@ -40,5 +40,9 @@
 		$SQL_Row = mysql_fetch_row($SQL_Result);
 		echo '<tr><td align="left" class="fieldnormaldark">Anzahl Scans:</td><td class="fieldnormallight" align="right">'.ZahlZuText($SQL_Row[0]).'</td></tr>';
 		echo '<tr><td align="left" class="fieldnormaldark">Letzte Scans&auml;uberung:</td><td class="fieldnormallight">'.$lastscanclean.'</td></tr>';
+		$SQL_Result = tic_mysql_query('SELECT COUNT(*) FROM `gn4scans_history`', $SQL_DBConn);
+		$SQL_Row = mysql_fetch_row($SQL_Result);
+		echo '<tr><td align="left" class="fieldnormaldark">Anzahl Scans Archiv:</td><td class="fieldnormallight" align="right">'.ZahlZuText($SQL_Row[0]).'</td></tr>';
+		
 	?>
 </table>
