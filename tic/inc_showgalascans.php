@@ -329,7 +329,7 @@
 			<td class="fieldnormallight"><?=$szeit;?></td>
 			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt"><pre>
 <?php
-	$sql_block = $sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 3";
+	$sql_block = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 3";
 	$res_blocks = tic_mysql_query($sql_block);
 	$num_blocks = mysql_num_rows($res_blocks);
 	
@@ -342,7 +342,7 @@
 		$svs = mysql_result($res_blocks, $j, 'svs' );
 		$type = mysql_result($res_blocks, $j, 'typ' );
 		
-		echo date('y.m.d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
+		echo date('Y-m-d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
 		switch($typ) {
 			case 0:
 				echo 'S';
