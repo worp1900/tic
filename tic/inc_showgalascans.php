@@ -1,4 +1,25 @@
+<script>
+  function copyToClipboard(text) {
+    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+  }
+</script>
 <?php
+	function xformat($number) {
+		if($number === '-') return $number;
+		return number_format($number);
+	}
+
+	function nformat($number, $totalLen) {
+		$out = $number = xformat($number);
+		$lenNum = strlen($out);
+
+		for($lenNum; $lenNum < $totalLen; $lenNum++) {
+			$out = " " . $out;
+		}
+
+		return $out;
+	}
+
 	function getscannames( $scantype ) {
 		$sn = explode( ' ', $scantype );
 		$res = '';
@@ -170,7 +191,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			$svs = mysql_result($res_news, $j, 'erfasser_svs' );
 ?>
 			<tr>
-				<td class="fieldnormaldark"><b>Scan: </b></td>
+				<td class="fieldnormaldark"><b>Newsscan: </b></td>
 				<td class="fieldnormaldark"><b><?=date('Y-m-d H:i', $t);?></b></td>
 				<td class="fieldnormaldark"><b><?=$gen;?>%</b></td>
 				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
@@ -353,10 +374,8 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>KrisExen</b></td>
 			<td class="fieldnormaldark"><b>Schiffe</b></td>
 			<td class="fieldnormaldark"><b>Deffensiv</b></td>
-			<td class="fieldnormaldark"><b>Astros</b></td>
-			<td>&nbsp;</td>
 			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for IRC</b></td>
-			<td>&nbsp;</td>
+			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for Slack</b></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
@@ -369,18 +388,18 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $ke; ?></td>
 			<td class="fieldnormallight"><?php echo $s; ?></td>
 			<td class="fieldnormallight"><?php echo $d; ?></td>
-			<td class="fieldnormallight"><?php echo $a; ?></td>
 <?php
-	$sektor =		'Ab hier Kopieren:&lt;br /&gt;';
-	$sektor = $sektor.	'00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)&lt;br /&gt;';
-	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a.'&lt;br /&gt;';
-	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Geschütze: 07,01'.$d.'&lt;br /&gt;';
-	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke.'&lt;br /&gt;';
-	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit.'';
+	$sektor = '00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a."\\n";
+	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Geschütze: 07,01'.$d."\\n";
+	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke."\\n";
+	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit;
+
+	$sektor_slack = '*Sektor* (' . $sgen . '%, ' . $szeit . ') - *'.$rname.' '.$rg.':'.$rp."*\\n";
+	$sektor_slack .= '```Punkte:  ' . xformat($pts) . '\\nExen:    M ' . xformat($me) . ', K ' . xformat($ke) . '; Sum ' . xformat($me + $ke) . '\\nSchiffe: ' . xformat($s) . '\\nDeff:    ' . xformat($d) . '```';
 ?>
-			<td>&nbsp;</td>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$sektor.'\', STICKY, CAPTION,\'Sektorscan\', CENTER);" onmouseout="nd();">Sektorscan</a>';?></td>
-			<td>&nbsp;</td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $sektor . '\')">Sektorscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $sektor_slack . '\')">Sektorscan</a>';?></td>
 			<td class="fieldnormallight"><?=$sgen;?></td>
 			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
@@ -449,16 +468,20 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>MR</b></td>
 			<td class="fieldnormaldark"><b>SR</b></td>
 			<td class="fieldnormaldark"><b>AJ</b></td>
-			<td colspan="2">&nbsp;</td>
 <?php
-	$gscan = 		'Ab hier Kopieren:&lt;br /&gt;';
-	$gscan = $gscan.	'00,10Geschützscan (01,10 '.$ggen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)&lt;br /&gt;';
-	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr.'&lt;br /&gt;';
-	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj.'&lt;br /&gt;';
-	$gscan = $gscan.	'00,01Datum: 07,01'.$gzeit.'';
+	$gscan = '00,10Geschützscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr."\\n";
+	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj."\\n";
+	$gscan = $gscan.	'00,01Datum: 07,01'.$gzeit;
+	
+	$clepkill = 0;
+	$clepkill += floor($aj * 0.32);
+	$clepkill += floor($lo * 1.28);
+	$gscan_slack = '*Geschütze* (' . $sgen . '%, ' . $szeit . ') *'.$rname.' '.$rg.':'.$rp."*\\n";
+	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . '\\nMR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . '\\nAJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
 ?>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$gscan.'\', STICKY, CAPTION,\'Geschützscan\', CENTER);" onmouseout="nd();">Geschützscan</a>';?></td>
-			<td>&nbsp;</td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Geschützscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Geschützscan</a>';?></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
@@ -469,23 +492,24 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $mr; ?></td>
 			<td class="fieldnormallight"><?php echo $sr; ?></td>
 			<td class="fieldnormallight"><?php echo $aj; ?></td>
-			<td colspan="2">&nbsp;</td>
 <?php
-	$MiliH = 		'Ab hier Kopieren:&lt;br /&gt;';
-	$MiliH = $MiliH.	'00,10Militärscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)&lt;br /&gt;';
-	$Orbit = 		'00,1Orbit: 07,01'.$ja0.' 00,1Leo 07,01'.$bo0.' 00,1Aquilae 07,01'.$fr0.' 00,1Fornax 07,01'.$ze0.' 00,1Draco 07,01'.$kr0.' 00,1Goron 07,01'.$sl0.' 00,1Pentalin 07,01'.$tr0.' 00,1Zenit 07,01'.$ka0.' 00,1Cleptor 07,01'.$ca0.' 00,1Cancri &lt;br /&gt;';
-	$Flotte1 = 		'00,01Flotte1: 07,01'.$ja1.' 00,01Leo 07,01'.$bo1.' 00,01Aquilae 07,01'.$fr1.' 00,01Fornax 07,01'.$ze1.' 00,01Draco 07,01'.$kr1.' 00,01Goron 07,01'.$sl1.' 00,01Pentalin 07,01'.$tr1.' 00,01Zenit 07,01'.$ka1.' 00,01Cleptor 07,01'.$ca1.' 00,01Cancri &lt;br /&gt;';
-	$Flotte2 = 		'00,01Flotte2: 07,01'.$ja2.' 00,01Leo 07,01'.$bo2.' 00,01Aquilae 07,01'.$fr2.' 00,01Fornax 07,01'.$ze2.' 00,01Draco 07,01'.$kr2.' 00,01Goron 07,01'.$sl2.' 00,01Pentalin 07,01'.$tr2.' 00,01Zenit 07,01'.$ka2.' 00,01Cleptor 07,01'.$ca2.' 00,01Cancri &lt;br /&gt;';
-	$MiliF = 		'00,01Datum: 07,01'.$mzeit.'';
+	$MiliH = '00,10Militärscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$Orbit = 		'00,1Orbit: 07,01'.$ja0.' 00,1Leo 07,01'.$bo0.' 00,1Aquilae 07,01'.$fr0.' 00,1Fornax 07,01'.$ze0.' 00,1Draco 07,01'.$kr0.' 00,1Goron 07,01'.$sl0.' 00,1Pentalin 07,01'.$tr0.' 00,1Zenit 07,01'.$ka0.' 00,1Cleptor 07,01'.$ca0.' 00,1Cancri'."\\n";
+	$Flotte1 = 		'00,01Flotte1: 07,01'.$ja1.' 00,01Leo 07,01'.$bo1.' 00,01Aquilae 07,01'.$fr1.' 00,01Fornax 07,01'.$ze1.' 00,01Draco 07,01'.$kr1.' 00,01Goron 07,01'.$sl1.' 00,01Pentalin 07,01'.$tr1.' 00,01Zenit 07,01'.$ka1.' 00,01Cleptor 07,01'.$ca1.' 00,01Cancri'."\\n";
+	$Flotte2 = 		'00,01Flotte2: 07,01'.$ja2.' 00,01Leo 07,01'.$bo2.' 00,01Aquilae 07,01'.$fr2.' 00,01Fornax 07,01'.$ze2.' 00,01Draco 07,01'.$kr2.' 00,01Goron 07,01'.$sl2.' 00,01Pentalin 07,01'.$tr2.' 00,01Zenit 07,01'.$ka2.' 00,01Cleptor 07,01'.$ca2.' 00,01Cancri'."\\n";
+	$MiliF = 		'00,01Datum: 07,01'.$mzeit;
+
+	$mili_slack = '*Militär* (' . $sgen . '%, ' . $szeit . ') - *'.$rname.' '.$rg.':'.$rp."*\\n";;
+	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2\\nJä   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . '\\nBo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . '\\nFr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . '\\nZe:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . '\\nKr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . '\\nSc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . '\\nTr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . '\\nCl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . '\\nCa:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
+	
 ?>
-			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF.'\', STICKY, CAPTION,\'Militärscan\', CENTER);" onmouseout="nd();">Kompleter Militärscan</a>';?></td>
-			<td>&nbsp;</td>
+			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF.'\')" >Milit&auml;rscan</a>';?></td>
+			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $mili_slack . '\')">Milit&auml;rscan</a>';?></td>
 			<td class="fieldnormallight"><?php echo $ggen; ?></td>
 			<td class="fieldnormallight"><?=$svs_g;?></td>
 			<td class="fieldnormallight"><?php echo $gzeit; ?></td>
 		</tr>
 		<tr>
-			<td bgcolor="#dbdbbb"><b>Copy</b></td>
 			<td class="fieldnormaldark"><b>J&auml;ger</b></td>
 			<td class="fieldnormaldark"><b>Bomber</b></td>
 			<td class="fieldnormaldark"><b>Fregs</b></td>
@@ -500,14 +524,6 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Datum</b></td>
 		</tr>
 		<tr bgcolor="#ddddfd">
-<?php
-	$unit = 	'Ab hier Kopieren:&lt;br /&gt;';
-	$unit = $unit.	'00,10Einheitenscan (01,10 '.$ugen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)&lt;br /&gt;';
-	$unit = $unit.	'00,01Leo: 07,01'.$ja.' 00,01Aquilae: 07,01'.$bo.' 00,01Fronax: 07,01'.$fr.' 00,01Draco: 07,01'.$ze.' 00,01Goron: 07,01'.$kr.'&lt;br /&gt;';
-	$unit = $unit.	'00,01Pentalin: 07,01'.$sl.' 00,01Zenit: 07,01'.$tr.' 00,01Cleptor: 07,01'.$ka.' 00,01Cancri: 07,01'.$ca.'&lt;br /&gt;';
-	$unit = $unit.	'00,01Datum: 07,01'.$uzeit.'';
-?>
-			<td bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$unit.'\', STICKY, CAPTION,\'Einheitenscan\', CENTER);" onmouseout="nd();">Summe</a>';?></td>
 			<td><b><?php echo $ja; ?></b></td>
 			<td><b><?php echo $bo; ?></b></td>
 			<td><b><?php echo $fr; ?></b></td>
@@ -522,7 +538,6 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td><b><?php echo $uzeit; ?></b></td>
 		</tr>
 		<tr class="fieldnormallight">
-			<td bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$MiliH.$Orbit.$MiliF.'\', STICKY, CAPTION,\'Militärscan Orbit\', CENTER);" onmouseout="nd();">Orbit</a>';?></td>
 			<td><?php echo $ja0; ?></td>
 			<td><?php echo $bo0; ?></td>
 			<td><?php echo $fr0; ?></td>
@@ -537,7 +552,6 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td rowspan="3"><?php echo $mzeit; ?></td>
 		</tr>
 		<tr class="fieldnormallight">
-			<td bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$MiliH.$Flotte1.$MiliF.'\', STICKY, CAPTION,\'Militärscan Flotte1\', CENTER);" onmouseout="nd();">Flotte1</a>';?></td>
 			<td><?php echo $ja1; ?></td>
 			<td><?php echo $bo1; ?></td>
 			<td><?php echo $fr1; ?></td>
@@ -549,7 +563,6 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td><?php echo $ca1; ?></td>
 		</tr>
 		<tr class="fieldnormallight">
-			<td bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="return overlib(\''.$MiliH.$Flotte2.$MiliF.'\', STICKY, CAPTION,\'Militärscan Flotte2\', CENTER);" onmouseout="nd();">Flotte2</a>';?></td>
 			<td><?php echo $ja2; ?></td>
 			<td><?php echo $bo2; ?></td>
 			<td><?php echo $fr2; ?></td>
