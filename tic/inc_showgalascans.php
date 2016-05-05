@@ -147,7 +147,7 @@
 	</form>
 	<br />
 <?php
-if($_GET['displaytype'] == 'news') {
+if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$rg = $xgala;
 	$rp = $xplanet;
 	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' LIMIT 1";

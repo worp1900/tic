@@ -65,7 +65,7 @@
 
 // ------------------
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=scans&txtScanGalaxie=".$user_g."&txtScanPlanet=".$user_p."\"><img src=\"./bilder/default/scan.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Scans erfassen\" title=\"Scans erfassen\"></a></td>\n";
-		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=showgalascans&xgala=".$user_g."&xplanet=".$user_p."&displaymode=0\"><img src=\"./bilder/default/ship.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffe anzeigen\" title=\"Schiffe anzeigen\"></a></td>\n";
+		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=showgalascans&xgala=".$user_g."&xplanet=".$user_p."&displaytype=0\"><img src=\"./bilder/default/ship.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffe anzeigen\" title=\"Schiffe anzeigen\"></a></td>\n";
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=anzeigen&id=".$SQL_Row_user['id']."\"><img src=\"./bilder/default/move.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffsbewegungen ändern\" title=\"Schiffsbewegungen ändern\"></a></td>\n";
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=vergleich&xgala=".$user_g."&xplanet=".$user_p."\"><img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegenüberstellung anzeigen\" title=\"Flottengegenüberstellung anzeigen\"></a></td>\n";
 
@@ -78,7 +78,7 @@
 		if ($scan["scan_militaer"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_militaer_time"], time()).">Milit&auml;r vom ".date("d.M H:i", $scan["scan_militaer_time"])." (".$scan["scan_militaer_prozent"]."%)</span><br />";
 		if (!($scan["scan_sektor"] || $scan["scan_geschuetze"] || $scan["scan_einheiten"] || $scan["scan_militaer"])) $tooltip_scan.= "<i>keine</i><br />";
 		$tooltip_scan .= "<br /><b>Letzter Login von ".$user_g.":".$user_p." ".$user_n."</b><br />".($user_ll?date("d.m.Y H:i", $user_ll):"<i>nie</i>");
-		$link_scan = "<a href=\"./main.php?modul=showgalascans&displaymode=0&xgala=".$user_g."&xplanet=".$user_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
+		$link_scan = "<a href=\"./main.php?modul=showgalascans&displaytype=0&xgala=".$user_g."&xplanet=".$user_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
 
 		$dsp .= "			<td class=\"field".$farb_zusatz."light\" align=\"center\">".$user_g.":".$user_p."</td>\n";
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\" align=\"left\"><img src=\"".$RangImage[$user_r]."\" width=\"20\" height=\"20\" border=\"0\" alt=\"".$RangName[$user_r]."\" title=\"".$RangName[$user_r]."\" align=\"middle\"> ".$link_scan."<span class=\"texttaktik\">[ ".$AllianzTag[$SQL_Row_user['allianz']]." ] ".($login_warn?"<span class=\"loginwarn\">":"").$user_n.($login_warn?"</span>":"")." <img src=\"./bilder/scans/".getScanAge($scan["scan_militaer_time"], time()).".gif\" width=\"15\" height=\"15\" border=\"0\" align=\"middle\"></span></a>".($user_ll > $time_online?" *":"")."</td>\n";
@@ -119,7 +119,7 @@
 				if ($scan["scan_militaer"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_militaer_time"], $f_eta).">Milit&auml;r vom ".date("d.M H:i", $scan["scan_militaer_time"])." (".$scan["scan_militaer_prozent"]."%)</span><br />";
 				if (!($scan["scan_sektor"] || $scan["scan_geschuetze"] || $scan["scan_einheiten"] || $scan["scan_militaer"])) $tooltip_scan.= "<i>keine</i>";
 				$scan_militaer_time = $scan["scan_militaer_time"];
-				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaymode=0&xgala=".$ziel_g."&xplanet=".$ziel_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
+				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaytype=0&xgala=".$ziel_g."&xplanet=".$ziel_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
 				$scan = getScanData($start_g, $start_p);
 				$tooltip_fleet = ($Benutzer['help']?$help_fleet:"")."<b>".($f_nummer == 0?"unbekannte Flotte":"Flotte ".$f_nummer)." von ".$start_g.":".$start_p." ".$start_n."</b><br />";
 				if ($scan["scan_militaer"] && $f_nummer > 0) {
@@ -172,7 +172,7 @@
 				if ($scan["scan_einheiten"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_einheiten_time"], $f_eta).">Einheiten vom ".date("d.M H:i", $scan["scan_einheiten_time"])." (".$scan["scan_einheiten_prozent"]."%)</span><br />";
 				if ($scan["scan_militaer"])	$tooltip_scan.= "<span class=".getScanage($scan["scan_militaer_time"], $f_eta).">Milit&auml;r vom ".date("d.M H:i", $scan["scan_militaer_time"])." (".$scan["scan_militaer_prozent"]."%)</span><br />";
 				if (!($scan["scan_sektor"] || $scan["scan_geschuetze"] || $scan["scan_einheiten"] || $scan["scan_militaer"])) $tooltip_scan.= "<i>keine</i>";
-				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaymode=0&xgala=".$start_g."&xplanet=".$start_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
+				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaytype=0&xgala=".$start_g."&xplanet=".$start_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
 				$tooltip_fleet = ($Benutzer['help']?$help_fleet:"")."<b>".($f_nummer == 0?"unbekannte Flotte":"Flotte ".$f_nummer)." von ".$start_g.":".$start_p." ".$start_n."</b><br />";
 				if ($scan["scan_militaer"] && $f_nummer > 0) {
 					$tooltip_fleet .= "<span class=".getScanAge($scan["scan_militaer_time"], $f_eta).">";
@@ -227,7 +227,7 @@
 				if ($scan["scan_einheiten"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_einheiten_time"], $f_eta).">Einheiten vom ".date("d.M H:i", $scan["scan_einheiten_time"])." (".$scan["scan_einheiten_prozent"]."%)</span><br />";
 				if ($scan["scan_militaer"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_militaer_time"], $f_eta).">Milit&auml;r vom ".date("d.M H:i", $scan["scan_militaer_time"])." (".$scan["scan_militaer_prozent"]."%)</span><br />";
 				if (!($scan["scan_sektor"] || $scan["scan_geschuetze"] || $scan["scan_einheiten"] || $scan["scan_militaer"])) $tooltip_scan.= "<i>keine</i>";
-				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaymode=0&xgala=".$start_g."&xplanet=".$start_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
+				$link_scan = "<a href=\"./main.php?modul=showgalascans&displaytype=0&xgala=".$start_g."&xplanet=".$start_p."\" onmouseover=\"return overlib('".$tooltip_scan."');\" onmouseout=\"return nd();\">";
 				$tooltip_fleet = ($Benutzer['help']?$help_fleet:"")."<b>".($f_nummer == 0?"unbekannte Flotte":"Flotte ".$f_nummer)." von ".$start_g.":".$start_p." ".$start_n."</b><br />";
 				if ($scan["scan_militaer"] && $f_nummer > 0) {
 					$tooltip_fleet .= "<span class=".getScanAge($scan["scan_militaer_time"], $f_eta).">";
