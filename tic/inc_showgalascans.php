@@ -147,6 +147,62 @@
 	</form>
 	<br />
 <?php
+if($_GET['displaytype'] == 'news') {
+	$rg = $xgala;
+	$rp = $xplanet;
+	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' LIMIT 1";
+	$res_news = tic_mysql_query($sql);
+	$num_news = mysql_num_rows($res_news);
+	
+	if($num_news == 0) {
+		echo '<font color="#800000" size="-1"><b>Sorry - Keine News-Scans vorhanden.</b></font>';
+	} else {
+?>
+		<table width="100%">
+			<tr>
+				<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=gnuser($rg, $rp);?>" target="_blank">Punkteverlauf</a></td>
+			</tr>
+<?php
+		for($j = 0; $j < $num_news; $j++) {
+			$id = mysql_result($res_news, $j, 'id' );
+			$t = mysql_result($res_news, $j, 't' );
+			$gen = mysql_result($res_news, $j, 'genauigkeit' );
+			$svs = mysql_result($res_news, $j, 'erfasser_svs' );
+?>
+			<tr>
+				<td class="fieldnormaldark"><b>Scan: </b></td>
+				<td class="fieldnormaldark"><b><?=date('Y-m-d H:i', $t);?></b></td>
+				<td class="fieldnormaldark"><b><?=$gen;?>%</b></td>
+				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
+			</tr>
+<?php
+			
+			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
+			$res_news_entries = tic_mysql_query($sql);
+			$num_news_entries = mysql_num_rows($res_news_entries);
+			
+			for($j = 0; $k < $num_news_entries; $k++) {
+				$t = mysql_result($res_news_entries, $k, 't' );
+				$typ = mysql_result($res_news_entries, $k, 'typ' );
+				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
+				?>
+				<tr>
+					<td class="fieldnormallight" valign="top"><?=date('Y-m-d H:i', $t);?> -<?=(round((time()-$t)/60, 0));?>min</td>
+					<td class="fieldnormallight" valign="top" align="left"><?=$typ;?></td>
+					<td class="fieldnormallight" valign="top" align="left" colspan="2"><pre style="font-size: 8pt;"><?=$inhalt;?></pre></td>
+				</tr>
+				<?
+			}
+			
+			mysql_free_result($res_news_entries);
+		}
+?>
+		</table>
+<?php
+	}
+	mysql_free_result($res_news);
+	
+} else {
 	//echo "sql=".$sql;
 	$SQL_Result = tic_mysql_query( $sql, $SQL_DBConn );
 	$count =  mysql_num_rows($SQL_Result);
@@ -289,7 +345,7 @@
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="14" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
+			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://iotduino.de/gn/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -305,6 +361,7 @@
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
 			<td class="fieldnormaldark"><b>Scanblocks</b></td>
+			<td class="fieldnormaldark"><b>News</b></td>
 		</tr>
 		<tr>
 			<td class="fieldnormallight"><?php echo ($pts != '-') ? number_format($pts, 0, ',', '.') : $pts; ?></td>
@@ -367,6 +424,23 @@
 	echo '</pre>';
 	mysql_free_result($res_blocks);
 ?>
+			</td>
+			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt">
+<?php
+	$sql = "select * from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "'";
+	$res_news = tic_mysql_query($sql);
+	$num_news = mysql_num_rows($res_news);
+	
+	if($num_news == 0) {
+		echo '-';
+	} else {
+		for($j = 0; $j < $num_news; $j++) {
+			$t = mysql_result($res_news, $j, 't' );
+			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news">' . date('Y-m-d H:i', $t) . '</a><br/>';
+		}
+	}
+	mysql_free_result($res_news);
+?>			
 			</td>
 		</tr>
 		<tr>
@@ -507,4 +581,5 @@
 			} // end of if (rp != rpnext)
 		} // end of for
 	} // end of else
+}//if displaytype news
 ?>
