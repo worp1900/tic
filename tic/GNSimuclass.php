@@ -408,10 +408,10 @@
 				$color = !$color;
 				echo "<tr class=\"fieldnormal".($color ? "light" : "dark")."\">";
 				echo "<td>".$this->shipdata[$i]['name']."</td>";
-				echo "<td bgcolor='#bbbbff'>".(isset($defsum->LostShips[$i]) ? $defsum->LostShips[$i] : 0)."</td>";
+				echo "<td bgcolor='".($color ? '#ccccff' : '#bbbbff')."'>".(isset($defsum->LostShips[$i]) ? $defsum->LostShips[$i] : 0)."</td>";
 				
 				if($i < 9) {
-					echo "<td bgcolor='#ffbbbb'>".(isset($attsum->LostShips[$i]) ? $attsum->LostShips[$i] : 0)."</td>";
+					echo "<td bgcolor='".($color ? '#ffcccc' : '#ffbbbb')."'>".(isset($attsum->LostShips[$i]) ? $attsum->LostShips[$i] : 0)."</td>";
 					for($j = 0; $j < count($this->DeffFleets); $j++) {
 						echo '<td>'.(isset($this->DeffFleets[$j]->LostShips[$i]) ? $this->DeffFleets[$j]->LostShips[$i] : 0).'</td>';
 					}
@@ -423,12 +423,12 @@
 			}
 			
 			//exen
-			echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#bbbbff'>".$attsum->StolenExenM."</td><td bgcolor='#ffbbbb'>".(-1*$attsum->StolenExenM)."</td>";
+			echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#ccccff'>".$attsum->StolenExenM."</td><td bgcolor='#ffcccc'>".(-1*$attsum->StolenExenM)."</td>";
 			echo '<td bgcolor="white" colspan="'.count($this->DeffFleets).'"></td>';
 			for($i = 0; $i < count($this->AttFleets); $i++)
 				echo '<td>'.(-1*$this->AttFleets[$i]->StolenExenM).'</td>';
 			echo "</tr>";
-			echo "<tr class=\"fieldnormallight\"><td>Kristallexen</td><td bgcolor='#bbbbff'>".$attsum->StolenExenK."</td><td bgcolor='#ffbbbb'>".(-1*$attsum->StolenExenK)."</td>";
+			echo "<tr class=\"fieldnormallight\"><td>Kristallexen</td><td bgcolor='#ccccff'>".$attsum->StolenExenK."</td><td bgcolor='#ffcccc'>".(-1*$attsum->StolenExenK)."</td>";
 			echo '<td bgcolor="white" colspan="'.count($this->DeffFleets).'"></td>';
 			for($i = 0; $i < count($this->AttFleets); $i++)
 				echo '<td>'.(-1*$this->AttFleets[$i]->StolenExenK).'</td>';
@@ -452,24 +452,24 @@
 			//kosten neubau
 			echo '<tr class="datatablehead"><td colspan="'.(3 + count($this->AttFleets) + count($this->DeffFleets)).'">Kosten f&uuml;r Neubau</td></tr>';
 			//	M
-			echo '<tr class="fieldnormallight"><td>Metall</td><td bgcolor="#bbbbff">'.ZahlZuText($this->calcResForLost($defsum)[0]).'</td><td bgcolor="#ffbbbb">'.ZahlZuText($this->calcResForLost($attsum)[0]).'</td>';
+			echo '<tr class="fieldnormallight"><td>Metall</td><td bgcolor="#ccccff">'.ZahlZuText($this->calcResForLost($defsum)[0]).'</td><td bgcolor="#ffcccc">'.ZahlZuText($this->calcResForLost($attsum)[0]).'</td>';
 			for($i = 0; $i < count($verluste); $i++) {
 				echo '<td>'.ZahlZuText($verluste[$i][0]).'</td>';
 			}
 			echo '</tr>';
 			//	K
-			echo '<tr class="fieldnormallight"><td>Kristall</td><td bgcolor="#bbbbff">'.ZahlZuText($this->calcResForLost($defsum)[1]).'</td><td bgcolor="#ffbbbb">'.ZahlZuText($this->calcResForLost($attsum)[1]).'</td>';
+			echo '<tr class="fieldnormallight"><td>Kristall</td><td bgcolor="#ccccff">'.ZahlZuText($this->calcResForLost($defsum)[1]).'</td><td bgcolor="#ffcccc">'.ZahlZuText($this->calcResForLost($attsum)[1]).'</td>';
 			for($i = 0; $i < count($verluste); $i++) {
 				echo '<td>'.ZahlZuText($verluste[$i][1]).'</td>';
 			}
 			echo '</tr>';
 			//	M Bergung
 			$bergungM = floor($this->calcResForLost($defsum)[0]*.4)+floor($this->calcResForLost($attsum)[0]*.4);
-			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungsmetall (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($bergungM).'<br/><i>('.ZahlZuText(2*$bergungM).')</i></td>';
+			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungsmetall (?)</td><td bgcolor="#ccccff">'.ZahlZuText($bergungM).'<br/><i>('.ZahlZuText(2*$bergungM).')</i></td>';
 			echo '</tr>';
 			//	K Bergung
 			$bergungK = floor($this->calcResForLost($defsum)[1]*.4)+floor($this->calcResForLost($attsum)[1]*.4);
-			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungskristall (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($bergungK).'<br/><i>('.ZahlZuText(2*$bergungK).')</i></td>';
+			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungskristall (?)</td><td bgcolor="#ccccff">'.ZahlZuText($bergungK).'<br/><i>('.ZahlZuText(2*$bergungK).')</i></td>';
 			echo '</tr>';
 			//	Summe
 			$total = $this->calcResForLost($defsum)[0] + $this->calcResForLost($defsum)[1] - $bergungK - $bergungM;
@@ -484,7 +484,7 @@
 			$exen_gesamt_jetzt = $this->Exen_K + $this->Exen_M;
 			$exen_vorher = $exen_gesamt_jetzt + $exenverlust_gesamt;
 			$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
-			echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($kosten_neubau_exen).'</td></tr>';
+			echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#ccccff">'.ZahlZuText($kosten_neubau_exen).'</td></tr>';
 
 			echo "</table>";
       }
@@ -551,10 +551,10 @@
 			$color = !$color;
 			echo "<tr class=\"fieldnormal".($color ? "light" : "dark")."\">";
 			echo "<td>".$this->shipdata[$i]['name']."</td>";
-			echo "<td bgcolor='#bbbbff'>".$defsum->OldShips[$i]."</td><td bgcolor='#bbbbff'>".$defsum->Ships[$i]."</td>";
+			echo "<td bgcolor='".($color ? "#ccccff" : "#bbbbff")."'>".$defsum->OldShips[$i]."</td><td bgcolor='".($color ? "#ccccff" : "#bbbbff")."'>".$defsum->Ships[$i]."</td>";
 			
 			if($i < 9)
-				echo "<td bgcolor='#ffbbbb'>".$attsum->OldShips[$i]."</td><td bgcolor='#ffbbbb'>".$attsum->Ships[$i]."</td>";
+				echo "<td bgcolor='".($color ? "#ffcccc" : "#ffbbbb")."'>".$attsum->OldShips[$i]."</td><td bgcolor='".($color ? "#ffcccc" : "#ffbbbb")."'>".$attsum->Ships[$i]."</td>";
 			else
 				echo '<td colspan="2" style="background-color: white;"></td>';
 
@@ -576,7 +576,7 @@
 			}
 			echo "</tr>";
         }
-        echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#bbbbff'>".($this->Exen_M + $attsum->StolenExenMthisTick)."</td><td bgcolor='#bbbbff'>".$this->Exen_M."</td><td bgcolor='white'></td><td bgcolor='#ffbbbb'>".$attsum->StolenExenMthisTick."</td>";
+        echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#ccccff'>".($this->Exen_M + $attsum->StolenExenMthisTick)."</td><td bgcolor='#ccccff'>".$this->Exen_M."</td><td bgcolor='white'></td><td bgcolor='#ffbbbb'>".$attsum->StolenExenMthisTick."</td>";
 		echo '<td bgcolor="white" colspan="'.(2*count($this->DeffFleets)).'"></td>';
 		for($i = 0; $i < count($this->AttFleets); $i++) {
 			echo '<td bgcolor="white"></td><td>'.($this->AttFleets[$i]->TicksToStay >= 0 ? $this->AttFleets[$i]->StolenExenMthisTick : 0).'</td>';
