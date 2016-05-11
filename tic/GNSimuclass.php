@@ -23,8 +23,12 @@
         var $LostShips;     // Schiffe, die diese Flotte verloren hat
         var $StolenExenM;   // Von Dieser Flotte gestohlene Kristallextraktoren
         var $StolenExenK;   // Von Dieser Flotte gestohlene Kristallextraktoren
+        var $StolenExenMthisTick = 0;
+        var $StolenExenKthisTick = 0;
         var $TicksToWait;   // Dauer in Ticks, bis die Flotte angreift/verteidgt
         var $TicksToStay;   // Wieviele Ticks die Flotte angreift/verteidgt
+		var $text;
+		var $showInSum = false;
     }
     class GNSimu_Multi
     {
@@ -37,7 +41,7 @@
         function GNSimu_Multi()
         {
             // Daten für Jäger Nr. 0
-            $this->shipdata[0]['name'] = "Jäger";
+            $this->shipdata[0]['name'] = "J&auml;ger";
             $this->shipdata[0]['attakpower']  = array(0.0246, 0.392, 0.0263); // Wie viele Schiffe ein Schiff mit 100% Feuerkrafft zerstören wrde
             $this->shipdata[0]['shiptoattak'] = array(11,1,4); // Welche Schiffe/Gesch&uuml;tze angegriffen werden
             $this->shipdata[0]['percent']     = array(0.35,0.30,0.35); // Die Verteilung der Prozente, mit der auf die Schiffe geschoßen wird.
@@ -58,7 +62,7 @@
             $this->shipdata[3]['attakpower']  = array(3.5,1.2444);
             $this->shipdata[3]['shiptoattak'] = array(9,2);
             $this->shipdata[3]['percent']     = array(0.6,0.4);
-            $this->shipdata[3]['name'] = "Zerstörer";
+            $this->shipdata[3]['name'] = "Zerst&ouml;rer";
             $this->shipdata[3]['cost'] = array(40000, 30000);
             // Daten für Kreuzer Nr. 4
             $this->shipdata[4]['attakpower']  = array(2.0,0.8571,10.0);
@@ -77,10 +81,10 @@
             $this->shipdata[6]['shiptoattak'] = array(7,8);
             $this->shipdata[6]['percent']     = array(0.5,0.5);
             $this->shipdata[6]['cost'] = array(200000, 50000);
-            $this->shipdata[6]['name'] = "Trägerschiff";
+            $this->shipdata[6]['name'] = "Tr&auml;gerschiff";
             // Daten für Kaperschiff
             $this->shipdata[7]['cost'] = array(1500, 1000);
-            $this->shipdata[3]['name'] = "Kaperschiff";
+            $this->shipdata[7]['name'] = "Kaperschiff";
             // Daten fr Schutzschiff
             $this->shipdata[8]['cost'] = array(1000, 1500);
             $this->shipdata[8]['name'] = "Schutzschiff";
@@ -89,31 +93,31 @@
             $this->shipdata[9]['shiptoattak'] = array(0,7);
             $this->shipdata[9]['percent']     = array(0.6,0.4);
             $this->shipdata[9]['cost'] = array(6000, 2000);
-            $this->shipdata[9]['name'] = "Leichtes Obligtalgeschütz";
+            $this->shipdata[9]['name'] = "Leichtes Obligtalgesch&uuml;tz";
             // Daten für Leichtes Raumgeschütz Nr. 10
             $this->shipdata[10]['attakpower']  = array(1.2,0.5334);
             $this->shipdata[10]['shiptoattak'] = array(1,2);
             $this->shipdata[10]['percent']     = array(0.4,0.6);
             $this->shipdata[10]['cost'] = array(20000, 10000);
-            $this->shipdata[10]['name'] = "Leichtes Raumgeschütz";
+            $this->shipdata[10]['name'] = "Leichtes Raumgesch&uuml;tz";
             // Daten für Mittleres Raumgeschütz Nr. 11
             $this->shipdata[11]['attakpower']  = array(0.9143,0.4267);
             $this->shipdata[11]['shiptoatta'] = array(3,4);
             $this->shipdata[11]['percent']     = array(0.4,0.6);
             $this->shipdata[11]['cost'] =  array(60000, 100000);
-            $this->shipdata[11]['name'] = "Mittleres Raumgeschütz";
+            $this->shipdata[11]['name'] = "Mittleres Raumgesch&uuml;tz";
             // Daten für Schweres Raumgeschütz Nr. 12
             $this->shipdata[12]['attakpower']  = array(0.5,0.3774);
             $this->shipdata[12]['shiptoattak'] = array(5,6);
             $this->shipdata[12]['percent']     = array(0.5,0.5);
             $this->shipdata[12]['cost'] = array(200000, 300000);
-            $this->shipdata[12]['name'] = "Schweres Raumgeschütz";
+            $this->shipdata[12]['name'] = "Schweres Raumgesch&uuml;tz";
             // Daten für  Abfangjäger Nr. 13
-            $this->shipdata[10]['attakpower']  = array(0.0114,0.32);
-            $this->shipdata[10]['shiptoattak'] = array(3,7);
-            $this->shipdata[10]['percent']     = array(0.4,0.6);
-            $this->shipdata[10]['cost'] = array(1000, 1000);
-            $this->shipdata[10]['name'] = "Abfangjäger";
+            $this->shipdata[13]['attakpower']  = array(0.0114,0.32);
+            $this->shipdata[13]['shiptoattak'] = array(3,7);
+            $this->shipdata[13]['percent']     = array(0.4,0.6);
+            $this->shipdata[13]['cost'] = array(1000, 1000);
+            $this->shipdata[13]['name'] = "Abfangj&auml;ger";
         }
         function Tick($debug)
         {
@@ -121,6 +125,7 @@
             {
                 if($this->AttFleets[$i]->TicksToWait == 0)
                 {
+					$this->AttFleets[$i]->showInSum = true;
                     $this->AttFleets[$i]->TicksToStay--;
                     if($this->AttFleets[$i]->TicksToStay >= 0)
                     {
@@ -138,10 +143,11 @@
             {
                 if($this->DeffFleets[$i]->TicksToWait == 0)
                 {
+					$this->DeffFleets[$i]->showInSum = true;
                     $this->DeffFleets[$i]->TicksToStay--;
                     if($this->DeffFleets[$i]->TicksToStay >= 0)
                     {
-                        for($j = 0;$j < 9;$j++)
+                        for($j = 0;$j < 14;$j++)
                             $TotalDeff[$j] += $this->DeffFleets[$i]->Ships[$j];
                     }
                 }
@@ -151,12 +157,12 @@
                 }
                 $this->DeffFleets[$i]->OldShips = $this->DeffFleets[$i]->Ships;
             }
-            for($i = 0;$i < 5;$i++)
-            {
-                $TotalDeff[$i+9] = $this->Deff[$i];
-            }
+            //for($i = 0;$i < 5;$i++)
+            //{
+            //    $TotalDeff[$i+9] = $this->Deff[$i];
+            //}
             //Schleife ber alle Schiffe
-            for($i = 0;$i < 14;$i++)
+            for($i = 0; $i < 14; $i++)
             {
                 //Variablen fr das nächste Schiff "nullen"
                 $RestPercentatt = 0;
@@ -197,8 +203,8 @@
                                 $MaxDestruction = floor($val);
                             if($debug)
                             {
-                                echo "<font color=#ff0000>- Angreifende Schiffe: ".$TotalAtt[$i]." Verteidigende Schiffe:".($TotalDeff[$this->shipdata[$i]['shiptoattak'][$j]]-$ToDestroyDeff[$this->shipdata[$i]['shiptoattak'][$j]])."<br />";
-                                echo "<font color=#ff0000>- Maximale Zerstörung: floor(($RestPercentatt+".$this->shipdata[$i]['percent'][$j].") * $OldRestpoweratt * ".$this->shipdata[$i]['attakpower'][$j].")=$MaxDestruction<br />";
+                                echo "<font color=#ff0000>- Angreifende Schiffe: ".$TotalAtt[$i]." Verteidigende Schiffe:".($TotalDeff[$this->shipdata[$i]['shiptoattak'][$j]]-$ToDestroyDeff[$this->shipdata[$i]['shiptoattak'][$j]])."<br /></font>";
+                                echo "<font color=#ff0000>- Maximale Zerstörung: floor(($RestPercentatt+".$this->shipdata[$i]['percent'][$j].") * $OldRestpoweratt * ".$this->shipdata[$i]['attakpower'][$j].")=$MaxDestruction<br /></font>";
                             }
                             // Wie viele Schiffe dann zerstört werden, nich mehr als die maximale Zerstörung und nich mehr als mit 100%(was oben eigentlich schon geprft wird) und nich mehr als Schiffe noch ber sind.
                             $del= floor(max(min($MaxDestruction, $Restpoweratt * $this->shipdata[$i]['attakpower'][$j], $TotalDeff[$this->shipdata[$i]['shiptoattak'][$j]]-$ToDestroyDeff[$this->shipdata[$i]['shiptoattak'][$j]]), 0));
@@ -261,140 +267,345 @@
                 }
             }
             //Todel verrechnen
-            for($i = 0;$i < 9;$i++)
+            for($i = 0;$i < 14;$i++)
             {
                 if($TotalAtt[$i] > 0)
                 {
                     for($j = 0;$j < count($this->AttFleets);$j++)
                     {
-                        if($this->AttFleets[$j]->TicksToWait > 0)
+                        if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0)
                             continue;
                         $t = 0;
 						if($this->AttFleets[$j]->Ships[$i] > 0)
 							$t = round($TotalAtt[$i] / $this->AttFleets[$j]->Ships[$i] * $ToDestroyAtt[$i]);
                         $this->AttFleets[$j]->LostShips[$i] += $t;
                         $this->AttFleets[$j]->Ships[$i] -= $t;
+						if($this->AttFleets[$j]->Ships[$i] < 0) $this->AttFleets[$j]->Ships[$i] = 0;
                     }
                 }
                 if($TotalDeff[$i] > 0)
                 {
                     for($j = 0;$j < count($this->DeffFleets);$j++)
                     {
-                        if($this->DeffFleets[$j]->TicksToWait > 0)
+                        if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0)
                             continue;
 						if($this->DeffFleets[$j]->Ships[$i] > 0)
 							$t = round($TotalDeff[$i] / $this->DeffFleets[$j]->Ships[$i] * $ToDestroyDeff[$i]);
                         $this->DeffFleets[$j]->LostShips[$i] += $t;
                         $this->DeffFleets[$j]->Ships[$i] -= $t;
+						if($this->DeffFleets[$j]->Ships[$i] < 0) $this->DeffFleets[$j]->Ships[$i] = 0;
                     }
                 }
             }
-            for($j = 0;$j < count($this->AttFleets) && $TotalAtt[8] > 0;$j++)
+
+
+            //Dann noch mal eben schnell paar exen klauen
+            //Erstmall ausrechnen, wie viele maximal mitgenommen werden k?nen, bin der Meinung mal Iregndwo im Forum gelesen zu haben, dass Metall- auf- und Kristallexen abgerundet werden
+            $maxmexen = ceil((max($TotalAtt[7]-$TotalDeff[8],0))/2);
+            $maxkexen = floor((max($TotalAtt[7]-$TotalDeff[8],0))/2);
+            //Dann wie viele Metallexen in den mei?en F?len geklaut werden
+            $rmexen = min($maxmexen, floor($this->Exen_M*0.1));
+            //Wenn nich alle Schiffe, die fr Metallexenlau bereitgestellt waren benutz werden, drfen diese zum Kristallexen klauen Benutzt werden
+            if($rmexen != $maxmexen)
+                $maxkexen += $maxmexen-$rmexen;
+            //Kristallexen in den mei?en F?len
+            $rkexen = min($maxkexen, floor($this->Exen_K*0.1));
+            // Wenn nich alle zum Kristallexen bereitgestellten Cleps benutzt wurden, rechnen wir nochmal Metallexen ob nich evtl mehr mit genommen werden k?nen.
+            if($rkexen != $maxkexen)
             {
-                if($this->AttFleets[$j]->TicksToWait > 0)
-                    continue;
-                $t = (max($this->AttFleets->Ships[7]-$this->AttFleets->Ships[8],0))/2;
-                $maxmexen = ceil($t)*($TotalAtt[8]/$this->AttFleets->Ships[8]);
-                $maxkexen = floor($t)*($TotalAtt[8]/$this->AttFleets->Ships[8]);
+                $maxmexen += $maxkexen-$rkexen;
                 $rmexen = min($maxmexen, floor($this->Exen_M*0.1));
-                if($rmexen != $maxmexen)
-                    $maxkexen += $maxmexen-$rmexen;
-                $rkexen = min($maxkexen, floor($this->Exen_K*0.1));
-                if($rmexen != $maxmexen)
-                {
-                    $maxmexen += $maxkexen-$rkexen;
-                    $rmexen = min($maxmexen, floor($this->Exen_M*0.1));
-                }
-                $this->Exen_M -= $rmexen;
-                $this->Exen_K -= $rkexen;
-                $this->AttFleets->Ships[8] -= $rmexen+$rkexen;
-                $this->AttFleets->LostShips[8] += $rmexen+$rkexen;
-                $this->AttFleets->StolenExenM += $this->stolenmexen = $rmexen;
-                $this->AttFleets->StolrnExenK += $this->stolenkexen = $rkexen;
-            }
-        }
-		function AddShipSpecs($fleet, $isatt) {
-			for($i = 0; $i < count($fleet->Ships); $i++) {
-				if($isatt)
-					$attaking[$i] += $fleet->Ships[$i];
-				else
-					$deffending[$i] += $fleet->Ships[$i];
-			}			
-			
-		}
-        function AddAttFleet(&$fleet, $ankunft, $dauer)
-        {
-            $this->AttFleets[] = &$fleet;
-			$this->AddShipSpecs($fleet->Ships, true);
-        
-			$fleet->TicksToWait = $ankunft;
-			$fleet->TicksToStay = $dauer;
-		}
-        function AddDeffFleet(&$fleet, $ankunft, $dauer)
-        {
-            $this->DeffFleets[] = &$fleet;
-			$this->AddShipSpecs($fleet->Ships, false);
-			
-			$fleet->TicksToWait = $ankunft;
-			$fleet->TicksToStay = $dauer;
-        }
-        function PrintOverview()
-        {
-            $vklost = $vmlost = $aklost = $amlost = 0;
-            for($i = 0;$i < count($this->AttFleets);$i++)
-            {
-                for($j = 0;$j < 9;$j++)
-                {
-                $geslostshipsa[$j] = $this->AttFleets[$i]->LostShips[$j];
-                if($geslostshipsa[$j]=="")
-                    $geslostshipsa[$j] = 0;
-                }
-                $gesstolenexenm+=$this->AttFleets[$i]->StolnenExenM;
-                $gesstolenexenk+=$this->AttFleets[$i]->StolnenExenK;
-            }
-            for($i=0;$i<count($this->DeffFleets);$i++)
-            {
-                for($j = 0;$j < 9;$j++)
-                {
-                $geslostshipsv[$j] = $this->DeffFleets[$i]->LostShips[$j];
-                if($geslostshipsv[$j]=="")
-                    $geslostshipsv[$j] = 0;
-                }
-            }
-            for($i=0;$i<15;$i++)
-            {
-                $vklost  += $this->shipdata[$i]['cost'][1]*$geslostshipsv[$i];
-                $vmlost  += $this->shipdata[$i]['cost'][0]*$geslostshipsv[$i];
-                $aklost  += $this->shipdata[$i]['cost'][1]*$geslostshipsa[$i];
-                $amlost  += $this->shipdata[$i]['cost'][0]*$geslostshipsa[$i];
             }
 
-            echo "<br /><center><table bgcolor=#555555 cellspacing=1>";
-            echo "<tr><td colspan=\"3\" class=\"datatablehead\" align=\"center\">Übersicht</td></tr>";
-            echo "<tr bgcolor=#666666><td colspan=\"3\">Verlorene Schiffe/Gesch&uuml;tze</td></tr>";
-            echo "<tr bgcolor=#777777><td>Typ</td><td>Verteidiger</td><td align='center'>Angreifer</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Jäger</td><td>          ".$geslostshipsv[0]."</td><td>".$geslostshipsa[0]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Bomber</td><td>         ".$geslostshipsv[1]."</td><td>".$geslostshipsa[1]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Fregatte</td><td>       ".$geslostshipsv[2]."</td><td>".$geslostshipsa[2]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Zerstörer</td><td>      ".$geslostshipsv[3]."</td><td>".$geslostshipsa[3]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Kreuzer</td><td>        ".$geslostshipsv[4]."</td><td>".$geslostshipsa[4]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Schlachtschiff</td><td>     ".$geslostshipsv[5]."</td><td>".$geslostshipsa[5]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Trägerschiff</td><td>       ".$geslostshipsv[6]."</td><td>".$geslostshipsa[6]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Kaperschiff</td><td>        ".$geslostshipsv[7]."</td><td>".$geslostshipsa[7]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Schutzschiff</td><td>       ".$geslostshipsv[8]."</td><td>".$geslostshipsa[8]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Leichtes Orbitalgsch&uuml;tz</td><td> ".$geslostshipsv[9]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Leichtes Raumgesch&uuml;tz</td><td>   ".$geslostshipsv[10]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Mittleres Raumgesch&uuml;tz</td><td>  ".$geslostshipsv[11]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Schweres Raumgesch&uuml;tz</td><td>  ".$geslostshipsv[12]."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Abfangjäger</td><td>    ".$geslostshipsv[13]."</td></tr>";
-            echo "<tr class=\"fieldnormaldark\">><td align='center' colspan=3>Kosten f&uuml;r Neubau</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Metall</td><td>".ZahlZuText($vmlost)."</td><td>".ZahlZuText($amlost)."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Kristall</td><td>".ZahlZuText($vklost)."</td><td>".ZahlZuText($aklost)."</td></tr>";
-            echo "<tr class=\"fieldnormaldark\">><td colspan=\"3\" align='center'>Gestohlene Extraktoren</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Metallextraktoren:</td><td> ".$gesstolenexenm."</td></tr>";
-            echo "<tr class=\"fieldnormallight\"><td>Kristallextraktoren:</td><td>   ".$gesstolenexenk."</td></tr>";
-            echo "</table></center>";
+			$this->Exen_M -= $rmexen;
+			$this->Exen_K -= $rkexen;
+
+			//exen den flotten zuweisen
+			for($j = 0;$j < count($this->AttFleets) && $TotalAtt[7] > 0;$j++)
+            {
+                if($this->AttFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0)
+                    continue;
+
+				//bruchteil dieser flotte berechnen
+				$factor = $this->AttFleets[$j]->OldShips[7] / $TotalAtt[7];
+				$xmexen = round($rmexen * $factor , 0);
+				$xkexen = round($rkexen * $factor , 0);
+
+				/*
+				aprint($maxmexen, 'maxmexen');
+				aprint($maxkexen, 'maxkexen');
+				aprint($rmexen, 'mexen');
+				aprint($rkexen, 'kexen');
+				aprint($factor, 'factor');
+				aprint($xmexen, 'fleetmexen');
+				aprint($xkexen, 'fleetkexen');
+				*/
+				
+				// Exen vom bestand abziehen und auch die benutzen Cleps "zerst?en"
+                $this->AttFleets[$j]->Ships[7] -= $xmexen+$xkexen;
+                $this->AttFleets[$j]->LostShips[7] += $xmexen+$xkexen;
+                $this->AttFleets[$j]->StolenExenM += $xmexen;
+                $this->AttFleets[$j]->StolenExenK += $xkexen;
+				$this->AttFleets[$j]->StolenExenMthisTick = $xmexen;
+				$this->AttFleets[$j]->StolenExenKthisTick = $xkexen;
+			}
         }
+        function AddAttFleet(&$fleet)
+        {
+            $this->AttFleets[] = &$fleet;
+		}
+        function AddDeffFleet(&$fleet)
+        {
+            $this->DeffFleets[] = &$fleet;
+			for($i = 9; $i < 14; $i++) {
+				$this->Deff[$i] += $fleet->Ships[$i] > 0 ? $fleet->Ships[$i] : 0;
+			}
+        }
+		function calcResForLost($fleet) {
+			$klost = 0;
+			$mlost = 0;
+			for($i=0;$i<14;$i++)
+			{
+				$mlost  += $this->shipdata[$i]['cost'][0]*$fleet->LostShips[$i];
+				$klost  += $this->shipdata[$i]['cost'][1]*$fleet->LostShips[$i];
+			}
+			return array($mlost, $klost);
+		}
+        function PrintOverview()
+		{
+			//head
+			echo "<br/><hr/><br/><b>Verluste:</b><br/><table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
+			//title
+			echo "<tr class=\"datatablehead\">";
+			echo "<td></td>";
+			echo "<td>&nbsp;Verteidiger&nbsp;</td><td>&nbsp;Angreifer&nbsp;</td>";
+			for($i = 0; $i < count($this->DeffFleets); $i++) {
+				if($this->DeffFleets[$i]->text) 
+					echo '<td>&nbsp;Deff: ' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
+				else
+					echo '<td>&nbsp;Deff #'.$i.'&nbsp;</td>';
+			}
+			for($i = 0; $i < count($this->AttFleets); $i++) {
+				if($this->AttFleets[$i]->text)
+						echo '<td>&nbsp;Att: ' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+				else
+						echo '<td>&nbsp;Att #'.$i.'&nbsp;</td>';
+			}
+			echo "</tr>";
+				echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Verlust</td><td>Verlust</td>";
+			for($i = 0; $i < count($this->DeffFleets) + count($this->AttFleets); $i++) {
+				echo "<td>Verlust</td>";
+			}
+			echo '</tr>';
+
+			//fleets
+			$color = 0;
+			$defsum = $this->sumFleets($this->DeffFleets, true);
+			$attsum = $this->sumFleets($this->AttFleets, true);
+
+			for($i = 0; $i < 14; $i++)
+			{
+				$color = !$color;
+				echo "<tr class=\"fieldnormal".($color ? "light" : "dark")."\">";
+				echo "<td>".$this->shipdata[$i]['name']."</td>";
+				echo "<td bgcolor='#bbbbff'>".(isset($defsum->LostShips[$i]) ? $defsum->LostShips[$i] : 0)."</td>";
+				
+				if($i < 9) {
+					echo "<td bgcolor='#ffbbbb'>".(isset($attsum->LostShips[$i]) ? $attsum->LostShips[$i] : 0)."</td>";
+					for($j = 0; $j < count($this->DeffFleets); $j++) {
+						echo '<td>'.(isset($this->DeffFleets[$j]->LostShips[$i]) ? $this->DeffFleets[$j]->LostShips[$i] : 0).'</td>';
+					}
+					for($j = 0; $j < count($this->AttFleets); $j++) {
+						echo '<td>'.(isset($this->AttFleets[$j]->LostShips[$i]) ? $this->AttFleets[$j]->LostShips[$i] : 0).'</td>';
+					}
+				}
+				echo "</tr>";
+			}
+			
+			//exen
+			echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#bbbbff'>".$attsum->StolenExenM."</td><td bgcolor='#ffbbbb'>".(-1*$attsum->StolenExenM)."</td>";
+			echo '<td bgcolor="white" colspan="'.count($this->DeffFleets).'"></td>';
+			for($i = 0; $i < count($this->AttFleets); $i++)
+				echo '<td>'.(-1*$this->AttFleets[$i]->StolenExenM).'</td>';
+			echo "</tr>";
+			echo "<tr class=\"fieldnormallight\"><td>Kristallexen</td><td bgcolor='#bbbbff'>".$attsum->StolenExenK."</td><td bgcolor='#ffbbbb'>".(-1*$attsum->StolenExenK)."</td>";
+			echo '<td bgcolor="white" colspan="'.count($this->DeffFleets).'"></td>';
+			for($i = 0; $i < count($this->AttFleets); $i++)
+				echo '<td>'.(-1*$this->AttFleets[$i]->StolenExenK).'</td>';
+			echo "</tr>";
+			//exen summe
+			echo "<tr class=\"fieldnormaldark\"><td>Summe</td><td bgcolor='#bbbbff'>".($attsum->StolenExenM + $attsum->StolenExenK)."</td><td bgcolor='#ffbbbb'>".(-1*($attsum->StolenExenM + $attsum->StolenExenK))."</td>";
+			echo '<td bgcolor="white" colspan="'.count($this->DeffFleets).'"></td>';
+			for($i = 0; $i < count($this->AttFleets); $i++)
+				echo '<td>'.(-1*($this->AttFleets[$i]->StolenExenK + $this->AttFleets[$i]->StolenExenM)).'</td>';
+			echo "</tr>";
+			
+			//kosten neubau
+			$verluste = array();
+			for($i = 0; $i < count($this->DeffFleets); $i++) {
+				$verluste[] = $this->calcResForLost($this->DeffFleets[$i]);
+			}
+			for($i = 0; $i < count($this->AttFleets); $i++) {
+				$verluste[] = $this->calcResForLost($this->AttFleets[$i]);
+			}
+			
+			//kosten neubau
+			echo '<tr class="datatablehead"><td colspan="'.(3 + count($this->AttFleets) + count($this->DeffFleets)).'">Kosten f&uuml;r Neubau</td></tr>';
+			//	M
+			echo '<tr class="fieldnormallight"><td>Metall</td><td bgcolor="#bbbbff">'.ZahlZuText($this->calcResForLost($defsum)[0]).'</td><td bgcolor="#ffbbbb">'.ZahlZuText($this->calcResForLost($attsum)[0]).'</td>';
+			for($i = 0; $i < count($verluste); $i++) {
+				echo '<td>'.ZahlZuText($verluste[$i][0]).'</td>';
+			}
+			echo '</tr>';
+			//	K
+			echo '<tr class="fieldnormallight"><td>Kristall</td><td bgcolor="#bbbbff">'.ZahlZuText($this->calcResForLost($defsum)[1]).'</td><td bgcolor="#ffbbbb">'.ZahlZuText($this->calcResForLost($attsum)[1]).'</td>';
+			for($i = 0; $i < count($verluste); $i++) {
+				echo '<td>'.ZahlZuText($verluste[$i][1]).'</td>';
+			}
+			echo '</tr>';
+			//	M Bergung
+			$bergungM = floor($this->calcResForLost($defsum)[0]*.4)+floor($this->calcResForLost($attsum)[0]*.4);
+			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungsmetall (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($bergungM).'<br/><i>('.ZahlZuText(2*$bergungM).')</i></td>';
+			echo '</tr>';
+			//	K Bergung
+			$bergungK = floor($this->calcResForLost($defsum)[1]*.4)+floor($this->calcResForLost($attsum)[1]*.4);
+			echo '<tr class="fieldnormallight"><td title="Bei weiteren Verteidigern gehen weitere 40% auf diese.">- Bergungskristall (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($bergungK).'<br/><i>('.ZahlZuText(2*$bergungK).')</i></td>';
+			echo '</tr>';
+			//	Summe
+			$total = $this->calcResForLost($defsum)[0] + $this->calcResForLost($defsum)[1] - $bergungK - $bergungM;
+			$total2 = $this->calcResForLost($defsum)[0] + $this->calcResForLost($defsum)[1] - 2*$bergungK - 2*$bergungM;
+			echo '<tr class="fieldnormaldark" style="font-weight: bold;"><td>Summe</td><td bgcolor="#bbbbff">'.ZahlZuText($total).'<br/><i>('.ZahlZuText($total2).')</i></td><td bgcolor="#ffbbbb">'.ZahlZuText($this->calcResForLost($attsum)[0] + $this->calcResForLost($attsum)[1]).'</td>';
+			for($i = 0; $i < count($verluste); $i++) {
+				echo '<td>'.ZahlZuText($verluste[$i][0] + $verluste[$i][1]).'</td>';
+			}
+			echo '</tr>';
+
+			$exenverlust_gesamt = $attsum->StolenExenM + $attsum->StolenExenK;
+			$exen_gesamt_jetzt = $this->Exen_K + $this->Exen_M;
+			$exen_vorher = $exen_gesamt_jetzt + $exenverlust_gesamt;
+			$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
+			echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#bbbbff">'.ZahlZuText($kosten_neubau_exen).'</td></tr>';
+
+			echo "</table>";
+      }
+
+	function sumFleets($fleets, $all = false) {
+		$sum = new Fleet();
+		$sum->StolenExenM = 0;
+		$sum->StolenExenK = 0;
+		$sum->StolenExenMthisTick = 0;
+		$sum->StolenExenKthisTick = 0;
+		for($i = 0; $i < count($fleets); $i++) {
+			if(($fleets[$i]->TicksToWait > 0 || $fleets[$i]->TicksToStay < 0 || !$fleets[$i]->showInSum) && !$all) {
+				continue;
+			}
+			$sum->Ships[$j] = 0;
+			$sum->OldShips[$j] = 0;
+			$sum->LostShips[$j] = 0;
+			for($j = 0; $j < 14; $j++) {
+				$sum->OldShips[$j] += $fleets[$i]->OldShips[$j] > 0 ? $fleets[$i]->OldShips[$j] : 0;
+				$sum->Ships[$j] += $fleets[$i]->Ships[$j] > 0 ? $fleets[$i]->Ships[$j] : 0;
+				$sum->LostShips[$j] += $fleets[$i]->LostShips[$j] > 0 ? $fleets[$i]->LostShips[$j] : 0;
+			}
+            $sum->StolenExenM += $fleets[$i]->StolenExenM > 0 ? $fleets[$i]->StolenExenM : 0;
+            $sum->StolenExenK += $fleets[$i]->StolenExenK > 0 ? $fleets[$i]->StolenExenK : 0;
+
+            $sum->StolenExenMthisTick += $fleets[$i]->StolenExenMthisTick > 0 ? $fleets[$i]->StolenExenMthisTick : 0;
+            $sum->StolenExenKthisTick += $fleets[$i]->StolenExenKthisTick > 0 ? $fleets[$i]->StolenExenKthisTick : 0;
+		}
+
+		//aprint($sum);
+		return $sum;
+	}
+
+       function PrintStates()
+       {
+        echo "<table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
+        echo "<tr class=\"datatablehead\">";
+	echo "<td></td>";
+	echo "<td colspan=\"2\">&nbsp;Summe Verteidigend&nbsp;</td><td colspan=\"2\">&nbsp;Summe Angreifend&nbsp;</td>";
+	for($i = 0; $i < count($this->DeffFleets); $i++) {
+		if($this->DeffFleets[$i]->text) 
+			echo '<td colspan="2">&nbsp;Deff: ' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
+		else
+			echo '<td colspan="2">&nbsp;Deff #'.$i.'&nbsp;</td>';
+	}
+	for($i = 0; $i < count($this->AttFleets); $i++) {
+                if($this->AttFleets[$i]->text)
+                        echo '<td colspan="2">&nbsp;Att: ' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+                else
+                        echo '<td colspan="2">&nbsp;Att #'.$i.'&nbsp;</td>';
+	}
+	echo "</tr>";
+        echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Vorher</td><td>Nachher</td><td>Vorher</td><td>Nachher</td>";
+	for($i = 0; $i < count($this->DeffFleets) + count($this->AttFleets); $i++) {
+		echo "<td>Vorher</td><td>Nachher</td>";
+	}
+	echo '</tr>';
+
+        $color = 0;
+        $defsum = $this->sumFleets($this->DeffFleets);
+        $attsum = $this->sumFleets($this->AttFleets);
+        for($i = 0; $i < 14; $i++)
+        {
+			$color = !$color;
+			echo "<tr class=\"fieldnormal".($color ? "light" : "dark")."\">";
+			echo "<td>".$this->shipdata[$i]['name']."</td>";
+			echo "<td bgcolor='#bbbbff'>".$defsum->OldShips[$i]."</td><td bgcolor='#bbbbff'>".$defsum->Ships[$i]."</td>";
+			
+			if($i < 9)
+				echo "<td bgcolor='#ffbbbb'>".$attsum->OldShips[$i]."</td><td bgcolor='#ffbbbb'>".$attsum->Ships[$i]."</td>";
+			else
+				echo '<td colspan="2" style="background-color: white;"></td>';
+
+			if($i < 9) {
+				for($j = 0; $j < count($this->DeffFleets); $j++) {
+					if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0) {
+						echo '<td></td><td></td>';
+					} else {
+						echo '<td>'.$this->DeffFleets[$j]->OldShips[$i].'</td><td>'.$this->DeffFleets[$j]->Ships[$i].'</td>';
+					}
+				}
+				for($j = 0; $j < count($this->AttFleets); $j++) {
+					if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0) {
+						echo '<td></td><td></td>';
+					} else {
+						echo '<td>'.$this->AttFleets[$j]->OldShips[$i].'</td><td>'.$this->AttFleets[$j]->Ships[$i].'</td>';
+					}
+				}
+			}
+			echo "</tr>";
+        }
+        echo "<tr class=\"fieldnormallight\"><td>Metallexen</td><td bgcolor='#bbbbff'>".($this->Exen_M + $attsum->StolenExenMthisTick)."</td><td bgcolor='#bbbbff'>".$this->Exen_M."</td><td bgcolor='white'></td><td bgcolor='#ffbbbb'>".$attsum->StolenExenMthisTick."</td>";
+		echo '<td bgcolor="white" colspan="'.(2*count($this->DeffFleets)).'"></td>';
+		for($i = 0; $i < count($this->AttFleets); $i++) {
+			echo '<td bgcolor="white"></td><td>'.($this->AttFleets[$i]->TicksToStay >= 0 ? $this->AttFleets[$i]->StolenExenMthisTick : 0).'</td>';
+		}
+		echo "</tr>";
+        echo "<tr class=\"fieldnormaldark\"><td>Metallexen</td><td bgcolor='#bbbbff'>".($this->Exen_K + $attsum->StolenExenKthisTick)."</td><td bgcolor='#bbbbff'>".$this->Exen_K."</td><td bgcolor='white'></td><td bgcolor='#ffbbbb'>".$attsum->StolenExenKthisTick."</td>";
+		echo '<td bgcolor="white" colspan="'.(2*count($this->DeffFleets)).'"></td>';
+		for($i = 0; $i < count($this->AttFleets); $i++) {
+			echo '<td bgcolor="white"></td><td>'.($this->AttFleets[$i]->TicksToStay >= 0 ? $this->AttFleets[$i]->StolenExenKthisTick : 0).'</td>';
+		}
+		echo "</tr>";
+        echo "</table>";
+	}
+	function PrintStatesGun()
+       {
+        echo "<table class=\"datatable\" cellspacing=\"1\" align=\"center\" style=\"padding:5px;\">";
+        echo "<tr class=\"datatablehead\"><td></td><td colspan=\"2\">Verteidigende Flotte</td><td colspan=\"2\">Angreifende Flotte</td></tr>";
+        echo "<tr style=\"font-weight:bold\" bgcolor=\"#cccc88\"><td>Typ</td><td>Vorher</td><td>Nachher</td><td>Vorher</td><td>Nachher</td></tr>";
+        $color = 0;
+        for($i = 0; $i < 14;$i++)
+        {
+            $color = !$color;
+            echo "<tr style=\"background-color:".($color ? "#dddd99" : "#cccc88").";\"><td>".$this->name[$i]."</td><td>          ".$this->Olddeff[$i]."</td><td>".$this->deffending[$i]."</td>";
+            if($i < 9)
+                echo "<td>".$this->Oldatt[$i]."</td><td>".$this->attaking[$i]."</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+       }
     }
     class GNSimu
     {
@@ -1016,8 +1227,8 @@
 	echo "<tr class=\"fieldnormaldark\"><td>Summe</td><td>" . ZahlZuText($vmlost + $vklost) . "</td><td>" . ZahlZuText($amlost + $aklost) . "</td></tr>";
 
         echo "<tr class=\"fieldnormaldark\"><td colspan=\"3\" style=\"font-weight:bold\">Gestohlene Extraktoren</td></tr>";
-        echo "<tr class=\"fieldnormallight\"><td>Metallextraktoren:</td><td> ".$this->gesstolenexenm."</td></tr>";
-        echo "<tr class=\"fieldnormallight\"><td>Kristallextraktoren:</td><td>   ".$this->gesstolenexenk."</td></tr>";
+        echo "<tr class=\"fieldnormallight\"><td>Metallextraktoren</td><td> ".$this->gesstolenexenm."</td></tr>";
+        echo "<tr class=\"fieldnormallight\"><td>Kristallextraktoren</td><td>   ".$this->gesstolenexenk."</td></tr>";
         
         $exenverlust_gesamt = $this->gesstolenexenm + $this->gesstolenexenk;
         $exen_gesamt_jetzt = $this->mexen + $this->kexen;
