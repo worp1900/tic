@@ -50,13 +50,22 @@
 					$gal_t_text .= " / ";
 
 				if($dt_raw > $thresh_red) {
-					$gal_t_text .= "<span class=textincopen>" . $dt . "</span>";
+					if($Benutzer['galaxie'] == $row[0]) {
+                                        	$gal_t_text .= '<a title="Reset: Flottenbewegungen sind gleich" href="main.php?modul=taktikbildschirm&mode=1&action=updatefleett" style="text-decoration: underline;"><span class=textincopen>' . $dt . '</span></a>';
+                               		} else {
+							$gal_t_text .= "<span class=textincopen>" . $dt . "</span>";
+					}
 					$gal_t_hover .= "<span class=textincopen><b>Gal " . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
 				} else {
-					$gal_t_text .= "<span class=textincsafe>" . $dt . "</span>";
+					if($Benutzer['galaxie'] == $row[0]) {
+						$gal_t_text .= '<a title="Reset: Flottenbewegungen sind gleich" href="main.php?modul=taktikbildschirm&mode=1&action=updatefleett" style="text-decoration: underline;"><span class=textincsafe>' . $dt . '</span></a>';
+					} else {
+						$gal_t_text .= "<span class=textincsafe>" . $dt . "</span>";
+					}
 					$gal_t_hover .= "<span class=textincsafe><b>Gal " . $row[0] . ":</b> " . $dt . " Min</span>&lt;br/&gt;";
 				}
-				
+			
+	
 				if($row[1] < $oldest_t || $oldest_t == -1) {
 					$oldest_t = $row[1];
 				}
