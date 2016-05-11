@@ -269,7 +269,9 @@
                     {
                         if($this->AttFleets[$j]->TicksToWait > 0)
                             continue;
-                        $t = round($TotalAtt[$i] / $this->AttFleets[$j]->Ships[$i] * $ToDestroyAtt[$i]);
+                        $t = 0;
+						if($this->AttFleets[$j]->Ships[$i] > 0)
+							$t = round($TotalAtt[$i] / $this->AttFleets[$j]->Ships[$i] * $ToDestroyAtt[$i]);
                         $this->AttFleets[$j]->LostShips[$i] += $t;
                         $this->AttFleets[$j]->Ships[$i] -= $t;
                     }
@@ -280,7 +282,8 @@
                     {
                         if($this->DeffFleets[$j]->TicksToWait > 0)
                             continue;
-                        $t = round($TotalDeff[$i] / $this->DeffFleets[$j]->Ships[$i] * $ToDestroyDeff[$i]);
+						if($this->DeffFleets[$j]->Ships[$i] > 0)
+							$t = round($TotalDeff[$i] / $this->DeffFleets[$j]->Ships[$i] * $ToDestroyDeff[$i]);
                         $this->DeffFleets[$j]->LostShips[$i] += $t;
                         $this->DeffFleets[$j]->Ships[$i] -= $t;
                     }
@@ -310,13 +313,30 @@
                 $this->AttFleets->StolrnExenK += $this->stolenkexen = $rkexen;
             }
         }
-        function AddAttFleet(&$fleet)
+		function AddShipSpecs($fleet, $isatt) {
+			for($i = 0; $i < count($fleet->Ships); $i++) {
+				if($isatt)
+					$attaking[$i] += $fleet->Ships[$i];
+				else
+					$deffending[$i] += $fleet->Ships[$i];
+			}			
+			
+		}
+        function AddAttFleet(&$fleet, $ankunft, $dauer)
         {
             $this->AttFleets[] = &$fleet;
-        }
-        function AddDeffFleet(&$fleet)
+			$this->AddShipSpecs($fleet->Ships, true);
+        
+			$fleet->TicksToWait = $ankunft;
+			$fleet->TicksToStay = $dauer;
+		}
+        function AddDeffFleet(&$fleet, $ankunft, $dauer)
         {
             $this->DeffFleets[] = &$fleet;
+			$this->AddShipSpecs($fleet->Ships, false);
+			
+			$fleet->TicksToWait = $ankunft;
+			$fleet->TicksToStay = $dauer;
         }
         function PrintOverview()
         {
