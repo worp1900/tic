@@ -16,109 +16,221 @@
 // GNU General Public License for more details.
 //
 /////////////////////////////////////////////////////
-    class Fleet
-    {
-        var $OldShips;      // Schiffe, die im letzten Tick in der Flotte waren
-        var $Ships;         // Schiffe, die diesen Tick in der Flotte sind
-        var $LostShips;     // Schiffe, die diese Flotte verloren hat
-        var $StolenExenM;   // Von Dieser Flotte gestohlene Kristallextraktoren
-        var $StolenExenK;   // Von Dieser Flotte gestohlene Kristallextraktoren
-        var $StolenExenMthisTick = 0;
-        var $StolenExenKthisTick = 0;
-        var $TicksToWait;   // Dauer in Ticks, bis die Flotte angreift/verteidgt
-        var $TicksToStay;   // Wieviele Ticks die Flotte angreift/verteidgt
-		var $text;
-		var $showInSum = false;
-    }
-    class GNSimu_Multi
-    {
-        var $AttFleets;
-        var $DeffFleets;
-        var $Deff;      // Gesch&uuml;tze des Verteidigers
-        var $Exen_M;    // Metall-Extarktoren des Verteidigers
-        var $Exen_K;    // Kristall-Extarktoren des Verteidigers
-        var $shipdata;
-        function GNSimu_Multi()
-        {
-            // Daten für Jäger Nr. 0
-            $this->shipdata[0]['name'] = "J&auml;ger";
-            $this->shipdata[0]['attakpower']  = array(0.0246, 0.392, 0.0263); // Wie viele Schiffe ein Schiff mit 100% Feuerkrafft zerstören wrde
-            $this->shipdata[0]['shiptoattak'] = array(11,1,4); // Welche Schiffe/Gesch&uuml;tze angegriffen werden
-            $this->shipdata[0]['percent']     = array(0.35,0.30,0.35); // Die Verteilung der Prozente, mit der auf die Schiffe geschoßen wird.
-            $this->shipdata[0]['cost'] = array(4000, 6000);
-            // Daten für Bomber Nr. 1
-            $this->shipdata[1]['attakpower']  = array(0.0080,0.0100,0.0075);
-            $this->shipdata[1]['shiptoattak'] = array(12,5,6);
-            $this->shipdata[1]['percent']     = array(0.35,0.35,0.30);
-            $this->shipdata[1]['name'] = "Bomber";
-            $this->shipdata[1]['cost'] = array(2000, 8000);
-            // Daten für Fregatte Nr. 2
-            $this->shipdata[2]['attakpower']  = array(4.5,0.85);
-            $this->shipdata[2]['shiptoattak'] = array(13,0);
-            $this->shipdata[2]['percent']     = array(0.6,0.4);
-            $this->shipdata[2]['name'] = "Fregatte";
-            $this->shipdata[2]['cost'] = array(15000, 7500);
-            // Daten für Zerstörer Nr. 3
-            $this->shipdata[3]['attakpower']  = array(3.5,1.2444);
-            $this->shipdata[3]['shiptoattak'] = array(9,2);
-            $this->shipdata[3]['percent']     = array(0.6,0.4);
-            $this->shipdata[3]['name'] = "Zerst&ouml;rer";
-            $this->shipdata[3]['cost'] = array(40000, 30000);
-            // Daten für Kreuzer Nr. 4
-            $this->shipdata[4]['attakpower']  = array(2.0,0.8571,10.0);
-            $this->shipdata[4]['shiptoattak'] = array(10,3,8);
-            $this->shipdata[4]['percent']     = array(0.35,0.30,0.35);
-            $this->shipdata[4]['name'] = "Kreuzer";
-            $this->shipdata[4]['cost'] = array(65000, 85000);
-            // Daten für Schalchtschiff Nr. 5
-            $this->shipdata[5]['attakpower']  = array(1.0,1.0666,0.4,0.3019,26.6667);
-            $this->shipdata[5]['shiptoattak'] = array(11,4,5,6,8);
-            $this->shipdata[5]['percent']     = array(0.2,0.2,0.2,0.2,0.2);
-            $this->shipdata[5]['name'] = "Schlachtschiff";
-            $this->shipdata[5]['cost'] = array(250000,  150000);
-            // Daten für Trägerschiff Nr. 6
-            $this->shipdata[6]['attakpower']  = array(25.0,14.0);
-            $this->shipdata[6]['shiptoattak'] = array(7,8);
-            $this->shipdata[6]['percent']     = array(0.5,0.5);
-            $this->shipdata[6]['cost'] = array(200000, 50000);
-            $this->shipdata[6]['name'] = "Tr&auml;gerschiff";
-            // Daten für Kaperschiff
-            $this->shipdata[7]['cost'] = array(1500, 1000);
-            $this->shipdata[7]['name'] = "Kaperschiff";
-            // Daten fr Schutzschiff
-            $this->shipdata[8]['cost'] = array(1000, 1500);
-            $this->shipdata[8]['name'] = "Schutzschiff";
-            // Daten für Leichtes Obligtalgeschütz Nr. 9
-            $this->shipdata[9]['attakpower']  = array(0.3,1.28);
-            $this->shipdata[9]['shiptoattak'] = array(0,7);
-            $this->shipdata[9]['percent']     = array(0.6,0.4);
-            $this->shipdata[9]['cost'] = array(6000, 2000);
-            $this->shipdata[9]['name'] = "Leichtes Obligtalgesch&uuml;tz";
-            // Daten für Leichtes Raumgeschütz Nr. 10
-            $this->shipdata[10]['attakpower']  = array(1.2,0.5334);
-            $this->shipdata[10]['shiptoattak'] = array(1,2);
-            $this->shipdata[10]['percent']     = array(0.4,0.6);
-            $this->shipdata[10]['cost'] = array(20000, 10000);
-            $this->shipdata[10]['name'] = "Leichtes Raumgesch&uuml;tz";
-            // Daten für Mittleres Raumgeschütz Nr. 11
-            $this->shipdata[11]['attakpower']  = array(0.9143,0.4267);
-            $this->shipdata[11]['shiptoatta'] = array(3,4);
-            $this->shipdata[11]['percent']     = array(0.4,0.6);
-            $this->shipdata[11]['cost'] =  array(60000, 100000);
-            $this->shipdata[11]['name'] = "Mittleres Raumgesch&uuml;tz";
-            // Daten für Schweres Raumgeschütz Nr. 12
-            $this->shipdata[12]['attakpower']  = array(0.5,0.3774);
-            $this->shipdata[12]['shiptoattak'] = array(5,6);
-            $this->shipdata[12]['percent']     = array(0.5,0.5);
-            $this->shipdata[12]['cost'] = array(200000, 300000);
-            $this->shipdata[12]['name'] = "Schweres Raumgesch&uuml;tz";
-            // Daten für  Abfangjäger Nr. 13
-            $this->shipdata[13]['attakpower']  = array(0.0114,0.32);
-            $this->shipdata[13]['shiptoattak'] = array(3,7);
-            $this->shipdata[13]['percent']     = array(0.4,0.6);
-            $this->shipdata[13]['cost'] = array(1000, 1000);
-            $this->shipdata[13]['name'] = "Abfangj&auml;ger";
-        }
+class Fleet
+{
+	var $OldShips;      // Schiffe, die im letzten Tick in der Flotte waren
+	var $Ships;         // Schiffe, die diesen Tick in der Flotte sind
+	var $LostShips;     // Schiffe, die diese Flotte verloren hat
+	var $StolenExenM;   // Von Dieser Flotte gestohlene Kristallextraktoren
+	var $StolenExenK;   // Von Dieser Flotte gestohlene Kristallextraktoren
+	var $StolenExenMthisTick = 0;
+	var $StolenExenKthisTick = 0;
+	var $TicksToWait;   // Dauer in Ticks, bis die Flotte angreift/verteidgt
+	var $TicksToStay;   // Wieviele Ticks die Flotte angreift/verteidgt
+	var $ArrivalTick;
+	var $text;
+	var $showInSum = false;
+}
+class GNSimu_Multi
+{
+	var $currentTick = -1;
+	var $AttFleets;
+	var $DeffFleets;
+	var $Deff;      // Gesch&uuml;tze des Verteidigers
+	var $Exen_M;    // Metall-Extarktoren des Verteidigers
+	var $Exen_K;    // Kristall-Extarktoren des Verteidigers
+	var $shipdata;
+	
+	function GNSimu_Multi()
+	{
+		// Daten für Jäger Nr. 0
+		$this->shipdata[0]['name'] = "J&auml;ger";
+		$this->shipdata[0]['attakpower']  = array(0.0246, 0.392, 0.0263); // Wie viele Schiffe ein Schiff mit 100% Feuerkrafft zerstören wrde
+		$this->shipdata[0]['shiptoattak'] = array(11,1,4); // Welche Schiffe/Gesch&uuml;tze angegriffen werden
+		$this->shipdata[0]['percent']     = array(0.35,0.30,0.35); // Die Verteilung der Prozente, mit der auf die Schiffe geschoßen wird.
+		$this->shipdata[0]['cost'] = array(4000, 6000);
+		// Daten für Bomber Nr. 1
+		$this->shipdata[1]['attakpower']  = array(0.0080,0.0100,0.0075);
+		$this->shipdata[1]['shiptoattak'] = array(12,5,6);
+		$this->shipdata[1]['percent']     = array(0.35,0.35,0.30);
+		$this->shipdata[1]['name'] = "Bomber";
+		$this->shipdata[1]['cost'] = array(2000, 8000);
+		// Daten für Fregatte Nr. 2
+		$this->shipdata[2]['attakpower']  = array(4.5,0.85);
+		$this->shipdata[2]['shiptoattak'] = array(13,0);
+		$this->shipdata[2]['percent']     = array(0.6,0.4);
+		$this->shipdata[2]['name'] = "Fregatte";
+		$this->shipdata[2]['cost'] = array(15000, 7500);
+		// Daten für Zerstörer Nr. 3
+		$this->shipdata[3]['attakpower']  = array(3.5,1.2444);
+		$this->shipdata[3]['shiptoattak'] = array(9,2);
+		$this->shipdata[3]['percent']     = array(0.6,0.4);
+		$this->shipdata[3]['name'] = "Zerst&ouml;rer";
+		$this->shipdata[3]['cost'] = array(40000, 30000);
+		// Daten für Kreuzer Nr. 4
+		$this->shipdata[4]['attakpower']  = array(2.0,0.8571,10.0);
+		$this->shipdata[4]['shiptoattak'] = array(10,3,8);
+		$this->shipdata[4]['percent']     = array(0.35,0.30,0.35);
+		$this->shipdata[4]['name'] = "Kreuzer";
+		$this->shipdata[4]['cost'] = array(65000, 85000);
+		// Daten für Schalchtschiff Nr. 5
+		$this->shipdata[5]['attakpower']  = array(1.0,1.0666,0.4,0.3019,26.6667);
+		$this->shipdata[5]['shiptoattak'] = array(11,4,5,6,8);
+		$this->shipdata[5]['percent']     = array(0.2,0.2,0.2,0.2,0.2);
+		$this->shipdata[5]['name'] = "Schlachtschiff";
+		$this->shipdata[5]['cost'] = array(250000,  150000);
+		// Daten für Trägerschiff Nr. 6
+		$this->shipdata[6]['attakpower']  = array(25.0,14.0);
+		$this->shipdata[6]['shiptoattak'] = array(7,8);
+		$this->shipdata[6]['percent']     = array(0.5,0.5);
+		$this->shipdata[6]['cost'] = array(200000, 50000);
+		$this->shipdata[6]['name'] = "Tr&auml;gerschiff";
+		$this->shipdata[6]['prefire_consequences_for'] = array(0, 1);
+		$this->shipdata[6]['prefire_consequences_factor'] = array(100, 100);
+		// Daten für Kaperschiff
+		$this->shipdata[7]['cost'] = array(1500, 1000);
+		$this->shipdata[7]['name'] = "Kaperschiff";
+		// Daten fr Schutzschiff
+		$this->shipdata[8]['cost'] = array(1000, 1500);
+		$this->shipdata[8]['name'] = "Schutzschiff";
+		// Daten für Leichtes Obligtalgeschütz Nr. 9
+		$this->shipdata[9]['attakpower']  = array(0.3,1.28);
+		$this->shipdata[9]['shiptoattak'] = array(0,7);
+		$this->shipdata[9]['percent']     = array(0.6,0.4);
+		$this->shipdata[9]['cost'] = array(6000, 2000);
+		$this->shipdata[9]['name'] = "Leichtes Obligtalgesch&uuml;tz";
+		// Daten für Leichtes Raumgeschütz Nr. 10
+		$this->shipdata[10]['attakpower']  = array(1.2,0.5334);
+		$this->shipdata[10]['shiptoattak'] = array(1,2);
+		$this->shipdata[10]['percent']     = array(0.4,0.6);
+		$this->shipdata[10]['cost'] = array(20000, 10000);
+		$this->shipdata[10]['name'] = "Leichtes Raumgesch&uuml;tz";
+		$this->shipdata[10]['prefire_ticks'] = array(1);
+		$this->shipdata[10]['prefire_effectiveness'] = array(0.5);
+		$this->shipdata[10]['prefire_attakpower']  = array(0.5334);
+		$this->shipdata[10]['prefire_shiptoattak'] = array(2);
+		// Daten für Mittleres Raumgeschütz Nr. 11
+		$this->shipdata[11]['attakpower']  = array(0.9143,0.4267);
+		$this->shipdata[11]['shiptoatta'] = array(3,4);
+		$this->shipdata[11]['percent']     = array(0.4,0.6);
+		$this->shipdata[11]['cost'] =  array(60000, 100000);
+		$this->shipdata[11]['name'] = "Mittleres Raumgesch&uuml;tz";
+		$this->shipdata[10]['prefire_effectiveness'] = array(0.5);
+		$this->shipdata[10]['prefire_attakpower']  = array(0.9143,0.4267);
+		$this->shipdata[10]['prefire_shiptoattak'] = array(3,4);
+		// Daten für Schweres Raumgeschütz Nr. 12
+		$this->shipdata[12]['attakpower']  = array(0.5,0.3774);
+		$this->shipdata[12]['shiptoattak'] = array(5,6);
+		$this->shipdata[12]['percent']     = array(0.5,0.5);
+		$this->shipdata[12]['cost'] = array(200000, 300000);
+		$this->shipdata[12]['name'] = "Schweres Raumgesch&uuml;tz";
+		$this->shipdata[10]['prefire_effectiveness'] = array(0.4,0.6);
+		$this->shipdata[10]['prefire_attakpower']  = array(0.5,0.3774);
+		$this->shipdata[10]['prefire_shiptoattak'] = array(5,6);
+		// Daten für  Abfangjäger Nr. 13
+		$this->shipdata[13]['attakpower']  = array(0.0114,0.32);
+		$this->shipdata[13]['shiptoattak'] = array(3,7);
+		$this->shipdata[13]['percent']     = array(0.4,0.6);
+		$this->shipdata[13]['cost'] = array(1000, 1000);
+		$this->shipdata[13]['name'] = "Abfangj&auml;ger";
+	}
+		
+	function preFireCombatRound($shipid, $defendingArmy, $attackingArmy) {
+		$RestPercentdeff = 0;
+		$Restpowerdeff = $this->defendingArmy[$shipid];
+		$OldRestpowerdeff = 0;
+		$first = 0;
+		$todel = array();
+		while($first<6 && ($Restpowerdeff>0))
+		{
+			$OldRestpowerdeff = $Restpowerdeff;
+
+			for($z = 0; $z < count($this->shipdata[$shipid]['prefire_shiptoattak']); $z++) {
+				$attackShipId = $this->shipdata[$shipid]['prefire_shiptoattak'][$z];
+				$attackShipPower = $this->shipdata[$shipid]['prefire_attakpower'][$z];
+				$attackShipEffectiveness = $this->shipdata[$shipid]['prefire_effectiveness'][$z];
+				$attackShipPercent = $this->shipdata[$shipid]['percent'][$z];
+				
+				// Verteidiger -> Atter
+				if($Restpowerdeff>0)
+				{
+					$del = 0;
+					$MaxDestruction = floor(($RestPercentdeff + $attackShipPercent) * $OldRestpowerdeff * $attackShipPower * $attackShipEffectiveness);
+					if($first==3)
+						$RestPercentdeff+=$this->shipdata[$shipid]['percent'][$z];
+					$del= floor(max(min($MaxDestruction, $Restpowerdeff *  $attackShipPower * $attackShipEffectiveness, $this->attaking[$z]+$todel[$attackShipId]), 0));
+					if($first==3)
+						$RestPercentdeff-= ($del / $OldRestpowerdeff / ($attackShipPower * $attackShipEffectiveness));
+					$Firepower = $del/($attackShipPower * $attackShipEffectiveness);
+					$Restpowerdeff -= $Firepower;
+					$todel[$attackShipId]-=$del;
+					if(isset($this->shipdata[$attackShipId]['prefire_consequences_for']))
+					{
+						for($x = 0; $x < count($this->shipdata[$attackShipId]['prefire_consequences_for']); $x++) {
+							$consequencedShipId = $this->shipdata[$attackShipId]['prefire_consequences_for'][$x];
+							$todel[$consequencedShipId] += $del * $this->shipdata[$attackShipId]['prefire_consequences_factor'] / count($this->shipdata[$attackShipId]['prefire_consequences_for']);
+						}
+					}
+				}
+			}
+			$first++;
+		}
+		return $todel;
+	}
+		
+	function prefire($ticks = 1) {
+		for($i = 0;$i < count($this->AttFleets);$i++)
+		{
+			if($this->AttFleets[$i]->ArrivalTick == $this->currentTick) {
+				for($j = 0;$j < 9;$j++)
+					$TotalAtt[$j] += $this->AttFleets[$i]->Ships[$j];
+				$this->AttFleets[$i]->OldShips = $this->AttFleets[$i]->Ships;
+			}
+		}
+
+		for($i = 0;$i < count($this->DeffFleets);$i++)
+		{
+			if($this->DeffFleets[$i]->TicksToWait == 0) {
+				for($j = 0;$j < 14;$j++)
+					$TotalDeff[$j] += $this->DeffFleets[$i]->Ships[$j];
+			}
+		}
+aprint($TotalAtt, 'Att');
+aprint($TotalDeff, 'Def');
+		for($i = 0; $i < 14; $i++) {
+			if(isset($this->shipdata[$i]['prefire_shiptoattak'])) {
+				//combat round
+				$todel = $this->preFireCombatRound($i, $TotalDeff, $TotalAtt);
+				
+				//verrechnung
+				for($i = 0;$i < 14;$i++)
+				{
+					if($TotalAtt[$i] > 0)
+					{
+						for($j = 0;$j < count($this->AttFleets);$j++)
+						{
+							if($this->AttFleets[$j]->ArrivalTick - 1 != $this->currentTick)
+								continue;
+							$t = 0;
+							if($this->AttFleets[$j]->Ships[$i] > 0)
+								$t = round($TotalAtt[$i] / $this->AttFleets[$j]->Ships[$i] * $todel[$i]);
+							$this->AttFleets[$j]->LostShips[$i] += $t;
+							$this->AttFleets[$j]->Ships[$i] -= $t;
+							if($this->AttFleets[$j]->Ships[$i] < 0) $this->AttFleets[$j]->Ships[$i] = 0;
+						}
+					}
+				}
+				
+				//calc
+				foreach($todel as $key=>$value) {
+					$TotalAtt[$key] -= $value;
+					if($TotalAtt[$key] < 0)
+						$TotalAtt[$key] = 0;
+				}
+			}
+		}
+	}
+		
         function Tick($debug)
         {
             for($i = 0;$i < count($this->AttFleets);$i++)
@@ -273,7 +385,7 @@
                 {
                     for($j = 0;$j < count($this->AttFleets);$j++)
                     {
-                        if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0)
+                        if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
                             continue;
                         $t = 0;
 						if($this->AttFleets[$j]->Ships[$i] > 0)
@@ -287,7 +399,7 @@
                 {
                     for($j = 0;$j < count($this->DeffFleets);$j++)
                     {
-                        if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0)
+                        if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
                             continue;
 						if($this->DeffFleets[$j]->Ships[$i] > 0)
 							$t = round($TotalDeff[$i] / $this->DeffFleets[$j]->Ships[$i] * $ToDestroyDeff[$i]);
@@ -323,7 +435,7 @@
 			//exen den flotten zuweisen
 			for($j = 0;$j < count($this->AttFleets) && $TotalAtt[7] > 0;$j++)
             {
-                if($this->AttFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0)
+                if($this->AttFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
                     continue;
 
 				//bruchteil dieser flotte berechnen
@@ -349,18 +461,25 @@
 				$this->AttFleets[$j]->StolenExenMthisTick = $xmexen;
 				$this->AttFleets[$j]->StolenExenKthisTick = $xkexen;
 			}
-        }
-        function AddAttFleet(&$fleet)
-        {
-            $this->AttFleets[] = &$fleet;
+			
+			$currentTick++;
 		}
-        function AddDeffFleet(&$fleet)
-        {
-            $this->DeffFleets[] = &$fleet;
+
+		function AddAttFleet(&$fleet)
+		{
+			$fleet->ArrivalTick = $fleet->TicksToWait;
+			$this->AttFleets[] = &$fleet;
+		}
+		
+		function AddDeffFleet(&$fleet)
+		{
+			$fleet->ArrivalTick = $fleet->TicksToWait;
+			$this->DeffFleets[] = &$fleet;
 			for($i = 9; $i < 14; $i++) {
 				$this->Deff[$i] += $fleet->Ships[$i] > 0 ? $fleet->Ships[$i] : 0;
 			}
-        }
+		}
+		
 		function calcResForLost($fleet) {
 			$klost = 0;
 			$mlost = 0;
@@ -369,6 +488,8 @@
 				$mlost  += $this->shipdata[$i]['cost'][0]*$fleet->LostShips[$i];
 				$klost  += $this->shipdata[$i]['cost'][1]*$fleet->LostShips[$i];
 			}
+			$mlost -= ($fleet->StolenExenK + $fleet->StolenExenM) * $this->shipdata[7]['cost'][0];
+			$klost -= ($fleet->StolenExenK + $fleet->StolenExenM) * $this->shipdata[7]['cost'][1];
 			return array($mlost, $klost);
 		}
         function PrintOverview()
@@ -560,14 +681,14 @@
 
 			if($i < 9) {
 				for($j = 0; $j < count($this->DeffFleets); $j++) {
-					if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0) {
+					if($this->DeffFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0 || !$this->DeffFleets[$j]->showInSum) {
 						echo '<td></td><td></td>';
 					} else {
 						echo '<td>'.$this->DeffFleets[$j]->OldShips[$i].'</td><td>'.$this->DeffFleets[$j]->Ships[$i].'</td>';
 					}
 				}
 				for($j = 0; $j < count($this->AttFleets); $j++) {
-					if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0) {
+					if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum) {
 						echo '<td></td><td></td>';
 					} else {
 						echo '<td>'.$this->AttFleets[$j]->OldShips[$i].'</td><td>'.$this->AttFleets[$j]->Ships[$i].'</td>';
@@ -1047,7 +1168,7 @@
             $this->deffending[$i]+=$todelv[$i];
         }
        }
-        function ComputeTwoTickBefore()
+    function ComputeTwoTickBefore()
         {
             $debug = false;
             $todela = array(0,0,0,0,0,0,0,0,0);

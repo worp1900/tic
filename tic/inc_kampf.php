@@ -410,16 +410,17 @@ if($ticks<1)
 	$ticks=1;
 
 if(isset($_POST['compute'])) {
-    if(isset($_POST['preticks'])) {
-        //$gnsimu->ComputeTwoTickBefore();
-        //$gnsimu->PrintStatesGun();
-        //$gnsimu->ComputeOneTickBefore();
-        //$gnsimu->PrintStatesGun();
-
-    }
+	if(isset($_POST['preticks'])) {
+		echo '<br/><br/><b>Gesch&uuml;tzfeuer Tick -2:</b>';
+		$gnsimu_m->prefire(2);
+		$gnsimu_m->PrintStates();
+		echo '<br/><br/><b>Gesch&uuml;tzfeuer Tick -1:</b>';
+		$gnsimu_m->prefire(1);
+		$gnsimu_m->PrintStates();
+	}
 
 	//aprint($gnsimu_m, 'start');
-    for($i=0;$i<$ticks;$i++) {
+	for($i=0;$i<$ticks;$i++) {
         $gnsimu_m->Tick(false);
 		//aprint($gnsimu_m, 'after tick ' . ($i+1));
 		echo '<br/><br/><b>Tick ' . ($i+1) . ':</b>';
