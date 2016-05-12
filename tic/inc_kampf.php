@@ -52,77 +52,137 @@ if(!$p[1] || !$g[1]) {
 	$p[1] = $Benutzer['planet'];
 }
 
+$usedscans = array();
 if(postOrGet('referenz')) {
+	
 	//process references
 	for($i = 0; $i < min(count($p), count($g)); $i++) {
 		if(!$g[$i] || !$p[$i]) {
 			continue;
 		}
 
-                $mysql_senden[0] = 'SELECT id, me, ke FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="0" LIMIT 1;';
-                $mysql_senden[1] = 'SELECT id, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="1" LIMIT 1;';
-                $mysql_senden[2] = 'SELECT id, glo, glr, gmr, gsr, ga FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="3" LIMIT 1;';
-                $mysql_senden[3] = 'SELECT id, sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su, sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="2" LIMIT 1;';
-                $res = mysql_multi_query($mysql_senden, 1);
+		$mysql_senden[0] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, me, ke FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="0" LIMIT 1;';
+		$mysql_senden[1] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="1" LIMIT 1;';
+		$mysql_senden[2] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, glo, glr, gmr, gsr, ga FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="3" LIMIT 1;';
+		$mysql_senden[3] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su, sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="2" LIMIT 1;';
+		$res = mysql_multi_query($mysql_senden, 1);
 
-				//meta for deffer
-                if ($res[0]['id'] != '' && $i == 0) {
-                        $d[$i][14] = $res[0]['me'];
-                        $d[$i][15] = $res[0]['ke'];
-                }
+		//meta for deffer
+		if($i == 0) {
+			if ($res[0]['id'] != '') {
+				$d[$i][14] = $res[0]['me'];
+				$d[$i][15] = $res[0]['ke'];
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Sektor',
+					'missing' => false,
+					'gen' => $res[0]['gen'],
+					't' => $res[0]['t'],
+				);
+			} else {
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Sektor',
+					'missing' => true
+				);
+			}
+		}
 
-               //deff only for deffer.
-                if ($res[2]['id'] != '' && $i == 0) {
-                        $d[$i][9] = $res[2]['glo'];
-                        $d[$i][10] = $res[2]['glr'];
-                        $d[$i][11] = $res[2]['gmr'];
-                        $d[$i][12] = $res[2]['gsr'];
-                        $d[$i][13] = $res[2]['ga'];
-                }
-
+		//deff only for deffer.
+		if($i == 0) {
+			if ($res[2]['id'] != '') {
+				$d[$i][9] = $res[2]['glo'];
+				$d[$i][10] = $res[2]['glr'];
+				$d[$i][11] = $res[2]['gmr'];
+				$d[$i][12] = $res[2]['gsr'];
+				$d[$i][13] = $res[2]['ga'];
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Gesch&uuml;tze',
+					'missing' => false,
+					'gen' => $res[2]['gen'],
+					't' => $res[2]['t']
+				);
+			} else {
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Gesch&uuml;tze',
+					'missing' => true,
+				);
+			}
+		}
 
 		//use all
-                if ($res[1]['id'] != '' && $f[$i] == 0) {
-                        $d[$i][0] = $res[1]['sfj'];
-                        $d[$i][1] = $res[1]['sfb'];
-                        $d[$i][2] = $res[1]['sff'];
-                        $d[$i][3] = $res[1]['sfz'];
-                        $d[$i][4] = $res[1]['sfkr'];
-                        $d[$i][5] = $res[1]['sfsa'];
-                        $d[$i][6] = $res[1]['sft'];
-                        $d[$i][7] = $res[1]['sfka'];
-                        $d[$i][8] = $res[1]['sfsu'];
-                }
-	
-		//deff only for deffer.
-                if ($res[2]['id'] != '' && $i == 0) {
-                        $d[$i][9] = $res[2]['glo'];
-                        $d[$i][10] = $res[2]['glr'];
-                        $d[$i][11] = $res[2]['gmr'];
-                        $d[$i][12] = $res[2]['gsr'];
-                        $d[$i][13] = $res[2]['ga'];
-                }
+		if($f[$i] == 0) {
+			if ($res[1]['id'] != '') {
+				$d[$i][0] = $res[1]['sfj'];
+				$d[$i][1] = $res[1]['sfb'];
+				$d[$i][2] = $res[1]['sff'];
+				$d[$i][3] = $res[1]['sfz'];
+				$d[$i][4] = $res[1]['sfkr'];
+				$d[$i][5] = $res[1]['sfsa'];
+				$d[$i][6] = $res[1]['sft'];
+				$d[$i][7] = $res[1]['sfka'];
+				$d[$i][8] = $res[1]['sfsu'];
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Einheiten',
+					'missing' => false,
+					'gen' => $res[1]['gen'],
+					't' => $res[1]['t']
+				);
+			} else {
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Einheiten',
+					'missing' => true
+				);
+			}
+		}
 
 		//use mili if any fleet selected or sum if newer
-                if ($res[3]['id'] != '' && $f[$i] != 0) {
-					$zusatz = '';
-					if($f[$i] == 1) {
-						$zusatz = '1';
-					} else if($f[$i] == 2) {
-						$zusatz = '2';
-					} else if($f[$i] == 3) {
-						$zusatz = '0';
-					}
-					$d[$i][0] = $res[3]['sf'.$zusatz.'j'];
-					$d[$i][1] = $res[3]['sf'.$zusatz.'b'];
-					$d[$i][2] = $res[3]['sf'.$zusatz.'f'];
-					$d[$i][3] = $res[3]['sf'.$zusatz.'z'];
-					$d[$i][4] = $res[3]['sf'.$zusatz.'kr'];
-					$d[$i][5] = $res[3]['sf'.$zusatz.'sa'];
-					$d[$i][6] = $res[3]['sf'.$zusatz.'t'];
-					$d[$i][7] = $res[3]['sf'.$zusatz.'ka'];
-					$d[$i][8] = $res[3]['sf'.$zusatz.'su'];
-                }
+		if($f[$i] != 0) {
+			if ($res[3]['id'] != '') {
+				$zusatz = '';
+				if($f[$i] == 1) {
+					$zusatz = '1';
+				} else if($f[$i] == 2) {
+					$zusatz = '2';
+				} else if($f[$i] == 3) {
+					$zusatz = '0';
+				}
+				$d[$i][0] = $res[3]['sf'.$zusatz.'j'];
+				$d[$i][1] = $res[3]['sf'.$zusatz.'b'];
+				$d[$i][2] = $res[3]['sf'.$zusatz.'f'];
+				$d[$i][3] = $res[3]['sf'.$zusatz.'z'];
+				$d[$i][4] = $res[3]['sf'.$zusatz.'kr'];
+				$d[$i][5] = $res[3]['sf'.$zusatz.'sa'];
+				$d[$i][6] = $res[3]['sf'.$zusatz.'t'];
+				$d[$i][7] = $res[3]['sf'.$zusatz.'ka'];
+				$d[$i][8] = $res[3]['sf'.$zusatz.'su'];
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Milit&auml;r',
+					'missing' => false,
+					'gen' => $res[1]['gen'],
+					't' => $res[1]['t']
+				);			
+			} else {
+				$usedscans[] = array(
+					'g' => $g[$i], 
+					'p' => $p[$i], 
+					'typ' => 'Milit&auml;r',
+					'missing' => true
+				);
+			}
+		}
 	}
 }
 function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt) {
@@ -185,11 +245,31 @@ if(isset($_POST['compute'])) {
 }
 
 echo '<center>';
-echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beachtet, dass die Gesch&uuml;tz-Vorticks noch nicht komplett implementiert sind.</p>';
+echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte be&auml;ugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler! Danke.</p>';
 echo '<form action="./main.php?modul=kampf" method="post">';
 echo '<input type="hidden" name="modul" value="kampf"/>';
 echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br /><br />';
 echo '</center>';
+
+if(count($usedscans) > 0) {
+	echo '<table class="datatable">';
+	echo '<tr class="datatablehead"><td colspan="6">Genutzte Scans</td></tr>';
+	echo '<tr class="fieldnormaldark" style="font-weight: bold;"><td>&nbsp;Galaxie&nbsp;</td><td>&nbsp;Planet&nbsp;</td><td>&nbsp;Typ&nbsp;</td><td>&nbsp;Genauigkeit&nbsp;</td><td>&nbsp;Datum&nbsp;</td><td>&nbsp;Alter [min]&nbsp;</td></tr>';
+	$color = false;
+	for($i = 0; $i < count($usedscans); $i++) {
+		echo '<tr class="fieldnormal' . ($color ? 'dark' : 'light') . '">';
+		if($usedscans[$i]['missing']) {
+			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>-</td><td>-</td><td>-</td>';
+		} else {
+			$date = date('Y.m.d H:i', $usedscans[$i]['t']);
+			$age = round((time() - $usedscans[$i]['t']) / 60, 0);
+			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>'.$usedscans[$i]['gen'].'%</td><td>'.$date.'</td><td>'.$age.'</td>';
+		}
+		echo '</tr>';
+		$color = !$color;
+	}
+	echo '</table><br/>';
+}
 
 ?>
 <table align="center" class="datatable">
