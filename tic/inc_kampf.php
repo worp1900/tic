@@ -185,8 +185,13 @@ if(postOrGet('referenz')) {
 		}
 	}
 }
-function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt) {
+function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno) {
 	$fleet = new Fleet();
+	
+	$fleet->g = $g;
+	$fleet->p = $p;
+	$fleet->fleet = $fno;
+	
 	$fleet->Ships = array();
 	for($i = 0; $i < 14; $i++) {
 		if(isset($dataRow[$i]) && is_numeric($dataRow[$i])) {
@@ -222,7 +227,7 @@ if(isset($_POST['compute'])) {
 		} else
 			$txt = 'Flotte #' . $i;
 
-		$fleet[$i] = createFleet($d[$i], $aufenthalt[$i], $ankunft[$i], $isAtt, $txt);
+		$fleet[$i] = createFleet($d[$i], $aufenthalt[$i], $ankunft[$i], $isAtt, $txt, $g[$i], $p[$i], $typ[$i]);
 
 		if($isAtt) {
 			$gnsimu_m->AddAttFleet($fleet[$i]);
@@ -509,7 +514,7 @@ if(isset($_POST['compute'])) {
 		$gnsimu_m->Tick(false);
 		//aprint($gnsimu_m, 'after tick ' . ($i+1));
 		$gnsimu_m->PrintStates();
-		
+		//aprint($gnsimu_m);
 		if(isset($_POST['preticks'])) {
 			$gnsimu_m->prefire(2);
 			$gnsimu_m->PrintStatesGun(2);
@@ -522,6 +527,10 @@ if(isset($_POST['compute'])) {
 	}
 
     $gnsimu_m->PrintOverView();
+/*aprint(array(
+	'Att' => $gnsimu_m->AttFleets,
+	'Deff' => $gnsimu_m->DeffFleets
+), 'Fleets');*/
 }
 
 ?>
