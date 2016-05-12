@@ -185,7 +185,7 @@ if(isset($_POST['compute'])) {
 }
 
 echo '<center>';
-echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beachtet, dass die Gesch&uuml;tz-Vorticks noch nicht implementiert sind./dv</p>';
+echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beachtet, dass die Gesch&uuml;tz-Vorticks noch nicht komplett implementiert sind.</p>';
 echo '<form action="./main.php?modul=kampf" method="post">';
 echo '<input type="hidden" name="modul" value="kampf"/>';
 echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br /><br />';
@@ -235,7 +235,7 @@ echo '</center>';
 </tr>
 <tr class="fieldnormallight">
 	<td><i>Ankunftstick:</i></td>
-	<td>1<input type="hidden" name="ankunft[0]" value="1"/></td>
+	<td>&infin;<input type="hidden" name="ankunft[0]" value="-2"/></td>
 <?php
 	for($i = 1; $i <= $num_flotten; $i++) {
 		echo '	<td>
@@ -257,8 +257,9 @@ echo '</center>';
 </tr>
 <tr class="fieldnormaldark">
 	<td><i>Aufenthaltsdauer:</i></td>
+	<td>&infin;<input type="hidden" name="aufenthalt[0]" value="99"/></td>
 <?php
-	for($i = 0; $i <= $num_flotten; $i++) {
+	for($i = 1; $i <= $num_flotten; $i++) {
 		echo '	<td>
 		<select tabindex="'.(700+$i).'" name="aufenthalt['.$i.']">
 			<option value="1"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 1) ? ' selected="selected"' : '').'>1</option>
@@ -393,7 +394,7 @@ echo '</center>';
 <tr>
 	<td colspan="<?=($num_flotten+2);?>">Ticks: <select name="ticks" tabindex="10000">';
 <?php
-for($i=1;$i<15;$i++) {
+for($i=1;$i<=20;$i++) {
 	if($i==$ticks)
 		echo '<option value="'.$i.'" selected="selected">'.$i.'</option>';
 	else
@@ -411,21 +412,34 @@ if($ticks<1)
 
 if(isset($_POST['compute'])) {
 	if(isset($_POST['preticks'])) {
-		echo '<br/><br/><b>Gesch&uuml;tzfeuer Tick -2:</b>';
-		$gnsimu_m->prefire(2);
-		$gnsimu_m->PrintStates();
-		echo '<br/><br/><b>Gesch&uuml;tzfeuer Tick -1:</b>';
-		$gnsimu_m->prefire(1);
-		$gnsimu_m->PrintStates();
+		for($i = 0; $i < 2; $i++) {
+			//aprint('', 'before pre gunticks');
+			$gnsimu_m->prefire(2);
+			$gnsimu_m->PrintStatesGun(2);
+			//aprint('', 'pre gunticks 2 done');
+			$gnsimu_m->prefire(1);
+			$gnsimu_m->PrintStatesGun(1);
+			//aprint('', 'pre gunticks 1 done');
+			$gnsimu_m->currentTick++;
+		}
 	}
 
 	//aprint($gnsimu_m, 'start');
 	for($i=0;$i<$ticks;$i++) {
-        $gnsimu_m->Tick(false);
+		$gnsimu_m->Tick(false);
 		//aprint($gnsimu_m, 'after tick ' . ($i+1));
-		echo '<br/><br/><b>Tick ' . ($i+1) . ':</b>';
 		$gnsimu_m->PrintStates();
-    }
+		
+		if(isset($_POST['preticks'])) {
+			$gnsimu_m->prefire(2);
+			$gnsimu_m->PrintStatesGun(2);
+			//aprint('', 'tick '.$i.': gunticks 2 done');
+			$gnsimu_m->prefire(1);
+			$gnsimu_m->PrintStatesGun(1);
+			//aprint('', 'tick '.$i.': gunticks 1 done');
+		}
+		$gnsimu_m->currentTick++;
+	}
 
     $gnsimu_m->PrintOverView();
 }
