@@ -609,6 +609,22 @@ class GNSimu_Multi
 
 	function PrintOverview()
 	{
+		//do player to fleet mapping
+		$players = array();
+		$deffer_g = $this->DeffFleets[0]->g;
+		$deffer_p = $this->DeffFleets[0]->p;
+		foreach($this->DeffFleets as $k=>$v) {
+			$players[$v->g . ':' . $v->p]['fleetids'][] = $k;
+			$players[$v->g . ':' . $v->p]['type'][] = 'd';
+			$players[$v->g . ':' . $v->p]['external'][] = ($k == 0 || $v->g == $deffer_g && $v->p == $deffer_p) ? true : false;
+		}
+		foreach($this->AttFleets as $k=>$v) {
+			$players[$v->g . ':' . $v->p]['fleetids'][] = $k;
+			$players[$v->g . ':' . $v->p]['type'][] = 'a';
+			$players[$v->g . ':' . $v->p]['external'][] = true;
+		}
+		ksort($players);
+
 		//head
 		echo "<br/><hr/><br/><b>Verluste:</b><br/><table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
 		//title
@@ -752,7 +768,13 @@ class GNSimu_Multi
 		//	M Bergung
 		$bergungM = floor(($atterLostM + $deffLostM + $pretickM) * .4);
 		$bergungM2 = $bergungM + floor(($atterLostM + $deffLostM) * .4);
-		echo '<tr class="fieldnormallight"><td title="Bei externen Verteidigern gehen weitere 40% auf diese.">- Bergungsmetall (?)</td><td bgcolor="#ccccff">'.ZahlZuText($bergungM).'<br/>'.($externalDeff ? '('.ZahlZuText($bergungM2).')' : '').'</td>';
+		echo '<tr class="fieldnormallight"><td title="Bei externen
+		Verteidigern gehen weitere 40% auf diese. Ausgenomen sind
+		Zerstörungen durch Vortick-Geschützfeuer.">- Bergungsmetall
+		(?)</td><td
+		bgcolor="#ccccff">'.ZahlZuText($bergungM).'<br/>'.($externalDeff ?
+		'('.ZahlZuText($snipedResTotalByNonPrimeDeffer > 0 ?
+		$bergungM2 : 0).')' : '').'</td>';
 
 		echo '<td bgcolor="white"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
@@ -763,7 +785,12 @@ class GNSimu_Multi
 		//	K Bergung
 		$bergungK = floor(($atterLostK + $deffLostK + $pretickK) * .4);
 		$bergungK2 = $bergungK + floor(($atterLostK + $deffLostK) * .4);
-		echo '<tr class="fieldnormallight"><td title="Bei externen Verteidigern gehen weitere 40% auf diese.">- Bergungskristall (?)</td><td bgcolor="#ccccff">'.ZahlZuText($bergungK).'<br/>'.($externalDeff ? '('.ZahlZuText($bergungK2).')' : '').'</td>';
+		echo '<tr class="fieldnormallight"><td title="Bei externen
+		Verteidigern gehen weitere 40% auf diese.">- Bergungskristall
+		(?)</td><td
+		bgcolor="#ccccff">'.ZahlZuText($bergungK).'<br/>'.($externalDeff ?
+		'('.ZahlZuText($snipedResTotalByNonPrimeDeffer > 0 ? $bergungK2
+		: 0).')' : '').'</td>';
 
 		echo '<td bgcolor="white"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
@@ -774,7 +801,8 @@ class GNSimu_Multi
 
 		//	Summe
 		$total = $this->calcResForLost($defsum)[0] + $this->calcResForLost($defsum)[1] - $bergungK - $bergungM - $pretickK - $pretickM;
-		$total2 = $total - $bergungK - $bergungM;
+		$total2 = ($snipedResTotalByNonPrimeDeffer > 0) ? $total - $bergungK
+		- $bergungM : 0;
 		echo '<tr class="fieldnormaldark"><td style="font-weight: bold;" rowspan="2">Verlustsumme</td><td bgcolor="#bbbbff" style="font-weight: bold;" rowspan="2">'.ZahlZuText($total).'<br/>'.($externalDeff ? '('.ZahlZuText($total2).')' : '').'</td><td bgcolor="#ffbbbb" style="font-weight: bold;" rowspan="2">'.ZahlZuText($this->calcResForLost($attsum)[0] + $this->calcResForLost($attsum)[1]).'</td>';
 		for($i = 0; $i < count($verluste); $i++) {
 			if($i < count($this->DeffFleets)) {
@@ -799,16 +827,20 @@ class GNSimu_Multi
 
 
 		//VAG
-		echo '<tr class="fieldnormallight" style="font-style: italic;"><td>Verlustausgleich Metall</td><td colspan="4" bgcolor="white"></td>';
+		echo '<tr class="fieldnormallight" style="font-style:
+		italic;"><td title="Im Verteidigungsfall dürfen bis
+		zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Metall (?)</td><td colspan="4" bgcolor="white"></td>';
 		//M
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
-			echo '<td colspan="2">'.ZahlZuText($verluste[$i][0] / 2) .'</td>';
+			echo '<td colspan="2">-'.ZahlZuText($verluste[$i][0] / 2) .'</td>';
 		}
 		echo '</tr>';
 		//K
-		echo '<tr class="fieldnormaldark" style="font-style: italic;"><td>Verlustausgleich Kristall</td><td colspan="4" bgcolor="white"></td>';
+		echo '<tr class="fieldnormaldark" style="font-style:
+		italic;"><td title="Im Verteidigungsfall dürfen bis
+		zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Kristall (?)</td><td colspan="4" bgcolor="white"></td>';
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
-			echo '<td colspan="2">'.ZahlZuText($verluste[$i][1]/2) .'</td>';
+			echo '<td colspan="2">-'.ZahlZuText($verluste[$i][1]/2) .'</td>';
 		}
 		echo '</tr>';
 
