@@ -47,20 +47,20 @@ $g = postOrGet('g');
 //aprint($p);
 
 
-if(!$p[1] || !$g[1]) {
+if((!$p[1] || !$g[1]) && !postOrGet('referenz') && !postOrGet('compute')) {
 	$g[1] = $Benutzer['galaxie'];
 	$p[1] = $Benutzer['planet'];
 }
 
 $usedscans = array();
 if(postOrGet('referenz')) {
-
 	//process references
+	$koords_seen = array();
 	for($i = 0; $i < min(count($p), count($g)); $i++) {
 		if(!$g[$i] || !$p[$i]) {
 			continue;
 		}
-
+		
 		$mysql_senden[0] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, me, ke FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="0" LIMIT 1;';
 		$mysql_senden[1] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="1" LIMIT 1;';
 		$mysql_senden[2] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, glo, glr, gmr, gsr, ga FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="3" LIMIT 1;';
@@ -73,7 +73,9 @@ if(postOrGet('referenz')) {
 		}
 
 		//meta for deffer
-		if($i == 0) {
+		$koord = $g[$i].':'.$p[$i];
+		if(($i == 0 || $typ[$i] == 'a') && !in_array($koord, $koords_seen)) {
+			$koords_seen[] = $koord;
 			if ($res[0]['id'] != '') {
 				$d[$i][14] = $res[0]['me'];
 				$d[$i][15] = $res[0]['ke'];
@@ -95,6 +97,9 @@ if(postOrGet('referenz')) {
 					'name' => $res[4]['name']
 				);
 			}
+		} else {
+			$d[$i][14] = 0;
+			$d[$i][15] = 0;
 		}
 
 		//deff only for deffer.
@@ -218,6 +223,10 @@ function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno
 	$fleet->TicksToStay = (is_numeric($aufenthalt) && $aufenthalt > 0) ? $aufenthalt : ($isAtt ? 5 : 99-$fleet->TicksToWait);
 
 	$fleet->text = $txt;
+
+	$fleet->atter_exenM = $dataRow[14] ? $dataRow[14] : 0;
+	$fleet->atter_exenK = $dataRow[15] ? $dataRow[15] : 0;
+	
 	//aprint($fleet);
 	return $fleet;
 }
@@ -230,10 +239,10 @@ if(isset($_POST['compute'])) {
 
 		if($g[$i] && $p[$i]) {
 			$txt = $g[$i].':'.$p[$i].' ';
-			if($typ[$i] == 0)
+			if($f[$i] == 0)
 				$txt .= 'all';
-			else if($typ[$i] == 1 || $typ[$i] == 2)
-				$txt .= '#' . $typ[$i];
+			else if($f[$i] == 1 || $f[$i] == 2)
+				$txt .= '#' . $f[$i];
 			else
 				$txt .= 'Orbit';
 		} else
@@ -248,17 +257,8 @@ if(isset($_POST['compute'])) {
 		}
 	}
 
-	//$gnsimu->mexen = $d[0][14];
-	//$gnsimu->kexen = $d[0][15];
 	$gnsimu_m->Exen_M = $d[0][14];
 	$gnsimu_m->Exen_K = $d[0][15];
-/*
-	aprint($gnsimu_m);
-	$gnsimu_m->Tick(false);
-	aprint($gnsimu_m);
-	$gnsimu_m->Tick(false);
-	aprint($gnsimu_m);
-*/
 }
 
 echo '<center>';
@@ -486,7 +486,7 @@ if(count($usedscans) > 0) {
 	<td><input tabindex="1200" type="text" name="d[0][14]" value="<?=$d[0][14]; ?>" /></td>
 <?php
 	for($i = 1; $i <= $num_flotten; $i++) {
-		echo '<td><input tabindex="'.(1000*($i+1)+14).'" type="text" name="d['.$i.'][14]" value="'.$d[$i][14].'" /></td>';
+		echo '<td><input id="d'.$i.'_14" tabindex="'.(1000*($i+1)+14).'" type="text" name="d['.$i.'][14]" value="'.($d[$i][14] > 0 ? $d[$i][14] : '').'" /></td>';
 	}
 ?>
 </tr>
@@ -495,7 +495,7 @@ if(count($usedscans) > 0) {
 	<td><input tabindex="1300" type="text" name="d[0][15]" value="<?=$d[0][15]; ?>" /></td>
 <?php
 	for($i = 1; $i <= $num_flotten; $i++) {
-		echo '<td><input tabindex="'.(1000*($i+1)+15).'" type="text" name="d['.$i.'][15]" value="'.$d[$i][15].'" /></td>';
+		echo '<td><input id="d'.$i.'_15" tabindex="'.(1000*($i+1)+15).'" type="text" name="d['.$i.'][15]" value="'.($d[$i][15] > 0 ? $d[$i][15] : '').'" /></td>';
 	}
 ?>
 </tr>
@@ -518,7 +518,11 @@ echo '<tr><td colspan="'.($num_flotten+2).'" align="center"><input tabindex="150
 if($ticks<1)
 	$ticks=1;
 
+
 if(isset($_POST['compute'])) {
+	//sort gnsimu-
+	$gnsimu_m->sortFleets();
+	
 	if(isset($_POST['preticks'])) {
 		for($i = 0; $i < 2; $i++) {
 			//aprint('', 'before pre gunticks');

@@ -32,7 +32,9 @@ class Fleet
 	var $showInSum = false;
 	var $abschuesse = array();
 	var $abschuesse_pretick = array();
-
+	var $atter_exenM;
+	var $atter_exenK;
+	
 	var $g;
 	var $p;
 	var $fleet;
@@ -49,6 +51,9 @@ class GNSimu_Multi
 
 	function GNSimu_Multi()
 	{
+		$playerFleetAtt = array();
+		$playerFleetDeff = array();
+		
 		// Daten für Jäger Nr. 0
 		$this->shipdata[0]['name'] = "J&auml;ger";
 		$this->shipdata[0]['attakpower']  = array(0.0246, 0.392, 0.0263); // Wie viele Schiffe ein Schiff mit 100% Feuerkrafft zerstören wrde
@@ -607,41 +612,94 @@ class GNSimu_Multi
 		return array($mlost, $klost);
 	}
 
-	function PrintOverview()
-	{
-		//do player to fleet mapping
-		$players = array();
+	function remapArray($array, $sortorder) {
+		$res = array();
+		for($i = 0; $i < count($sortorder); $i++) {
+			$res[$i] = $array[$sortorder[$i]];
+		}
+		return $res;
+	}
+	
+	function sortFleets() {
+		$orderDeff = array();
+		$orderAtt = array();
+		
+		//deff
 		$deffer_g = $this->DeffFleets[0]->g;
 		$deffer_p = $this->DeffFleets[0]->p;
+		$i = 0;
 		foreach($this->DeffFleets as $k=>$v) {
-			$players[$v->g . ':' . $v->p]['fleetids'][] = $k;
-			$players[$v->g . ':' . $v->p]['type'][] = 'd';
-			$players[$v->g . ':' . $v->p]['external'][] = ($k == 0 || $v->g == $deffer_g && $v->p == $deffer_p) ? true : false;
+			$key = $v->g . ':' . $v->p;
+			if(!$v->g || !$v->p) {
+				$key = 'z' . $i;
+				$i++;
+			}
+				
+			$this->playerFleetDeff[$key]['fleetids'][] = $k;
+			$this->playerFleetDeff[$key]['type'][] = 'd';
+			$this->playerFleetDeff[$key]['external'][] = ($k == 0 || $v->g == $deffer_g && $v->p == $deffer_p) ? false : true;
 		}
+		//create actual sort order
+		ksort($this->playerFleetDeff);
+		foreach($this->playerFleetDeff as $v)
+			foreach($v['fleetids'] as $fid)
+				$orderDeff[] = $fid;
+		
+		//att
+		$i = 0;
 		foreach($this->AttFleets as $k=>$v) {
-			$players[$v->g . ':' . $v->p]['fleetids'][] = $k;
-			$players[$v->g . ':' . $v->p]['type'][] = 'a';
-			$players[$v->g . ':' . $v->p]['external'][] = true;
-		}
-		ksort($players);
+			$key = $v->g . ':' . $v->p;
+			if(!$v->g || !$v->p) {
+				$key = 'z' . $i;
+				$i++;
+			}
 
+			$this->playerFleetAtt[$key]['fleetids'][] = $k;
+			$this->playerFleetAtt[$key]['type'][] = 'a';
+			$this->playerFleetAtt[$key]['external'][] = true;
+		}
+
+		//create actual sort order
+		ksort($this->playerFleetAtt);
+		foreach($this->playerFleetAtt as $v)
+			foreach($v['fleetids'] as $fid)
+				$orderAtt[] = $fid;
+				
+
+		//debug
+		/*
+		aprint($orderDeff, 'sortorder deff');
+		aprint($orderAtt, 'sortorder att');
+		aprint($this->DeffFleets, 'defffleets');
+		$this->DeffFleets = $this->remapArray($this->DeffFleets, $orderDeff);
+		aprint($this->DeffFleets, 'defffleets_sorted');
+		aprint($this->AttFleets, 'attfleets');
+		$this->AttFleets = $this->remapArray($this->AttFleets, $orderAtt);
+		aprint($this->AttFleets, 'attfleets_sorted');
+		*/
+	}
+	
+	function PrintOverview()
+	{
 		//head
 		echo "<br/><hr/><br/><b>Verluste:</b><br/><table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
 		//title
 		echo "<tr class=\"datatablehead\">";
-		echo "<td></td>";
-		echo "<td>&nbsp;Verteidiger&nbsp;</td><td>&nbsp;Angreifer&nbsp;</td>";
+		echo "<td></td><td>&nbsp;Summe Verteidigend&nbsp;</td><td>&nbsp;Summe Angreifend&nbsp;</td>";
+		echo '<td colspan="'.(2*count($this->DeffFleets)).'">Verteidigend</td><td colspan="'.(2*count($this->AttFleets)).'">Angreifend</td>';
+		echo "</tr>";
+		echo '<tr class="datatablehead"><td></td><td colspan="2"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
 			if($this->DeffFleets[$i]->text)
-				echo '<td colspan="2">&nbsp;Deff: ' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
+				echo '<td colspan="2">&nbsp;' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
 			else
-				echo '<td colspan="2">&nbsp;Deff #'.$i.'&nbsp;</td>';
+				echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 		}
 		for($i = 0; $i < count($this->AttFleets); $i++) {
 			if($this->AttFleets[$i]->text)
-					echo '<td colspan="2">&nbsp;Att: ' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+					echo '<td colspan="2">&nbsp;' . $this->AttFleets[$i]->text . '&nbsp;</td>';
 			else
-					echo '<td colspan="2">&nbsp;Att #'.$i.'&nbsp;</td>';
+					echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 		}
 		echo "</tr>";
 			echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Verlust</td><td>Verlust</td>";
@@ -823,24 +881,75 @@ class GNSimu_Multi
 		$exen_gesamt_jetzt = $this->Exen_K + $this->Exen_M;
 		$exen_vorher = $exen_gesamt_jetzt + $exenverlust_gesamt;
 		$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
-		echo '<tr class="fieldnormaldark"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#ccccff">'.ZahlZuText($kosten_neubau_exen).'</td></tr>';
+		echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#ccccff">'.ZahlZuText($kosten_neubau_exen).'</td>';
+		echo '<td colspan="'.(1+2*count($this->DeffFleets)).'" bgcolor="white"></td>';
+
+		$x = 0;
+		for($i = 0; $i < count($this->AttFleets); $i++) {
+			$key = $this->AttFleets[$i]->g . ':' . $this->AttFleets[$i]->p;
+			if(!$this->AttFleets[$i]->g || !$this->AttFleets[$i]->p) {
+				$key = 'z' . $x;
+				$x++;
+			}
+			
+			if($i > 0 && in_array($i-1, $this->playerFleetAtt[$key]['fleetids'])) {
+				//same fleet, do nothing.
+			} else {
+				$neueExen = 0;
+				$exen_vorher = 0;
+				foreach($this->playerFleetAtt[$key]['fleetids'] as $v) {
+					$neueExen += $this->AttFleets[$v]->StolenExenM + $this->AttFleets[$v]->StolenExenK;
+					$exen_vorher += $this->AttFleets[$v]->atter_exenM + $this->AttFleets[$v]->atter_exenK;
+				}
+				$exen_gesamt_jetzt = $exen_vorher + $neueExen;
+				$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
+				/*aprint(array(
+					//'attfleets' => $this->AttFleets,
+					'exen alt' => $exen_vorher,
+					'exen neu' => $neueExen,
+					'exen gesamt jetzt' => $exen_gesamt_jetzt,
+					'kosten' => $kosten_neubau_exen
+				));*/
+				echo '<td title="Von '.ZahlZuText($exen_vorher).' Extraktoren kostet der Bau von *'.ZahlZuText($neueExen).'* auf gesamt '.ZahlZuText($exen_gesamt_jetzt).' Extraktoren kostet diesen Betrag Metall." colspan="'.(2*count($this->playerFleetAtt[$key]['fleetids'])).'">' . ZahlZuText($kosten_neubau_exen) . ' <i>(?)</i></td>';
+				$alteExen = 0;
+			}
+		}
+		echo '</tr>';
 
 
 		//VAG
-		echo '<tr class="fieldnormallight" style="font-style:
+		echo '<tr class="fieldnormaldark" style="font-style:
 		italic;"><td title="Im Verteidigungsfall dürfen bis
 		zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Metall (?)</td><td colspan="4" bgcolor="white"></td>';
 		//M
+		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
-			echo '<td colspan="2">-'.ZahlZuText($verluste[$i][0] / 2) .'</td>';
+			$key = $this->DeffFleets[$i]->g . ':' . $this->DeffFleets[$i]->p;
+			if(!$this->DeffFleets[$i]->g || !$this->DeffFleets[$i]->p) {
+				$key = 'z' . $x;
+				$x++;
+			}
+			if(!in_array(0, $this->playerFleetDeff[$key]['fleetids']))
+				echo '<td colspan="2">-'.ZahlZuText($verluste[$i][0] / 2) .'</td>';
+			else
+				echo '<td colspan="2" bgcolor="white"></td>';
 		}
 		echo '</tr>';
 		//K
-		echo '<tr class="fieldnormaldark" style="font-style:
+		echo '<tr class="fieldnormallight" style="font-style:
 		italic;"><td title="Im Verteidigungsfall dürfen bis
 		zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Kristall (?)</td><td colspan="4" bgcolor="white"></td>';
+		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
-			echo '<td colspan="2">-'.ZahlZuText($verluste[$i][1]/2) .'</td>';
+			$key = $this->DeffFleets[$i]->g . ':' . $this->DeffFleets[$i]->p;
+			if(!$this->DeffFleets[$i]->g || !$this->DeffFleets[$i]->p) {
+				$key = 'z' . $x;
+				$x++;
+			}
+			if(!in_array(0, $this->playerFleetDeff[$key]['fleetids']))
+				echo '<td colspan="2">-'.ZahlZuText($verluste[$i][1] / 2) .'</td>';
+			else
+				echo '<td colspan="2" bgcolor="white"></td>';
 		}
 		echo '</tr>';
 
@@ -890,17 +999,20 @@ class GNSimu_Multi
 		echo "<tr class=\"datatablehead\">";
 		echo "<td></td>";
 		echo "<td colspan=\"2\">&nbsp;Summe Verteidigend&nbsp;</td><td colspan=\"2\">&nbsp;Summe Angreifend&nbsp;</td>";
+		echo '<td colspan="'.(2*count($this->DeffFleets)).'">Verteidigend</td><td colspan="'.(2*count($this->AttFleets)).'">Angreifend</td>';
+		echo "</tr>";
+		echo '<tr class="datatablehead"><td></td><td colspan="2"></td><td colspan="2"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
 			if($this->DeffFleets[$i]->text)
-				echo '<td colspan="2">&nbsp;Deff: ' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
+				echo '<td colspan="2">&nbsp;' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
 			else
-				echo '<td colspan="2">&nbsp;Deff #'.$i.'&nbsp;</td>';
+				echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 		}
 		for($i = 0; $i < count($this->AttFleets); $i++) {
 			if($this->AttFleets[$i]->text)
-					echo '<td colspan="2">&nbsp;Att: ' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+					echo '<td colspan="2">&nbsp;' . $this->AttFleets[$i]->text . '&nbsp;</td>';
 			else
-					echo '<td colspan="2">&nbsp;Att #'.$i.'&nbsp;</td>';
+					echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 		}
 		echo "</tr>";
 		echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Vorher</td><td>Nachher</td><td>Vorher</td><td>Nachher</td>";
