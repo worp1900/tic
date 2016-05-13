@@ -282,6 +282,24 @@
               echo '<input type="submit" name="Change" value="SET">';
               echo '</Form>';
         }
+		
+		
+$SQLx='select a.galaxie, a.planet, f.flottenr from gn4attflotten f
+left join gn4accounts a on a.id = f.id
+where f.lfd="'.$lfd.'"
+order by a.galaxie, a.planet';
+$SQLx_Result = tic_mysql_query($SQLx) or die(tic_mysql_error(__FILE__,__LINE__));
+$SQLx_Num = mysql_num_rows($SQLx_Result);
+
+$link = '';
+for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
+	$f = mysql_result($SQLx_Result, $i2, "flottenr");
+	$g = mysql_result($SQLx_Result, $i2, "galaxie");
+	$p = mysql_result($SQLx_Result, $i2, "planet");
+	$link .= '&g['.($i2+1).']='.$g.'&p['.($i2+1).']='.$p.'&t['.($i2+1).']=a&f['.($i2+1).']='.$f;
+}
+		echo '<a href="main.php?modul=kampf&num_flotten='.$SQLx_Num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'">Zur Kampfsimulation</a>';
+		
         echo '</TD>';
 
         echo '<TD bgcolor="#6490BB"><center>';
