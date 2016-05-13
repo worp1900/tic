@@ -54,7 +54,7 @@ if(!$p[1] || !$g[1]) {
 
 $usedscans = array();
 if(postOrGet('referenz')) {
-	
+
 	//process references
 	for($i = 0; $i < min(count($p), count($g)); $i++) {
 		if(!$g[$i] || !$p[$i]) {
@@ -65,7 +65,12 @@ if(postOrGet('referenz')) {
 		$mysql_senden[1] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="1" LIMIT 1;';
 		$mysql_senden[2] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, glo, glr, gmr, gsr, ga FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="3" LIMIT 1;';
 		$mysql_senden[3] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su, sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="2" LIMIT 1;';
+		$mysql_senden[4] = "SELECT name FROM gn4gnuser WHERE gala = '".$g[$i]."' AND planet = '".$p[$i]."' LIMIT 1";
 		$res = mysql_multi_query($mysql_senden, 1);
+
+		if(!isset($res[4]['name'])) {
+			$res[4]['name'] = '<i>unknown</i>';
+		}
 
 		//meta for deffer
 		if($i == 0) {
@@ -73,19 +78,21 @@ if(postOrGet('referenz')) {
 				$d[$i][14] = $res[0]['me'];
 				$d[$i][15] = $res[0]['ke'];
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Sektor',
 					'missing' => false,
 					'gen' => $res[0]['gen'],
 					't' => $res[0]['t'],
+					'name' => $res[4]['name']
 				);
 			} else {
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Sektor',
-					'missing' => true
+					'missing' => true,
+					'name' => $res[4]['name']
 				);
 			}
 		}
@@ -99,19 +106,21 @@ if(postOrGet('referenz')) {
 				$d[$i][12] = $res[2]['gsr'];
 				$d[$i][13] = $res[2]['ga'];
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Gesch&uuml;tze',
 					'missing' => false,
 					'gen' => $res[2]['gen'],
-					't' => $res[2]['t']
+					't' => $res[2]['t'],
+					'name' => $res[4]['name']
 				);
 			} else {
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Gesch&uuml;tze',
 					'missing' => true,
+					'name' => $res[4]['name']
 				);
 			}
 		}
@@ -129,19 +138,21 @@ if(postOrGet('referenz')) {
 				$d[$i][7] = $res[1]['sfka'];
 				$d[$i][8] = $res[1]['sfsu'];
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Einheiten',
 					'missing' => false,
 					'gen' => $res[1]['gen'],
-					't' => $res[1]['t']
+					't' => $res[1]['t'],
+					'name' => $res[4]['name']
 				);
 			} else {
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Einheiten',
-					'missing' => true
+					'missing' => true,
+					'name' => $res[4]['name']
 				);
 			}
 		}
@@ -167,19 +178,21 @@ if(postOrGet('referenz')) {
 				$d[$i][7] = $res[3]['sf'.$zusatz.'ka'];
 				$d[$i][8] = $res[3]['sf'.$zusatz.'su'];
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Milit&auml;r',
 					'missing' => false,
 					'gen' => $res[1]['gen'],
-					't' => $res[1]['t']
-				);			
+					't' => $res[1]['t'],
+					'name' => $res[4]['name']
+				);
 			} else {
 				$usedscans[] = array(
-					'g' => $g[$i], 
-					'p' => $p[$i], 
+					'g' => $g[$i],
+					'p' => $p[$i],
 					'typ' => 'Milit&auml;r',
-					'missing' => true
+					'missing' => true,
+					'name' => $res[4]['name']
 				);
 			}
 		}
@@ -187,11 +200,11 @@ if(postOrGet('referenz')) {
 }
 function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno) {
 	$fleet = new Fleet();
-	
+
 	$fleet->g = $g;
 	$fleet->p = $p;
 	$fleet->fleet = $fno;
-	
+
 	$fleet->Ships = array();
 	for($i = 0; $i < 14; $i++) {
 		if(isset($dataRow[$i]) && is_numeric($dataRow[$i])) {
@@ -200,17 +213,16 @@ function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno
 			$fleet->Ships[] = 0;
 		}
 	}
-	
+
 	$fleet->TicksToWait = (is_numeric($ankunft) && $ankunft > 0) ? $ankunft-1 : 0;
 	$fleet->TicksToStay = (is_numeric($aufenthalt) && $aufenthalt > 0) ? $aufenthalt : ($isAtt ? 5 : 99-$fleet->TicksToWait);
 
-	$fleet->text = $txt;	
+	$fleet->text = $txt;
 	//aprint($fleet);
 	return $fleet;
 }
 
 if(isset($_POST['compute'])) {
-	$gnsimu = new GNSimu();
 	$gnsimu_m = new GNSimu_Multi();
 
 	for($i = 0; $i < count($d); $i++) {
@@ -235,12 +247,12 @@ if(isset($_POST['compute'])) {
 			$gnsimu_m->AddDeffFleet($fleet[$i]);
 		}
 	}
-	
+
 	//$gnsimu->mexen = $d[0][14];
 	//$gnsimu->kexen = $d[0][15];
 	$gnsimu_m->Exen_M = $d[0][14];
 	$gnsimu_m->Exen_K = $d[0][15];
-/*	
+/*
 	aprint($gnsimu_m);
 	$gnsimu_m->Tick(false);
 	aprint($gnsimu_m);
@@ -250,25 +262,26 @@ if(isset($_POST['compute'])) {
 }
 
 echo '<center>';
-echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte be&auml;ugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler! Danke.</p>';
+echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beaeugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler!<br/>Die Bergungsressourcen aus Vorticks werden ggf. noch falsch berechnet - testet das gerne.<br/>Ferner zaehlt derzeit noch nur die orbitale erste Flotte Bergungsmaessig zum eigentlichen Verteidiger.<br/>Danke. /dv</p>';
 echo '<form action="./main.php?modul=kampf" method="post">';
 echo '<input type="hidden" name="modul" value="kampf"/>';
 echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br /><br />';
 echo '</center>';
 
 if(count($usedscans) > 0) {
+	$age_thresh = 12*60;
 	echo '<table class="datatable">';
-	echo '<tr class="datatablehead"><td colspan="6">Genutzte Scans</td></tr>';
-	echo '<tr class="fieldnormaldark" style="font-weight: bold;"><td>&nbsp;Galaxie&nbsp;</td><td>&nbsp;Planet&nbsp;</td><td>&nbsp;Typ&nbsp;</td><td>&nbsp;Genauigkeit&nbsp;</td><td>&nbsp;Datum&nbsp;</td><td>&nbsp;Alter [min]&nbsp;</td></tr>';
+	echo '<tr class="datatablehead"><td colspan="7">Genutzte Scans</td></tr>';
+	echo '<tr class="fieldnormaldark" style="font-weight: bold;"><td>&nbsp;Galaxie&nbsp;</td><td>&nbsp;Planet&nbsp;</td><td>&nbsp;Spieler&nbsp;</td><td>&nbsp;Typ&nbsp;</td><td>&nbsp;Genauigkeit&nbsp;</td><td>&nbsp;Datum&nbsp;</td><td>&nbsp;Alter [min]&nbsp;</td></tr>';
 	$color = false;
 	for($i = 0; $i < count($usedscans); $i++) {
-		echo '<tr class="fieldnormal' . ($color ? 'dark' : 'light') . '">';
+		$date = date('Y.m.d H:i', $usedscans[$i]['t']);
+		$age = round((time() - $usedscans[$i]['t']) / 60, 0);
+		echo '<tr class="fieldnormal' . ($color ? 'dark' : 'light') . '"'.(($usedscans[$i]['missing'] || $age > $age_thresh) ? ' style="color: red;"' : '').'>';
 		if($usedscans[$i]['missing']) {
-			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>-</td><td>-</td><td>-</td>';
+			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['name'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>-</td><td>-</td><td>-</td>';
 		} else {
-			$date = date('Y.m.d H:i', $usedscans[$i]['t']);
-			$age = round((time() - $usedscans[$i]['t']) / 60, 0);
-			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>'.$usedscans[$i]['gen'].'%</td><td>'.$date.'</td><td>'.$age.'</td>';
+			echo '<td>'.$usedscans[$i]['g'].'</td><td>'.$usedscans[$i]['p'].'</td><td>'.$usedscans[$i]['name'].'</td><td>'.$usedscans[$i]['typ'].'</td><td>'.$usedscans[$i]['gen'].'%</td><td>'.$date.'</td><td>'.ZahlZuText($age).'</td>';
 		}
 		echo '</tr>';
 		$color = !$color;
@@ -351,7 +364,7 @@ if(count($usedscans) > 0) {
 			<option value="2"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 2) ? ' selected="selected"' : '').'>2</option>
 			<option value="3"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 3) ? ' selected="selected"' : '').'>3</option>
 			<option value="4"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 4) ? ' selected="selected"' : '').'>4</option>';
-			
+
 			if(isset($_POST['compute'])) {
 				echo '<option value="5"'.((isset($aufenthalt[$i]) && $aufenthalt[$i] == 5) ? ' selected="selected"' : '').'>5</option>';
 				echo '<option value="10"'.((isset($aufenthalt[$i]) && $aufenthalt[$i] == 10) ? ' selected="selected"' : '').'>10</option>';
@@ -471,10 +484,20 @@ if(count($usedscans) > 0) {
 <tr class="fieldnormallight">
 	<td>Metalextraktoren:</td>
 	<td><input tabindex="1200" type="text" name="d[0][14]" value="<?=$d[0][14]; ?>" /></td>
+<?php
+	for($i = 1; $i <= $num_flotten; $i++) {
+		echo '<td><input tabindex="'.(1000*($i+1)+14).'" type="text" name="d['.$i.'][14]" value="'.$d[$i][14].'" /></td>';
+	}
+?>
 </tr>
 <tr class="fieldnormaldark">
 	<td>Kristalextraktoren:</td>
 	<td><input tabindex="1300" type="text" name="d[0][15]" value="<?=$d[0][15]; ?>" /></td>
+<?php
+	for($i = 1; $i <= $num_flotten; $i++) {
+		echo '<td><input tabindex="'.(1000*($i+1)+15).'" type="text" name="d['.$i.'][15]" value="'.$d[$i][15].'" /></td>';
+	}
+?>
 </tr>
 <tr>
 	<td colspan="<?=($num_flotten+2);?>">Ticks: <select name="ticks" tabindex="10000">';
