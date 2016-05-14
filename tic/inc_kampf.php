@@ -533,6 +533,9 @@ if(postOrGet('compute')) {
 			//aprint('', 'pre gunticks 1 done');
 			$gnsimu_m->currentTick++;
 		}
+	} else {
+		$gnsimu_m->currentTick++;
+		$gnsimu_m->currentTick++;
 	}
 
 	//aprint($gnsimu_m, 'start');
