@@ -24,7 +24,7 @@
 	function getscannames( $scantype ) {
 		$sn = explode( ' ', $scantype );
 		$res = '';
-		$snarr = array( 'Sektor', 'Einheiten', 'Mili', 'Gesch&uuml;tz' );
+		$snarr = array( 'Sektor', 'Einheiten', 'Milit&auml;r', 'Gesch&uuml;tze' );
 		for ( $j=0; $j< count( $sn )-1; $j++ ) {
 			$idx = $sn[$j];
 			if ( $j < count( $sn )-2 )
@@ -182,7 +182,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 ?>
 		<table width="100%">
 			<tr>
-				<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=gnuser($rg, $rp);?>" target="_blank">Punkteverlauf</a></td>
+				<td colspan="15" class="datatablehead">NEWS: <?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="javascript:history.back();">zur&uuml;ck</a></td>
 			</tr>
 <?php
 		for($j = 0; $j < $num_news; $j++) {
@@ -367,7 +367,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a></td>
+			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a> - <a href="main.php?modul=kampf&preticks=1&flotten=1&ticks=5&g[0]=<?=$rg;?>&p[0]=<?=$rp;?>&typ[0]=d&g[1]=<?=$Benutzer['galaxie'];?>&p[1]=<?=$Benutzer['planet'];?>&f[1]=0&typ[1]=a&referenz=eintragen&compute=Berechnen">Angriff simulieren</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -380,7 +380,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark"><b>Scanblocks</b></td>
+			<td class="fieldnormaldark" title="F&uuml;r einen erfolgreichen Scan werden SV/SB ben&ouml;tigt:&#013;* Sektor 1-1.5&#013;* Einheiten/Gesch&uuml;tze 1.5-2.0&#013;* Milit&auml;r/News 2.0-2.5"><b>Scanblocks</b><i>(?)</i></td>
 			<td class="fieldnormaldark"><b>News</b></td>
 		</tr>
 		<tr>
