@@ -12,7 +12,7 @@
 */
 
 include("GNSimuclass.php");
-$ticks = (isset($_POST['ticks']) ? $_POST['ticks'] : 5);
+$ticks = postOrGet('ticks') ? postOrGet('ticks') : 5;
 
 function aprint($val, $txt = null) {
 	echo '<code style="text-align: left; font-size: 8pt;"><pre>';
@@ -36,10 +36,13 @@ $aufenthalt = postOrGet('aufenthalt');
 $ankunft = postOrGet('ankunft');
 $typ = postOrGet('typ');
 $f = postOrGet('f');
-//aprint($d, 'd');
-//aprint($aufenthalt, 'aufenthalt');
-//aprint($ankunft, 'ankunft');
-//aprint($typ, 'typ');
+
+/*
+aprint($aufenthalt, 'aufenthalt');
+aprint($ankunft, 'ankunft');
+aprint($typ, 'typ');
+aprint($f, 'f');
+*/
 
 $p = postOrGet('p');
 $g = postOrGet('g');
@@ -231,7 +234,7 @@ function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno
 	return $fleet;
 }
 
-if(isset($_POST['compute'])) {
+if(postOrGet('compute')) {
 	$gnsimu_m = new GNSimu_Multi();
 
 	for($i = 0; $i < count($d); $i++) {
@@ -261,16 +264,20 @@ if(isset($_POST['compute'])) {
 	$gnsimu_m->Exen_K = $d[0][15];
 }
 
-echo '<center>';
+echo '<a name="oben"></a><center>';
 echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beaeugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler!<br/>Die Bergungsressourcen aus Vorticks werden ggf. noch falsch berechnet - testet das gerne.<br/>Ferner zaehlt derzeit noch nur die orbitale erste Flotte Bergungsmaessig zum eigentlichen Verteidiger.<br/>Danke. /dv</p>';
 echo '<form action="./main.php?modul=kampf" method="post">';
 echo '<input type="hidden" name="modul" value="kampf"/>';
-echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br /><br />';
+echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br />';
+if(postOrGet('compute'))
+	echo '<div style="text-align: right"><a href="#overview">&raquo; zum Ergebnis</a></div><br/>';
+echo '<br />';
 echo '</center>';
+
 
 if(count($usedscans) > 0) {
 	$age_thresh = 12*60;
-	echo '<table class="datatable">';
+	echo '<table class="datatable" align="center">';
 	echo '<tr class="datatablehead"><td colspan="7">Genutzte Scans</td></tr>';
 	echo '<tr class="fieldnormaldark" style="font-weight: bold;"><td>&nbsp;Galaxie&nbsp;</td><td>&nbsp;Planet&nbsp;</td><td>&nbsp;Spieler&nbsp;</td><td>&nbsp;Typ&nbsp;</td><td>&nbsp;Genauigkeit&nbsp;</td><td>&nbsp;Datum&nbsp;</td><td>&nbsp;Alter [min]&nbsp;</td></tr>';
 	$color = false;
@@ -358,24 +365,13 @@ if(count($usedscans) > 0) {
 	<td>&infin;<input type="hidden" name="aufenthalt[0]" value="99"/></td>
 <?php
 	for($i = 1; $i <= $num_flotten; $i++) {
-		echo '	<td>
-		<select tabindex="'.(700+$i).'" name="aufenthalt['.$i.']">
-			<option value="1"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 1) ? ' selected="selected"' : '').'>1</option>
-			<option value="2"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 2) ? ' selected="selected"' : '').'>2</option>
-			<option value="3"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 3) ? ' selected="selected"' : '').'>3</option>
-			<option value="4"'.((isset($_POST['compute']) && isset($aufenthalt[$i]) && $aufenthalt[$i] == 4) ? ' selected="selected"' : '').'>4</option>';
+		echo '	<td><select tabindex="'.(700+$i).'" name="aufenthalt['.$i.']">';
 
-			if(isset($_POST['compute'])) {
-				echo '<option value="5"'.((isset($aufenthalt[$i]) && $aufenthalt[$i] == 5) ? ' selected="selected"' : '').'>5</option>';
-				echo '<option value="10"'.((isset($aufenthalt[$i]) && $aufenthalt[$i] == 10) ? ' selected="selected"' : '').'>10</option>';
-				echo '<option value="99"'.((isset($aufenthalt[$i]) && $aufenthalt[$i] == 99) ? ' selected="selected"' : '').'>99</option>';
-			} else {
-				echo '<option value="5"'.(($i != 0) ? ' selected="selected"' : '').'>5</option>';
-				echo '<option value="10">10</option>';
-				echo '<option value="99"'.(($i == 0) ? ' selected="selected"' : '').'>99</option>';
-			}
-		echo '</select>
-	</td>';
+		for($j = 1; $j <= 20; $j++) {
+			echo '<option value="'.$j.'"'.((postOrGet('compute') && isset($aufenthalt[$i]) && $aufenthalt[$i] == $j) ? ' selected="selected"' : '').'>'.$j.'</option>';
+		}
+
+		echo '</select></td>';
 	}
 ?>
 </tr>
@@ -502,7 +498,7 @@ if(count($usedscans) > 0) {
 <tr>
 	<td colspan="<?=($num_flotten+2);?>">Ticks: <select name="ticks" tabindex="10000">';
 <?php
-for($i=1;$i<=20;$i++) {
+for($i=1;$i<=99;$i++) {
 	if($i==$ticks)
 		echo '<option value="'.$i.'" selected="selected">'.$i.'</option>';
 	else
@@ -510,7 +506,7 @@ for($i=1;$i<=20;$i++) {
 }
 
 echo '</select><input tabindex="10100" type="checkbox" name="preticks"';
-if(isset($_POST['preticks']) || !isset($_POST['ticks'])) {
+if(postOrGet('preticks') || !postOrGet('ticks')) {
 	echo ' checked="checked"';
 }
 echo ' />Feuerkraft der Gesch&uuml;tze vor Ankunft der Flotte berechnen</td></tr>';
@@ -519,11 +515,11 @@ if($ticks<1)
 	$ticks=1;
 
 
-if(isset($_POST['compute'])) {
+if(postOrGet('compute')) {
 	//sort gnsimu-
 	$gnsimu_m->sortFleets();
 	
-	if(isset($_POST['preticks'])) {
+	if(postOrGet('preticks')) {
 		for($i = 0; $i < 2; $i++) {
 			//aprint('', 'before pre gunticks');
 			$gnsimu_m->prefire(2);
@@ -542,7 +538,7 @@ if(isset($_POST['compute'])) {
 		//aprint($gnsimu_m, 'after tick ' . ($i+1));
 		$gnsimu_m->PrintStates();
 		//aprint($gnsimu_m);
-		if(isset($_POST['preticks'])) {
+		if(postOrGet('preticks')) {
 			$gnsimu_m->prefire(2);
 			$gnsimu_m->PrintStatesGun(2);
 			//aprint('', 'tick '.$i.': gunticks 2 done');
@@ -554,6 +550,8 @@ if(isset($_POST['compute'])) {
 	}
 
     $gnsimu_m->PrintOverView();
+
+	echo '<div style="text-align: right;"><a href="#oben">&raquo; nach oben</a></div>';
 /*aprint(array(
 	'Att' => $gnsimu_m->AttFleets,
 	'Deff' => $gnsimu_m->DeffFleets

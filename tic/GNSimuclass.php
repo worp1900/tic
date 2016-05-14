@@ -682,7 +682,7 @@ class GNSimu_Multi
 	function PrintOverview()
 	{
 		//head
-		echo "<br/><hr/><br/><b>Verluste:</b><br/><table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
+		echo "<br/><hr/><br/><a name='overview'></a><b>Verluste:</b><br/><table align=\"center\" class=\"datatable\" cellspacing=\"1\" style=\"padding:5px;\">";
 		//title
 		echo "<tr class=\"datatablehead\">";
 		echo "<td></td><td>&nbsp;Summe Verteidigend&nbsp;</td><td>&nbsp;Summe Angreifend&nbsp;</td>";
@@ -702,7 +702,7 @@ class GNSimu_Multi
 					echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 		}
 		echo "</tr>";
-			echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Verlust</td><td>Verlust</td>";
+		echo "<tr style=\"font-weight:bold\" class=\"fieldnormaldark\"><td>Typ</td><td>Verlust</td><td>Verlust</td>";
 		for($i = 0; $i < count($this->DeffFleets) + count($this->AttFleets); $i++) {
 			echo "<td>&nbsp;Verlust&nbsp;</td><td style='font-weight: normal; color: #888888;'>&nbsp;Absch&uuml;sse&nbsp;</td>";
 		}
@@ -797,9 +797,31 @@ class GNSimu_Multi
 		for($i = 0; $i < count($this->AttFleets); $i++) {
 			$verluste[] = $this->calcResForLost($this->AttFleets[$i]);
 		}
-
+		
 		//kosten neubau
-		echo '<tr class="datatablehead"><td colspan="'.(3 + 2*count($this->AttFleets) + 2*count($this->DeffFleets)).'">Kosten f&uuml;r Neubau</td></tr>';
+		echo '<tr><td colspan="'.(3+2*count($this->DeffFleets) + 2*count($this->AttFleets)).'" style="font-size: 9pt; font-weight: bold;"><br/>Kosten f&uuml;r Neubau:</td></tr>';
+
+		echo "<tr class=\"datatablehead\">";
+		echo "<td></td><td>&nbsp;Summe Verteidigend&nbsp;</td><td>&nbsp;Summe Angreifend&nbsp;</td>";
+		echo '<td colspan="'.(2*count($this->DeffFleets)).'">Verteidigend</td><td colspan="'.(2*count($this->AttFleets)).'">Angreifend</td>';
+		echo "</tr>";
+		
+		echo '<tr class="datatablehead"><td></td><td colspan="2"></td>';
+		for($i = 0; $i < count($this->DeffFleets); $i++) {
+			if($this->DeffFleets[$i]->text)
+				echo '<td colspan="2">&nbsp;' . $this->DeffFleets[$i]->text . '&nbsp;</td>';
+			else
+				echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
+		}
+		for($i = 0; $i < count($this->AttFleets); $i++) {
+			if($this->AttFleets[$i]->text)
+					echo '<td colspan="2">&nbsp;' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+			else
+					echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
+		}
+		echo "</tr>";
+
+
 		//	M
 		echo '<tr class="fieldnormallight"><td>Metall</td><td bgcolor="#ccccff">'.ZahlZuText($this->calcResForLost($defsum)[0]).'</td><td bgcolor="#ffcccc">'.ZahlZuText($this->calcResForLost($attsum)[0]).'</td>';
 		for($i = 0; $i < count($verluste); $i++) {
@@ -910,7 +932,7 @@ class GNSimu_Multi
 					'exen gesamt jetzt' => $exen_gesamt_jetzt,
 					'kosten' => $kosten_neubau_exen
 				));*/
-				echo '<td title="Von '.ZahlZuText($exen_vorher).' Extraktoren kostet der Bau von *'.ZahlZuText($neueExen).'* auf gesamt '.ZahlZuText($exen_gesamt_jetzt).' Extraktoren kostet diesen Betrag Metall." colspan="'.(2*count($this->playerFleetAtt[$key]['fleetids'])).'">' . ZahlZuText($kosten_neubau_exen) . ' <i>(?)</i></td>';
+				echo '<td title="Von '.ZahlZuText($exen_vorher).' Extraktoren kostet der Bau von '.ZahlZuText($neueExen).' auf gesamt '.ZahlZuText($exen_gesamt_jetzt).' Extraktoren diesen Betrag Metall." colspan="'.(2*count($this->playerFleetAtt[$key]['fleetids'])).'">' . ZahlZuText($kosten_neubau_exen) . ' <i>(?)</i></td>';
 				$alteExen = 0;
 			}
 		}

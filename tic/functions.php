@@ -1,4 +1,34 @@
 <?PHP
+	function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
+		$sql = 'SELECT 
+				angreifer_galaxie g, 
+				angreifer_planet p, 
+				flugzeit, 
+				flottennr,
+				floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
+				IF(modus = 1, "a", "d") typ
+			FROM gn4flottenbewegungen
+			WHERE (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2)';
+//echo $sql;
+		$res = tic_mysql_query($sql) or die(tic_mysql_error(__FILE__,__LINE__));
+		$num = mysql_num_rows($res);
+
+		$link = '';
+		$ticks = 0;
+		for($i = 0; $i < $num; $i++) {
+			$f = mysql_result($res, $i, "flottennr");
+			$g = mysql_result($res, $i, "g");
+			$p = mysql_result($res, $i, "p");
+			$typ = mysql_result($res, $i, "typ");
+			$ankunft = mysql_result($res, $i, "tick");
+			$dauer = mysql_result($res, $i, "flugzeit");
+			$link .= '&g['.($i+1).']='.$g.'&p['.($i+1).']='.$p.'&typ['.($i+1).']='.$typ.'&f['.($i+1).']='.$f.'&ankunft['.($i+1).']='.$ankunft.'&aufenthalt['.($i+1).']='.$dauer;
+			
+			$ticks = ($ankunft + $dauer > $ticks) ? $ankunft + $dauer : $ticks;
+		}
+
+		return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.$num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'#oben">'.$linkName.'</a>';;
+	}
     function GetScans($SQL_DBConn, $galaxie, $planet) {
         $scan_type[0] = 'S';
         $scan_type[1] = 'E';

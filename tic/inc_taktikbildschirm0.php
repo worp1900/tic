@@ -52,7 +52,7 @@
 		$koord_p = mysql_result($SQL_Result_user, $n, 'planet');
 
 // ------------------
-		$dsp .= "			<td bgcolor=".$farb_zusatz2."><a href=\"./main.php?modul=vergleich&xgala=".$koord_g."&xplanet=".$koord_p."\"><img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegenüberstellung anzeigen\" title=\"Flottengegenüberstellung anzeigen\"></a></td>\n";
+		$dsp .= "			<td bgcolor=".$farb_zusatz2.">" . getKampfSimuLinksForTarget($koord_g, $koord_p, "<img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegenüberstellung anzeigen\" title=\"Flottengegenüberstellung anzeigen\"></a>")  ."</td>\n";
 		$dsp .= "			<td bgcolor=\"".$htmlstyle['dunkel'.$farb_zusatz]."\" align=\"center\"><font size=\"-1\">".$koord_g.":".$koord_p."</font></td>\n";
 		$dsp .= "			<td bgcolor=\"".$htmlstyle['hell'.$farb_zusatz]."\"><font size=\"-1\">\n";
 		$dsp .= "				<a href=\"./main.php?modul=anzeigen&id=".mysql_result($SQL_Result_user, $n, 'id')."\"".($Benutzer['help']?" onmouseover=\"return overlib('Klick hier rauf um inc,deff usw. einzutragen ');\" onmouseout=\"return nd();\"":"").">".mysql_result($SQL_Result_user, $n, 'name')."</a>\n";
