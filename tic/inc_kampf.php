@@ -237,7 +237,7 @@ function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno
 if(postOrGet('compute')) {
 	$gnsimu_m = new GNSimu_Multi();
 
-	for($i = 0; $i < count($d); $i++) {
+	for($i = 0; $i < max(count($d), count($g), count($p), count($typ)); $i++) {
 		$isAtt = $typ[$i] === "a" ? true : false;
 
 		if($g[$i] && $p[$i]) {
@@ -368,7 +368,10 @@ if(count($usedscans) > 0) {
 		echo '	<td><select tabindex="'.(700+$i).'" name="aufenthalt['.$i.']">';
 
 		for($j = 1; $j <= 20; $j++) {
-			echo '<option value="'.$j.'"'.((postOrGet('compute') && isset($aufenthalt[$i]) && $aufenthalt[$i] == $j) ? ' selected="selected"' : '').'>'.$j.'</option>';
+			if(!isset($aufenthalt[$i]) || $aufenthalt[$i] == 0) {
+				$aufenthalt[$i] = ($typ[$j] == 'a') ? 5 : 20;
+			}
+			echo '<option value="'.$j.'"'.(($aufenthalt[$i] == $j) ? ' selected="selected"' : '').'>'.$j.'</option>';
 		}
 
 		echo '</select></td>';

@@ -1116,9 +1116,9 @@ class GNSimu_Multi
 		for($i = 0; $i < count($this->AttFleets); $i++) {
 			if($this->AttFleets[$i]->ArrivalTick == $this->currentTick + $tick) {
 				if($this->AttFleets[$i]->text)
-						echo '<td colspan="2">&nbsp;Att: ' . $this->AttFleets[$i]->text . '&nbsp;</td>';
+						echo '<td colspan="2">&nbsp;' . $this->AttFleets[$i]->text . '&nbsp;</td>';
 				else
-						echo '<td colspan="2">&nbsp;Att #'.$i.'&nbsp;</td>';
+						echo '<td colspan="2">&nbsp;#'.$i.'&nbsp;</td>';
 			}
 		}
 		echo "</tr>";

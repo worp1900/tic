@@ -5,10 +5,10 @@
 				angreifer_planet p, 
 				flugzeit, 
 				flottennr,
-				floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
+				floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
 				IF(modus = 1, "a", "d") typ
 			FROM gn4flottenbewegungen
-			WHERE (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2)';
+			WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2)';
 //echo $sql;
 		$res = tic_mysql_query($sql) or die(tic_mysql_error(__FILE__,__LINE__));
 		$num = mysql_num_rows($res);
@@ -20,11 +20,11 @@
 			$g = mysql_result($res, $i, "g");
 			$p = mysql_result($res, $i, "p");
 			$typ = mysql_result($res, $i, "typ");
-			$ankunft = mysql_result($res, $i, "tick");
+			$ankunft = mysql_result($res, $i, "tick") + 1;
 			$dauer = mysql_result($res, $i, "flugzeit");
 			$link .= '&g['.($i+1).']='.$g.'&p['.($i+1).']='.$p.'&typ['.($i+1).']='.$typ.'&f['.($i+1).']='.$f.'&ankunft['.($i+1).']='.$ankunft.'&aufenthalt['.($i+1).']='.$dauer;
 			
-			$ticks = ($ankunft + $dauer > $ticks) ? $ankunft + $dauer : $ticks;
+			$ticks = ($typ == 'a' && ($ankunft + $dauer > $ticks)) ? $ankunft + $dauer -1 : $ticks;
 		}
 
 		return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.$num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'#oben">'.$linkName.'</a>';;
