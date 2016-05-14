@@ -39,22 +39,23 @@
 	<tr><td>
 		<table cellspacing="1" style="width:100%;background:#000000;">
 			<tr>
-				<td class="menu"><a href="./main.php?modul=NWshow"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Nachtwache</a></td>
-			</tr>
-			<tr>
 				<td class="menu"><a href="./main.php?modul=scans"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scan-Erfassen</a></td>
 			</tr>
+			<!--
 			<tr>
 				<td class="menu"><a href="./main.php?modul=ircpaste"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />IRC-Paste</a></td>
 			</tr>
+			//-->
 			<tr>
 				<td class="menu"><a href="./main.php?modul=showgalascans&amp;displaytype=0&amp;xgala=<?=$Benutzer['galaxie']?>&amp;xplanet=<?=$Benutzer['planet']?>"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scans-Anzeige</a></td>
 			</tr>
+			<!--
 			<tr>
 				<td class="menu"><a href="./main.php?modul=forum&amp;faction=show&amp;falli=0&amp;ftopic=0"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Forum</a></td>
 			</tr>
+			//-->
 			<tr>
-				<td class="menu"><a href="./main.php?modul=profil"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Profil</a></td>
+				<td class="menu"><a href="./main.php?modul=profil"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Mein Profil</a></td>
 			</tr>
 			<tr>
 
@@ -65,6 +66,9 @@
 	$attanzahl = AttAnzahl($Benutzer['allianz'],$Benutzer['ticid'],1);
 	echo '<font color="#'.$ATTSTATUSHTML[5].'">'.$attanzahl.'</font>)</a></td>';
 ?>
+			</tr>
+			<tr>
+				<td class="menu"><a href="./main.php?modul=NWshow"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Nachtwache</a></td>
 			</tr>
 			<tr>
 				<td class="menu"><a href="help/help.html" target="tic-hilfe"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Hilfe</a></td>
@@ -87,13 +91,15 @@
 		echo "			<tr>\n";
 		echo "				<td class=\"menu\"><a href=\"./main.php?modul=management_meta\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Meta-Management</a></td>\n";
 		echo "			</tr>\n";
+		/*
 		if ($Benutzer['rang'] >= $Rang_Techniker) {
 			echo "			<tr>\n";
 			echo "				<td class=\"menu\"><a href=\"./main.php?modul=management_channels\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Channel-Management</a></td>\n";
 			echo "			</tr>\n";
 		}
+		*/
 		echo "			<tr>\n";
-		echo "				<td class=\"menu\"><a href=\"./main.php?modul=userman\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Benutzerverw.</a></td>\n";
+		echo "				<td class=\"menu\"><a href=\"./main.php?modul=userman\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Benutzerverwaltung</a></td>\n";
 		echo "			</tr>\n";
 		if ($Benutzer['rang'] > $Rang_GC) {
 			echo "			<tr>\n";
@@ -118,10 +124,10 @@
 	<tr><td>
 		<table cellspacing="1" style="width:100%;background:#000000;">
 			<tr>
-				<td class="menu"><a href="./main.php?modul=vag-rechner"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Vag-Rechner</a></td>
+				<td class="menu"><a href="./main.php?modul=kampf"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Kampf-Simu</a></td>
 			</tr>
 			<tr>
-				<td class="menu"><a href="./main.php?modul=kampf"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Kampf-Simu</a></td>
+				<td class="menu"><a href="./main.php?modul=vag-rechner"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Vag-Rechner</a></td>
 			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=statistic"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Statistic</a></td>
