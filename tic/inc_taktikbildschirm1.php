@@ -35,6 +35,25 @@
 	$help_fleet = "Hier klicken um die Flottennummer zu ändern.<br /><br />";
 	$help_safe = "Hier klicken um den Status zu ändern.<br /><br />";
 
+	
+	function addScanblockInfo($blocks, &$tooltip_scan) {
+		if(count($blocks) > 0) {
+			/*
+			aprint(array(
+				'g' => $user_g,
+				'p' => $user_p,
+				'blocks' => $scan["blocks"]
+			));
+			*/
+			$tooltip_scan.= "<span style=\'color: red; font-weight: bold;\'>Scanblocks:<br/>";
+			for($k = 0; $k < count($blocks); $k++) {
+				$tooltip_scan .= '&nbsp;&nbsp;&nbsp;&nbsp;' . ZahlZuText($blocks[$k]['svs']) . ' SVS, ' . $blocks[$k]['typ'] . ' (' . date('d.M H:i', $blocks[$k]['t']) . ')<br/>';
+			}
+			$tooltip_scan.= "</span><br/>";
+		} 
+	}
+	
+	
 	// Flottenbewegungen
 	define ("FLEET_MOVEMENT_UNKNOWN", 0);
 	define ("FLEET_MOVEMENT_ATTACK", 1);
@@ -72,6 +91,10 @@
 
 		$tooltip_scan = ($Benutzer['help']?$help_scan:"")."<b>Scans von ".$user_g.":".$user_p." ".$user_n."</b><br />";
 		$scan = getScanData($user_g, $user_p);
+
+		addScanblockInfo($scan['blocks'], $tooltip_scan);
+
+
 		if ($scan["scan_elokas_time"] > 0) $tooltip_scan.= "EloKas: min. ".$scan["scan_elokas"]." (Stand: ".date("d.M H:i", $scan["scan_elokas_time"]).")<br /><br />";
 		if ($scan["scan_sektor"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_sektor_time"], time()).">Sektor vom ".date("d.M H:i", $scan["scan_sektor_time"])." (".$scan["scan_sektor_prozent"]."%)</span><br />";
 		if ($scan["scan_geschuetze"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_geschuetze_time"], time()).">Gesch&uuml;tze vom ".date("d.M H:i", $scan["scan_geschuetze_time"])." (".$scan["scan_geschuetze_prozent"]."%)</span><br />";
@@ -113,6 +136,9 @@
 			if (( $start_g == $user_g ) && ( $start_p == $user_p )) {
 				$tooltip_scan = ($Benutzer['help']?$help_scan:"")."<b>Scans von ".$ziel_g.":".$ziel_p." ".$ziel_n."</b><br />";
 				$scan = getScanData($ziel_g, $ziel_p);
+				
+				addScanblockInfo($scan['blocks'], $tooltip_scan);				
+				
 				if ($scan["scan_elokas_time"] > 0) $tooltip_scan.= "EloKas: min. ".$scan["scan_elokas"]." (Stand: ".date("d.M H:i", $scan["scan_elokas_time"]).")<br /><br />";
 				if ($scan["scan_sektor"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_sektor_time"], $f_eta).">Sektor vom ".date("d.M H:i", $scan["scan_sektor_time"])." (".$scan["scan_sektor_prozent"]."%)</span><br />";
 				if ($scan["scan_geschuetze"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_geschuetze_time"], $f_eta).">Gesch&uuml;tze vom ".date("d.M H:i", $scan["scan_geschuetze_time"])." (".$scan["scan_geschuetze_prozent"]."%)</span><br />";
@@ -167,6 +193,9 @@
 
 				$tooltip_scan = ($Benutzer['help']?$help_scan:"")."<b>Scans von ".$start_g.":".$start_p." ".$start_n."</b><br />";
 				$scan = getScanData($start_g, $start_p);
+
+				addScanblockInfo($scan['blocks'], $tooltip_scan);
+
 				if ($scan["scan_elokas_time"] > 0) $tooltip_scan.= "EloKas: min. ".$scan["scan_elokas"]." (Stand: ".date("d.M H:i", $scan["scan_elokas_time"]).")<br /><br />";
 				if ($scan["scan_sektor"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_sektor_time"], $f_eta).">Sektor vom ".date("d.M H:i", $scan["scan_sektor_time"])." (".$scan["scan_sektor_prozent"]."%)</span><br />";
 				if ($scan["scan_geschuetze"])	$tooltip_scan.= "<span class=".getScanAge($scan["scan_geschuetze_time"], $f_eta).">Gesch&uuml;tze vom ".date("d.M H:i", $scan["scan_geschuetze_time"])." (".$scan["scan_geschuetze_prozent"]."%)</span><br />";

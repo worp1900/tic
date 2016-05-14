@@ -1,4 +1,11 @@
 <?PHP
+function aprint($val, $txt = null) {
+	echo '<code style="text-align: left; font-size: 8pt;"><pre>';
+	if($txt != null) echo '<b>' . $txt . ':</b> ';
+	print_r($val);
+	echo '</pre></code><br><hr>';
+}
+
 	function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$sql = 'SELECT 
 				angreifer_galaxie g, 
@@ -307,7 +314,7 @@ function GetUserInfos($id) {
 
     include './globalvars2.php';
 
-    $SQL = "SELECT * FROM gn4scans WHERE rg=".$galaxie." and rp=".$planet." order by type;";
+    $SQL = "SELECT * FROM gn4scans WHERE rg=".$galaxie." and rp=".$planet." order by type ASC, id DESC;";
     $SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
     $SQL_Num = mysql_num_rows($SQL_Result);
     for ($i=0;$i<15;$i++) {
@@ -320,7 +327,12 @@ function GetUserInfos($id) {
     $gzeit="";
     $ggen ="";
 
+	//blocks
+	$sql = "SELECT t, svs, typ FROM gn4scanblock WHERE g='".$galaxie."' AND p='".$planet."' ORDER BY t DESC";
+	$res = tic_mysql_query($sql, $SQL_DBConn);
+	$num = mysql_num_rows($res);
 
+	//iterate others
     for ($i = 0; $i < $SQL_Num; $i++) {
          $type = mysql_result($SQL_Result, $i, 'type' );
          if ($punkte >= 0) {
@@ -421,6 +433,36 @@ function GetUserInfos($id) {
    }
 
    $output = "";
+   
+   //blocks
+   if($num > 0) {
+		$output .= '<b>Scanblocks:</b><br/>';
+	for ($k = 0; $k < $num; $k++) {
+		$typ;
+		switch(mysql_result($res, $k, 'typ')) {
+			case 0:
+				$typ = 'Sektor'; break;
+			case 1:
+				$typ = 'Einheiten'; break;
+			case 2:
+				$typ = 'Milit&auml;r'; break;
+			case 3:
+				$typ = 'Gesch&uuml;tze'; break;
+			case 4:
+				$typ = 'Nachrichten'; break;
+			default:
+				$typ = '<i>unknown</i>'; break;
+		}
+
+		$entry = array(
+			'svs' => mysql_result($res, $k, 'svs'),
+			't' => mysql_result($res, $k, 't'),
+			'typ' => $typ
+			);
+		$output .= $entry['svs'] . ' SVS, ' . $entry['typ'] . ' (' . date('H:i d.m.Y', $entry['t']) . ')<br/>';
+	}
+   }
+   
    if  ($xzeit[0] != '?') {
      $output .= $xzeit[0];
      for ($i=0; $i<5; $i++) {

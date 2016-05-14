@@ -14,12 +14,6 @@
 include("GNSimuclass.php");
 $ticks = postOrGet('ticks') ? postOrGet('ticks') : 5;
 
-function aprint($val, $txt = null) {
-	echo '<code style="text-align: left; font-size: 8pt;"><pre>';
-	if($txt != null) echo '<b>' . $txt . ':</b> ';
-	print_r($val);
-	echo '</pre></code><br><hr>';
-}
 //aprint($_POST);
 
 function postOrGet($name) {

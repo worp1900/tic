@@ -2,18 +2,34 @@
 	function getScanData($scan_galaxie, $scan_planet) {
 		global $SQL_DBConn;
 
-		$scan = array(	"scan_sektor" => 0,			"scan_sektor_time" => 0,
-				"scan_sektor_prozent" => 0,		"scan_sektor_SVs" => 0,		"scan_sektor_scanner" => "",
-				"scan_geschuetze" => 0,			"scan_geschuetze_time" => 0,
-				"scan_geschuetze_prozent" => 0,		"scan_geschuetze_SVs" => 0,	"scan_geschuetze_scanner" => "",
-				"scan_einheiten" => 0,			"scan_einheiten_time" => 0,
-				"scan_einheiten_prozent" => 0,		"scan_einheiten_SVs" => 0,	"scan_einheiten_scanner" => "",
-				"scan_militaer" => 0,			"scan_militaer_time" => 0,
-				"scan_militaer_prozent" => 0,		"scan_militaer_SVs" => 0,	"scan_militaer_scanner" => "",
-				"scan_elokas" => 0,			"scan_elokas_time" => 0,
-				"scan_sektor_extraktoren_metall" => 0,	"scan_sektor_extraktoren_kristall" => 0,
-				"scan_sektor_asteroiden" => 0,		"scan_sektor_punkte" => 0,
-				"scan_sektor_geschuetze" => 0,		"scan_sektor_schiffe" => 0,
+		$scan = array(	"scan_sektor" => 0,			
+			"scan_sektor_time" => 0,
+				"scan_sektor_prozent" => 0,		
+				"scan_sektor_SVs" => 0,		
+				"scan_sektor_scanner" => "",
+				"scan_geschuetze" => 0,			
+				"scan_geschuetze_time" => 0,
+				"scan_geschuetze_prozent" => 0,		
+				"scan_geschuetze_SVs" => 0,	
+				"scan_geschuetze_scanner" => "",
+				"scan_einheiten" => 0,			
+				"scan_einheiten_time" => 0,
+				"scan_einheiten_prozent" => 0,		
+				"scan_einheiten_SVs" => 0,	
+				"scan_einheiten_scanner" => "",
+				"scan_militaer" => 0,			
+				"scan_militaer_time" => 0,
+				"scan_militaer_prozent" => 0,		
+				"scan_militaer_SVs" => 0,	
+				"scan_militaer_scanner" => "",
+				"scan_elokas" => 0,			
+				"scan_elokas_time" => 0,
+				"scan_sektor_extraktoren_metall" => 0,	
+				"scan_sektor_extraktoren_kristall" => 0,
+				"scan_sektor_asteroiden" => 0,		
+				"scan_sektor_punkte" => 0,
+				"scan_sektor_geschuetze" => 0,		
+				"scan_sektor_schiffe" => 0,
 				"scan_geschuetze_lorbit" => 0,
 				"scan_geschuetze_lraum" => 0,
 				"scan_geschuetze_mraum" => 0,
@@ -154,6 +170,40 @@
 		}
 
 		mysql_free_result($SQL_Result);
+		
+		$scan['blocks'] = array();
+		$sql = "SELECT t, svs, typ FROM gn4scanblock WHERE g='".$scan_galaxie."' AND p='".$scan_planet."' ORDER BY t DESC";
+		$res = tic_mysql_query($sql, $SQL_DBConn);
+		$num = mysql_num_rows($res);
+		
+		for ($k = 0; $k < $num; $k++) {
+			$typ;
+			switch(mysql_result($res, $k, 'typ')) {
+				case 0:
+					$typ = 'Sektor'; break;
+				case 1:
+					$typ = 'Einheiten'; break;
+				case 2:
+					$typ = 'Milit&auml;r'; break;
+				case 3:
+					$typ = 'Gesch&uuml;tze'; break;
+				case 4:
+					$typ = 'Nachrichten'; break;
+				default:
+					$typ = '<i>unknown</i>'; break;
+			}
+
+			$entry = array(
+				'svs' => mysql_result($res, $k, 'svs'),
+				't' => mysql_result($res, $k, 't'),
+				'typ' => $typ
+				);
+			$scan['blocks'][] = $entry;
+		}
+		//echo '<pre><code>'; print_r($scan['blocks']); echo '</code></pre>'; 
+
+		mysql_free_result($res);
+		
 		return $scan;
 	}
 
