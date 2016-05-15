@@ -546,11 +546,11 @@ class GNSimu_Multi
 		//exen den flotten zuweisen
 		for($j = 0;$j < count($this->AttFleets) && $TotalAtt[7] > 0;$j++)
 		{
-			if($this->AttFleets[$j]->TicksToWait > 0 || $this->DeffFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
+			if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
 				continue;
 
 			//bruchteil dieser flotte berechnen
-			$factor = $this->AttFleets[$j]->OldShips[7] / $TotalAtt[7];
+			$factor = $this->AttFleets[$j]->Ships[7] / $TotalAtt[7];
 			$xmexen = round($rmexen * $factor , 0);
 			$xkexen = round($rkexen * $factor , 0);
 
@@ -561,8 +561,14 @@ class GNSimu_Multi
 			aprint($rkexen, 'kexen');
 			aprint($factor, 'factor');
 			*/
-			//aprint($xmexen, 'fleetmexen');
-			//aprint($xkexen, 'fleetkexen');
+			/*
+			aprint(array(
+				'exenm' => $xmexen,
+				'exenk' => $xkexen,
+				'j' => $j,
+				'fleet' => $this->AttFleets[$j]
+			));
+			*/
 
 			// Exen vom bestand abziehen und auch die benutzen Cleps "zerst?en"
 			$this->AttFleets[$j]->Ships[7] -= $xmexen+$xkexen;
@@ -736,10 +742,11 @@ class GNSimu_Multi
 			$color = !$color;
 			echo "<tr class=\"fieldnormal".($color ? "light" : "dark")."\">";
 			echo "<td>".$this->shipdata[$i]['name']."</td>";
-			echo "<td bgcolor='".($color ? '#ccccff' : '#bbbbff')."'>".(isset($attsum->abschuesse[$i]) ? $attsum->abschuesse[$i] : 0)."</td>";
+			echo "<td bgcolor='".($color ? '#ccccff' : '#bbbbff')."'>".(isset($defsum->LostShips[$i]) ? $defsum->LostShips[$i] : 0)."</td>";
 
 			if($i < 9) {
-				echo "<td bgcolor='".($color ? '#ffcccc' : '#ffbbbb')."'>".(isset($deffsum->abschuesse[$i]) ? $deffsum->abschuesse[$i] : 0)."</td>";
+				echo "<td bgcolor='".($color ? '#ffcccc' : '#ffbbbb')."'>".(isset($attsum->LostShips[$i]) ? $attsum->LostShips[$i] : 0)."</td>";
+				
 				for($j = 0; $j < count($this->DeffFleets); $j++) {
 					echo '<td>'.(isset($this->DeffFleets[$j]->LostShips[$i]) ? $this->DeffFleets[$j]->LostShips[$i] : 0).'</td>';
 					echo '<td style="color: #888888;">'.(isset($this->DeffFleets[$j]->abschuesse[$i]) ? $this->DeffFleets[$j]->abschuesse[$i] : 0).'</td>';
