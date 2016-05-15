@@ -296,9 +296,20 @@ for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
 	$f = mysql_result($SQLx_Result, $i2, "flottenr");
 	$g = mysql_result($SQLx_Result, $i2, "galaxie");
 	$p = mysql_result($SQLx_Result, $i2, "planet");
-	$link .= '&g['.($i2+1).']='.$g.'&p['.($i2+1).']='.$p.'&t['.($i2+1).']=a&f['.($i2+1).']='.$f;
+	$freigegeben = mysql_result($SQL_Result, $i, "freigabe");
+	$link .= '&g['.($i2+1).']='.$g.'&p['.($i2+1).']='.$p.'&t['.($i2+1).']=a&f['.($i2+1).']='.$f.'&aufenthalt['.($i2+1).']=5';
 }
-		echo '<a href="main.php?modul=kampf&num_flotten='.$SQLx_Num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'">Zur Kampfsimulation</a>';
+		echo '<br/><a href="main.php?modul=kampf&num_flotten='.$SQLx_Num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'">Zur Kampfsimulation</a>';
+		
+		//newsscans
+		$sql = "SELECT t, genauigkeit FROM gn4scans_news WHERE ziel_g = '".$rg."' AND ziel_p = '".$rp."' ORDER BY t DESC LIMIT 1";
+		$res = tic_mysql_query($sql) or die(tic_mysql_error(__FILE__,__LINE__));
+		$num = mysql_num_rows($res);
+		if($num > 0) {
+			$t = mysql_result($res, 0, 't');
+			$gen = mysql_result($res, 0, 'genauigkeit');
+			echo '<br/><a href="main.php?modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype=news" title="'.$gen.'%"><b>Newsscan</b> '.date('Y-m-d H:i', $t).'</a>';
+		}
 		
         echo '</TD>';
 
@@ -307,7 +318,7 @@ for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
                 if (AttPlanerRights( mysql_result($SQL_Result, $i, 'forallianz'),  mysql_result($SQL_Result, $i, 'formeta'),  mysql_result($SQL_Result, $i, 'forall'), $Benutzer['attplaner'], $Benutzer['ticid'], $Benutzer['allianz']) == true) {
 // Attplaner funktionen
 
-                  if (mysql_result($SQL_Result, $i, "freigabe") == false) {
+                  if ($freigegeben == false) {
                     echo '<a href="./main.php?modul=attplanerlist&lfd='.mysql_result($SQL_Result, $i, "lfd").'&fkt=attfreigabe&action=attplaneradmin2">';
                     echo '<img src="./bilder/attplaner/Ziel_freigabe.gif" width="128" height="25" border="0">';
                     echo '</a><br>';
