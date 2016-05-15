@@ -172,7 +172,7 @@
 if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$rg = $xgala;
 	$rp = $xplanet;
-	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' LIMIT 1";
+	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 1";
 	$res_news = tic_mysql_query($sql);
 	$num_news = mysql_num_rows($res_news);
 	
@@ -230,6 +230,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$count =  mysql_num_rows($SQL_Result);
 	if ( $count == 0 ) {
 		$sql = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($_GET['xgala']) . "' AND p = '" . mysql_real_escape_string($_GET['xplanet']) . "' ORDER BY t DESC LIMIT 1";
+
 		$SQL_Result = tic_mysql_query($sql, $SQL_DBConn);
 		if(mysql_num_rows($SQL_Result) > 0) {
 			$svs = mysql_result($SQL_Result, 0, 'svs');
@@ -409,7 +410,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$sql_block = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 3";
 	$res_blocks = tic_mysql_query($sql_block);
 	$num_blocks = mysql_num_rows($res_blocks);
-	
+	//aprint($sql_block);
 	if($num_blocks == 0) {
 		echo '-';
 	}
@@ -420,7 +421,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		$type = mysql_result($res_blocks, $j, 'typ' );
 		
 		echo date('Y-m-d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
-		switch($typ) {
+		switch($type) {
 			case 0:
 				echo 'S';
 				break;
