@@ -532,10 +532,18 @@ if(postOrGet('compute')) {
 		$gnsimu_m->currentTick++;
 	}
 
-	//aprint($gnsimu_m, 'start');
+	/*
+	aprint(array(
+		'Deff' => $gnsimu_m->DeffFleets,
+		'Att' => $gnsimu_m->AttFleets,
+	), 'start');
+	*/
 	for($i=0;$i<$ticks;$i++) {
 		$gnsimu_m->Tick(false);
-		//aprint($gnsimu_m, 'after tick ' . ($i+1));
+		/*aprint(array(
+			'Deff' => $gnsimu_m->DeffFleets,
+			'Att' => $gnsimu_m->AttFleets,
+		), 'after tick ' . ($i+1));*/
 		$gnsimu_m->PrintStates();
 		//aprint($gnsimu_m);
 		if(postOrGet('preticks')) {
