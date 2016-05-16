@@ -181,7 +181,7 @@ ORDER BY s.allianz_name";
 			echo '<tr><td>'.$ally.'</td><td>&nbsp;'.$blocks.'&nbsp;</td></tr>';
 		}
 	}
-	echo '<tr><td class="menu" colspan="2"><a href="javascript:alert(\'to be implemented\')"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Details</a></td></tr>';
+	echo '<tr><td class="menu" colspan="2"><a href="main.php?modul=scanblocks"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Details</a></td></tr>';
 	echo '</table><td>';
 }
 ?>
