@@ -47,13 +47,16 @@
 			</tr>
 			//-->
 			<tr>
-				<td class="menu"><a href="./main.php?modul=showgalascans&amp;displaytype=0&amp;xgala=<?=$Benutzer['galaxie']?>&amp;xplanet=<?=$Benutzer['planet']?>"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scans-Anzeige</a></td>
+				<td class="menu"><a href="./main.php?modul=showgalascans&amp;displaytype=0&amp;xgala=<?=$Benutzer['galaxie']?>&amp;xplanet=<?=$Benutzer['planet']?>"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scan-Datenbank</a></td>
 			</tr>
 			<!--
 			<tr>
 				<td class="menu"><a href="./main.php?modul=forum&amp;faction=show&amp;falli=0&amp;ftopic=0"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Forum</a></td>
 			</tr>
 			//-->
+			<tr>
+				<td class="menu"><a href="./main.php"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Nachrichten</a></td>
+			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=profil"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Mein Profil</a></td>
 			</tr>
@@ -130,7 +133,7 @@
 				<td class="menu"><a href="./main.php?modul=vag-rechner"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Vag-Rechner</a></td>
 			</tr>
 			<tr>
-				<td class="menu"><a href="./main.php?modul=statistic"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Statistic</a></td>
+				<td class="menu"><a href="./main.php?modul=statistic"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />TIC Statistik</a></td>
 			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=listen"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Listen</a></td>
@@ -164,7 +167,7 @@ ORDER BY s.allianz_name";
 	$res = tic_mysql_query($sql);
 	$num = mysql_num_rows($res);
 	
-	echo '<td><table title="Anzahl erfafasster Scanblocks der letzten '.$time_h.'h." cellspacing="1" style="width:100%;background:#999999;">';
+	echo '<td><table title="Anzahl erfafasster Scanblocks der letzten '.$time_h.'h." cellspacing="1" style="width:100%;background:#000000;">';
 	if($num > 0) {
 		for($i = 0; $i < $num; $i++) {
 			/*$t = mysql_result($res, $i, 't');
@@ -178,7 +181,7 @@ ORDER BY s.allianz_name";
 			$ally = mysql_result($res, $i, 'allianz_name');
 			$blocks = mysql_result($res, $i, 'blocks');
 			
-			echo '<tr><td>'.$ally.'</td><td>&nbsp;'.$blocks.'&nbsp;</td></tr>';
+			echo '<tr><td bgcolor="#aaaaaa">'.$ally.'</td><td bgcolor="#aaaaaa" align="right">&nbsp;'.$blocks.'&nbsp;</td></tr>';
 		}
 	}
 	echo '<tr><td class="menu" colspan="2"><a href="main.php?modul=scanblocks"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Details</a></td></tr>';
