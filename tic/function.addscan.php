@@ -967,7 +967,7 @@ function parseLine( $line_in) {
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
             } // 2 scantyp geschütze
 
-			aprint($zeilen);
+			//aprint($zeilen);
 			if(strpos($zeilen[0], 'Scan Block') !== false) {
 				$datestr = substr(trim($zeilen[0]), 15, 34);
 				$tmp = explode(' ', trim($zeilen[1]));
