@@ -28,4 +28,7 @@
   <tr>
     <td class="fieldnormallight"><a href="?modul=atteinplanen">Neues Att-Ziel erfassen</a></td>
   </tr>
+  <tr>
+    <td class="fieldnormallight"><a href="?modul=scanliste">Scannerliste</a></td>
+  </tr>
 </table>
