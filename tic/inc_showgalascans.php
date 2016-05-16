@@ -4,6 +4,19 @@
   }
 </script>
 <?php
+	function in_array_contains($needle, $haystack) {
+		if(!is_array($haystack) || !$needle)
+			return false;
+		
+		foreach($haystack as $v) {
+			if (strpos($v, $needle) !== false) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	function xformat($number) {
 		if(is_numeric($number))
 			return number_format($number);
@@ -205,22 +218,31 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
 			</tr>
 <?php
+			$highlight = array('Verteidigung', 'Angriff', 'ckzug');
 			
 			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
 			$res_news_entries = tic_mysql_query($sql);
 			$num_news_entries = mysql_num_rows($res_news_entries);
 			
+			$color = true;
 			for($j = 0; $k < $num_news_entries; $k++) {
 				$t = mysql_result($res_news_entries, $k, 't' );
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
+				
+				if(in_array_contains($typ, $highlight)) {
+					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
+				} else {
+					echo $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';
+				}
+
 				?>
-				<tr>
-					<td class="fieldnormallight" valign="top"><?=date('Y-m-d H:i', $t);?> -<?=(round((time()-$t)/60, 0));?>min</td>
-					<td class="fieldnormallight" valign="top" align="left"><?=$typ;?></td>
-					<td class="fieldnormallight" valign="top" align="left" colspan="2"><pre style="font-size: 8pt;"><?=$inhalt;?></pre></td>
+					<td valign="top"><?=date('Y-m-d H:i', $t);?> -<?=(round((time()-$t)/60, 0));?>min</td>
+					<td valign="top" align="left"><?=$typ;?></td>
+					<td valign="top" align="left" colspan="2"><pre style="font-size: 8pt;"><?=$inhalt;?></pre></td>
 				</tr>
 				<?
+				$color = !$color;
 			}
 			
 			mysql_free_result($res_news_entries);
