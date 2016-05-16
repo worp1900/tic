@@ -544,11 +544,17 @@ class GNSimu_Multi
 		$this->Exen_K -= $rkexen;
 
 		//exen den flotten zuweisen
-		for($j = 0;$j < count($this->AttFleets) && $TotalAtt[7] > 0;$j++)
+		for($j = 0;$j < count($this->AttFleets);$j++)
 		{
+			$this->AttFleets[$j]->StolenExenMthisTick = 0;
+			$this->AttFleets[$j]->StolenExenKthisTick = 0;
+			
 			if($this->AttFleets[$j]->TicksToWait > 0 || $this->AttFleets[$j]->TicksToStay < 0 || !$this->AttFleets[$j]->showInSum)
 				continue;
 
+			if($this->AttFleets[$j]->Ships[7] <= 0)
+				continue;
+			
 			//bruchteil dieser flotte berechnen
 			$factor = $this->AttFleets[$j]->Ships[7] / $TotalAtt[7];
 			$xmexen = round($rmexen * $factor , 0);
