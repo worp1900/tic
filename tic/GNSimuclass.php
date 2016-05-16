@@ -337,8 +337,8 @@ class GNSimu_Multi
 			$this->DeffFleets[$i]->OldShips = $this->DeffFleets[$i]->Ships;
 		}
 
-		//aprint($TotalAtt, 'TotalAtt');
-		//aprint($TotalDeff, 'TotalDeff');
+//aprint($TotalAtt, 'TotalAtt');
+//aprint($TotalDeff, 'TotalDeff');
 
 		//Schleife ber alle Schiffe
 		for($i = 0; $i < 14; $i++)
@@ -458,7 +458,10 @@ class GNSimu_Multi
 			}//while strikes
 		}//for schiffstypen
 
-		//aprint($ToDestroyAtt, 'ToDestroyAtt');
+//aprint($ToDestroyAtt, 'ToDestroyAtt');
+//aprint($ToDestroyDeff, 'ToDestroyDeff');
+//aprint($this->DeffFleets);
+
 		//Todel verrechnen
 		for($i = 0;$i < 14;$i++)
 		{
@@ -478,15 +481,17 @@ class GNSimu_Multi
 						'$ToDestroyAtt[$i]' => $ToDestroyAtt[$i],
 						'$t' => $t
 					), 'ToDestroy');*/
-					$this->AttFleets[$j]->LostShips[$i] += $t;
-					$this->AttFleets[$j]->Ships[$i] -= $t;
-					if($this->AttFleets[$j]->Ships[$i] < 0) $this->AttFleets[$j]->Ships[$i] = 0;
 					
-					if($t > 0)
+					if($t > 0) {
+						$this->AttFleets[$j]->LostShips[$i] += $t;
+						$this->AttFleets[$j]->Ships[$i] -= $t;
+						if($this->AttFleets[$j]->Ships[$i] < 0) 
+							$this->AttFleets[$j]->Ships[$i] = 0;
 						$TotalAtt[$i] -= $t;
+					}
 				}
 			}
-			if($TotalDeff[$i] > 0 && $ToDestroyDeff[$i])
+			if($TotalDeff[$i] > 0 && $ToDestroyDeff[$i] > 0)
 			{
 				for($j = 0;$j < count($this->DeffFleets);$j++)
 				{
@@ -511,16 +516,19 @@ class GNSimu_Multi
 						'$t' => $t,
 						'fleet' => $this->DeffFleets[$j],
 					), 'todel deff');*/
-					$this->DeffFleets[$j]->LostShips[$i] += $t;
-					$this->DeffFleets[$j]->Ships[$i] -= $t;
-					if($this->DeffFleets[$j]->Ships[$i] < 0) $this->DeffFleets[$j]->Ships[$i] = 0;
 					
-					if($t > 0)
+					if($t > 0) {
+						$this->DeffFleets[$j]->LostShips[$i] += $t;
+						$this->DeffFleets[$j]->Ships[$i] -= $t;
+						if($this->DeffFleets[$j]->Ships[$i] < 0) 
+							$this->DeffFleets[$j]->Ships[$i] = 0;
 						$TotalDeff[$i] -= $t;
+					}
 				}//for defffleets
 			}//if totaldeff i > 0
 		}//for todel schiffe
 
+//aprint($this->DeffFleets);
 
 		//Dann noch mal eben schnell paar exen klauen
 		//Erstmall ausrechnen, wie viele maximal mitgenommen werden k?nen, bin der Meinung mal Iregndwo im Forum gelesen zu haben, dass Metall- auf- und Kristallexen abgerundet werden
