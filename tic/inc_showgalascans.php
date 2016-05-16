@@ -170,9 +170,16 @@
 	<br />
 <?php
 if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
+	
+	$newsid = null;
+	if(isset($_GET['newsid']) && $_GET['newsid']) {
+		$newsid = $_GET['newsid'];
+	}
+	
 	$rg = $xgala;
 	$rp = $xplanet;
-	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' ORDER BY t DESC LIMIT 1";
+	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "'".($newsid ? ' AND id="'.mysql_real_escape_string($newsid).'"' : '')." ORDER BY t DESC LIMIT 1";
+	//aprint($sql);
 	$res_news = tic_mysql_query($sql);
 	$num_news = mysql_num_rows($res_news);
 	
@@ -365,10 +372,12 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			}
 
 			if ( $rpnext != $rp ) {
+//num archiv
+
 ?>
 	<table width="100%">
 		<tr>
-			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a> - <a href="main.php?modul=kampf&preticks=1&flotten=1&ticks=5&g[0]=<?=$rg;?>&p[0]=<?=$rp;?>&typ[0]=d&g[1]=<?=$Benutzer['galaxie'];?>&p[1]=<?=$Benutzer['planet'];?>&f[1]=0&typ[1]=a&referenz=eintragen&compute=Berechnen">Angriff simulieren</a></td>
+			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a> - <a href="main.php?modul=kampf&preticks=1&flotten=1&ticks=5&g[0]=<?=$rg;?>&p[0]=<?=$rp;?>&typ[0]=d&g[1]=<?=$Benutzer['galaxie'];?>&p[1]=<?=$Benutzer['planet'];?>&f[1]=0&typ[1]=a&referenz=eintragen&compute=Berechnen">Angriff simulieren</a> - <a href="main.php?auto&modul=scanarchiv&xgala=<?php echo $rg; ?>&xplanet=<?php echo $rp; ?>">Archiv</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -457,7 +466,8 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	} else {
 		for($j = 0; $j < $num_news; $j++) {
 			$t = mysql_result($res_news, $j, 't' );
-			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news">' . date('Y-m-d H:i', $t) . '</a><br/>';
+			$newsid = mysql_result($res_news, $j, 'id');
+			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid='.$newsid.'">' . date('Y-m-d H:i', $t) . '</a><br/>';
 		}
 	}
 	mysql_free_result($res_news);
