@@ -143,6 +143,48 @@
 			</tr>
 		</table>
 	</td></tr>
+<?php
+if ($Benutzer['rang'] >= $Rang_GC) {
+?>
+	<tr>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="menutop">Eingefangene Scanblocks</td>
+	</tr>
+<?php
+	$time_h = 36;
+	$sql = "SELECT s.allianz_name, COUNT(*) blocks
+FROM gn4scanblock sb
+LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = sb.sg
+AND s.spieler_planet = sb.sp
+WHERE sb.suspicious = 1 AND sb.t > UNIX_TIMESTAMP(NOW()) - (".$time_h."*60*60)
+GROUP BY s.allianz_name
+ORDER BY s.allianz_name";
+	$res = tic_mysql_query($sql);
+	$num = mysql_num_rows($res);
+	
+	echo '<td><table title="Anzahl erfafasster Scanblocks der letzten '.$time_h.'h." cellspacing="1" style="width:100%;background:#999999;">';
+	if($num > 0) {
+		for($i = 0; $i < $num; $i++) {
+			/*$t = mysql_result($res, $i, 't');
+			$g = mysql_result($res, $i, 'g');
+			$p = mysql_result($res, $i, 'p');
+			$sg = mysql_result($res, $i, 'sg');
+			$sp = mysql_result($res, $i, 'sp');
+			$typ = mysql_result($res, $i, 'typ');
+			
+			echo '<tr><td>'.date('Y-m-d H:i', $t).'</td><td>'.$sg.':'.$sp.'</td><td>'.$g.':'.$p.'</td><td>'.$typ.'</td></tr>';*/
+			$ally = mysql_result($res, $i, 'allianz_name');
+			$blocks = mysql_result($res, $i, 'blocks');
+			
+			echo '<tr><td>'.$ally.'</td><td>&nbsp;'.$blocks.'&nbsp;</td></tr>';
+		}
+	}
+	echo '<tr><td class="menu" colspan="2"><a href="javascript:alert(\'to be implemented\')"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Details</a></td></tr>';
+	echo '</table><td>';
+}
+?>
 </table>
 </div>
 <!-- END: menu.inc.php -->
