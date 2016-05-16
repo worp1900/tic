@@ -150,11 +150,13 @@ $hours = 36;
 		<td>&nbsp;Galaxie&nbsp;</td>
 		<td>&nbsp;Planet&nbsp;</td>
 		<td>&nbsp;Spieler&nbsp;</td>
+		<td colspan="2">&nbsp;Blocks&nbsp;</td>
 		<td colspan="2">&nbsp;Sektor&nbsp;</td>
 		<td colspan="2">&nbsp;Gesch&uuml;tze&nbsp;</td>
 		<td colspan="2">&nbsp;Einheiten&nbsp;</td>
 		<td colspan="2">&nbsp;Milit&auml;r&nbsp;</td>
 		<td colspan="2">&nbsp;Nachrichten&nbsp;</td>
+		<td>&nbsp;Scandb&nbsp;</td>
 	</tr>
 <?php
 
@@ -174,13 +176,21 @@ $hours = 36;
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans1.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t1,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans2.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t2,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans3.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t3,
-			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/-60, 0) t4
+			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/-60, 0) t4,
+			blocks.typ,
+			blocks.svs
 		FROM gn_spieler2 s 
 		LEFT JOIN gn4scans scans0 ON scans0.type = 0 AND scans0.rg = s.spieler_galaxie AND scans0.rp = s.spieler_planet
 		LEFT JOIN gn4scans scans1 ON scans1.type = 1 AND scans1.rg = s.spieler_galaxie AND scans1.rp = s.spieler_planet
 		LEFT JOIN gn4scans scans2 ON scans2.type = 2 AND scans2.rg = s.spieler_galaxie AND scans2.rp = s.spieler_planet
 		LEFT JOIN gn4scans scans3 ON scans3.type = 3 AND scans3.rg = s.spieler_galaxie AND scans3.rp = s.spieler_planet
 		LEFT JOIN (SELECT ziel_g, ziel_p, max(t) t FROM `gn4scans_news` group by ziel_g, ziel_p) scans4 ON scans4.ziel_g = s.spieler_galaxie AND scans4.ziel_p = s.spieler_planet
+		LEFT JOIN (SELECT b1.g, b1.p, b1.svs, b1.typ
+					FROM gn4scanblock b1
+					WHERE b1.t = (SELECT MAX(b2.t)
+								FROM gn4scanblock b2
+								WHERE b2.g = b1.g AND b2.p = b1.p)
+				) blocks ON blocks.g = s.spieler_galaxie AND blocks.p = s.spieler_planet
 		WHERE (".$where.") ORDER BY s.meta, ally, g, p";
 	//aprint($sql);
 
@@ -201,6 +211,19 @@ $hours = 36;
 		$age_m = mysql_result($res, $i, 't2');
 		$age_g = mysql_result($res, $i, 't3');
 		$age_n = mysql_result($res, $i, 't4');
+
+		$block_svs = mysql_result($res, $i, 'svs');
+		$block_typ = mysql_result($res, $i, 'typ');
+		
+		switch($block_typ) {
+			case 0: $block_typ = 'S'; break;
+			case 1: $block_typ = 'E'; break;
+			case 2: $block_typ = 'M'; break;
+			case 3: $block_typ = 'G'; break;
+			case 4: $block_typ = 'N'; break;
+			default:
+				$block_typ = '<i>unknown</i>';
+		}
 		
 //<|S> | ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=einheit|E> ';
@@ -211,22 +234,25 @@ $hours = 36;
 		if($umode)
 			echo '<tr title="Urlaub" bgcolor="#ccaaaa">';
 		else
-			echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
+			echo '<tr id="row'.$i.'" class="fieldnormal'.($color ? 'light' : 'dark').'">';
 		echo '	<td>&nbsp;' . $meta . '&nbsp;</td>';
 		echo '	<td>&nbsp;' . $ally . '&nbsp;</td>';
-		echo '	<td>&nbsp;' . $g . '&nbsp;</td>';
-		echo '	<td>&nbsp;' . $p . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $g . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $p . '&nbsp;</td>';
 		echo '	<td>&nbsp;' . $name . '&nbsp;</td>';
-		echo '	<td>&nbsp;' . $age_s . '&nbsp;</td>';
-		echo '	<td>&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=sektor" target="_blank"><b>Scan S</b></a>&nbsp;</td>';
-		echo '	<td>&nbsp;' . $age_g . '&nbsp;</td>';
-		echo '	<td>&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=gesch" target="_blank"><b>Scan G</b></a>&nbsp;</td>';
-		echo '	<td>&nbsp;' . $age_e . '&nbsp;</td>';
-		echo '	<td>&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=einheit" target="_blank"><b>Scan E</b></a>&nbsp;</td>';
-		echo '	<td>&nbsp;' . $age_m . '&nbsp;</td>';
-		echo '	<td>&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=mili" target="_blank"><b>Scan M</b></a>&nbsp;</td>';
-		echo '	<td>&nbsp;' . $age_n . '&nbsp;</td>';
-		echo '	<td>&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($block_svs) . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $block_typ . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $age_s . '&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=sektor" target="_blank"><b>Scan S</b></a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $age_g . '&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=gesch" target="_blank"><b>Scan G</b></a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $age_e . '&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=einheit" target="_blank"><b>Scan E</b></a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $age_m . '&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=mili" target="_blank"><b>Scan M</b></a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $age_n . '&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
+		echo '	<td align="center"><a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=0">Details</a></td>';
 		echo '</tr>';
 		
 		$color = !$color;
