@@ -15,6 +15,7 @@ $hours = 36;
 		
 		foreach($metas as $v) {
 			$v = trim($v);
+			$v = str_replace('?', '_', $v);
 			if(strlen($v) > 0) {
 				$where .= ' OR meta LIKE "'.mysql_real_escape_string($v).'"';
 			}
@@ -26,6 +27,7 @@ $hours = 36;
 		
 		foreach($allies as $v) {
 			$v = trim($v);
+			$v = str_replace('?', '_', $v);
 			if(strlen($v) > 0) {
 				$where .= ' OR allianz_name LIKE "'.mysql_real_escape_string($v).'"';
 			}
@@ -46,7 +48,7 @@ $hours = 36;
 	$where .= ')';
 
 	$sql = "SELECT spieler_galaxie g, spieler_planet p FROM gn_spieler2 WHERE " . $where;
-	
+
 	$res = tic_mysql_query($sql) or tic_mysql_error(__FILE__, __LINE__);
 	$num = mysql_num_rows($res);
 	
