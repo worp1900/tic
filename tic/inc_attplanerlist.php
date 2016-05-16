@@ -299,7 +299,7 @@ for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
 	$freigegeben = mysql_result($SQL_Result, $i, "freigabe");
 	$link .= '&g['.($i2+1).']='.$g.'&p['.($i2+1).']='.$p.'&t['.($i2+1).']=a&f['.($i2+1).']='.$f.'&aufenthalt['.($i2+1).']=5';
 }
-		echo '<br/><a href="main.php?modul=kampf&num_flotten='.$SQLx_Num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'">Zur Kampfsimulation</a>';
+		echo '<br/><a href="main.php?modul=kampf&num_flotten='.$SQLx_Num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'">&raquo; Zur Kampfsimulation</a>';
 		
 		//newsscans
 		$sql = "SELECT t, genauigkeit FROM gn4scans_news WHERE ziel_g = '".$rg."' AND ziel_p = '".$rp."' ORDER BY t DESC LIMIT 1";
@@ -308,7 +308,7 @@ for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
 		if($num > 0) {
 			$t = mysql_result($res, 0, 't');
 			$gen = mysql_result($res, 0, 'genauigkeit');
-			echo '<br/><a href="main.php?modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype=news" title="'.$gen.'%"><b>Newsscan</b> '.date('Y-m-d H:i', $t).'</a>';
+			echo '<br/><a href="main.php?modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype=news" title="'.$gen.'%">&raquo; <b>Newsscan</b> '.date('Y-m-d H:i', $t).'</a>';
 		}
 		
         echo '</TD>';
