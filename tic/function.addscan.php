@@ -967,6 +967,50 @@ function parseLine( $line_in) {
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
             } // 2 scantyp geschütze
 
+			aprint($zeilen);
+			if(strpos($zeilen[0], 'Scan Block') !== false) {
+				$datestr = substr(trim($zeilen[0]), 15, 34);
+				$tmp = explode(' ', trim($zeilen[1]));
+				$koords = explode(':', $tmp[0]);
+				$typ = $tmp[4];
+
+				/*
+				aprint(array(
+					'tstr' => $datestr,
+					'koords' => $koords,
+					'vs' => array($Benutzer['galaxie'], $Benutzer['planet']),
+					'typ' => $typ
+				));
+				*/
+				
+				if(strpos($typ, "Sektor") !== false) {
+					$typ = 0;
+				} else if(strpos($typ, "Einheiten") !== false) {
+					$typ = 1;
+				} else if(strpos($typ, "Milit") !== false) {
+					$typ = 2;
+				} else if(strpos($typ, "tz") !== false) {
+					$typ = 3;
+				} else if(strpos($typ, "Nachrichten") !== false) {
+					$typ = 4;
+				}else {
+					$typ = -1;
+				}
+				
+				$sql = 'INSERT INTO `gn4scanblock` (
+						g, p, t, svs, sg, sp, sname, typ, suspicious
+					) SELECT 
+						"'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", UNIX_TIMESTAMP(STR_TO_DATE("'.$datestr.'","%d. %m %Y - %H %i")), NULL, "'.$koords[0].'", "'.$koords[1].'", "'.$Benutzer['name'].'", '.$typ.', 1
+					FROM DUAL
+					WHERE NOT EXISTS (
+						SELECT * FROM gn4scanblock WHERE g = "'.$Benutzer['galaxie'].'" AND p = "'.$Benutzer['planet'].'" AND sg = "'.$koords[0].'" AND sp = "'.$koords[1].'" AND t = UNIX_TIMESTAMP(STR_TO_DATE("'.$datestr.'","%d. %m %Y - %H %i")) AND typ = "'.$typ.'") LIMIT 1;';
+
+				//aprint($sql);
+
+				tic_mysql_query($sql) or tic_mysql_error(__FILE__, __LINE__);
+				
+			}
+			
 			if($scan_typ == 'Newsscan') {
 				unset($text_in);
 				function aprint($var) {

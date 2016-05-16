@@ -75,6 +75,7 @@
                       <input type="submit" name="manuell" value="Manuell erfassen" />
                     </form>
                   </td>
+				</tr>
                 <tr>
                   <td class="datatablehead" align="center">Sektor-Eingabe &quot;von Hand&quot;</td>
                 </tr>
