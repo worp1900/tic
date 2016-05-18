@@ -13,7 +13,7 @@
 	#                                                        #
 	##########################################################
 */
-//	error_reporting(E_ALL); // zu testzwecken einschalten
+	//error_reporting(E_ALL); // zu testzwecken einschalten
 	ob_start("ob_gzhandler");
 
 	//header("Content-Type: text/html;charset=UTF-8");
@@ -270,16 +270,5 @@
 			</tr></table>
 //-->
 		</div></div></div></div>
-<?
-	if ($_REQUEST['autoclose'] == "now") {
-?>
-	<script language="javascript" type="text/javascript">
-	<!--
-	window.close();
-	-->
-	</script>
-<?
-	}
-?>
 	</body>
 </html>
