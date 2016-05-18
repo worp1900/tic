@@ -288,7 +288,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			echo '<b><font color="red">Scanblock ' . $type . ' mit ' . $svs . ' SVS!</font></b><br/>';
 		}
 
-		echo '<font color="#800000" size="-1"><b>Sorry - Keine Scans vorhanden.</b></font>';
+		echo '<font color="#800000" size="-1"><b>Sorry - Keine Scans vorhanden. Vielleicht im <a href="main.php?auto&modul=scanarchiv&xgala='.$_GET['xgala'].'&xplanet='.$_GET['xplanet'].'">&raquo; Archiv</a>.</b></font>';
 		return;
 	} else {
 		// all
@@ -424,7 +424,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 <?php
 	$sektor = '00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
 	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a."\\n";
-	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Geschütze: 07,01'.$d."\\n";
+	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Gesch\FCtze: 07,01'.$d."\\n";
 	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke."\\n";
 	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit;
 
@@ -449,6 +449,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	for($j = 0; $j < $num_blocks; $j++) {
 		$t = mysql_result($res_blocks, $j, 't' );
 		$svs = mysql_result($res_blocks, $j, 'svs' );
+		if(!$svs) $svs = '?';
 		$type = mysql_result($res_blocks, $j, 'typ' );
 		
 		echo date('Y-m-d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
@@ -503,7 +504,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>SR</b></td>
 			<td class="fieldnormaldark"><b>AJ</b></td>
 <?php
-	$gscan = '00,10Geschützscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$gscan = '00,10Gesch\FCtzscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
 	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr."\\n";
 	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj."\\n";
 	$gscan = $gscan.	'00,01Datum: 07,01'.$gzeit;
@@ -511,11 +512,11 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$clepkill = 0;
 	$clepkill += floor($aj * 0.32);
 	$clepkill += floor($lo * 1.28);
-	$gscan_slack = '*Geschütze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
+	$gscan_slack = '*Gesch\FCtze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
 	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . '\\nMR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . '\\nAJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
 ?>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Geschützscan</a>';?></td>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Geschützscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Gesch\FCtzscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Gesch\FCtzscan</a>';?></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
@@ -527,18 +528,18 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $sr; ?></td>
 			<td class="fieldnormallight"><?php echo $aj; ?></td>
 <?php
-	$MiliH = '00,10Militärscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$MiliH = '00,10Milit\E4rscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
 	$Orbit = 		'00,1Orbit: 07,01'.$ja0.' 00,1Leo 07,01'.$bo0.' 00,1Aquilae 07,01'.$fr0.' 00,1Fornax 07,01'.$ze0.' 00,1Draco 07,01'.$kr0.' 00,1Goron 07,01'.$sl0.' 00,1Pentalin 07,01'.$tr0.' 00,1Zenit 07,01'.$ka0.' 00,1Cleptor 07,01'.$ca0.' 00,1Cancri'."\\n";
 	$Flotte1 = 		'00,01Flotte1: 07,01'.$ja1.' 00,01Leo 07,01'.$bo1.' 00,01Aquilae 07,01'.$fr1.' 00,01Fornax 07,01'.$ze1.' 00,01Draco 07,01'.$kr1.' 00,01Goron 07,01'.$sl1.' 00,01Pentalin 07,01'.$tr1.' 00,01Zenit 07,01'.$ka1.' 00,01Cleptor 07,01'.$ca1.' 00,01Cancri'."\\n";
 	$Flotte2 = 		'00,01Flotte2: 07,01'.$ja2.' 00,01Leo 07,01'.$bo2.' 00,01Aquilae 07,01'.$fr2.' 00,01Fornax 07,01'.$ze2.' 00,01Draco 07,01'.$kr2.' 00,01Goron 07,01'.$sl2.' 00,01Pentalin 07,01'.$tr2.' 00,01Zenit 07,01'.$ka2.' 00,01Cleptor 07,01'.$ca2.' 00,01Cancri'."\\n";
 	$MiliF = 		'00,01Datum: 07,01'.$mzeit;
 
-	$mili_slack = '*Militär* (' . $svs_m . 'SVS, ' . $mgen . '%, ' . $mzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2\\nJä   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . '\\nBo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . '\\nFr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . '\\nZe:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . '\\nKr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . '\\nSc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . '\\nTr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . '\\nCl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . '\\nCa:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
+	$mili_slack = '*Milit\E4r* (' . $svs_m . 'SVS, ' . $mgen . '%, ' . $mzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
+	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2\\nJ\E4   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . '\\nBo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . '\\nFr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . '\\nZe:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . '\\nKr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . '\\nSc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . '\\nTr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . '\\nCl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . '\\nCa:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
 	
 	if($mzeit === '-') {
 		$mili_slack = '*Einheiten* (' . $svs_e . 'SVS, ' . $ugen . '%, ' . $uzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-		$mili_slack .= '```Jäger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . '\\nFregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . '\\nKreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . '\\nTräger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . '\\nCancs:   ' . nformat($ca, 7) . '```';
+		$mili_slack .= '```J\E4ger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . '\\nFregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . '\\nKreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . '\\nTr\E4ger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . '\\nCancs:   ' . nformat($ca, 7) . '```';
 	}
 	
 ?>
