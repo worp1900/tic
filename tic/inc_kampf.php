@@ -57,7 +57,7 @@ if(postOrGet('referenz')) {
 		if(!$g[$i] || !$p[$i]) {
 			continue;
 		}
-		
+
 		$mysql_senden[0] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, me, ke FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="0" LIMIT 1;';
 		$mysql_senden[1] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="1" LIMIT 1;';
 		$mysql_senden[2] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, glo, glr, gmr, gsr, ga FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="3" LIMIT 1;';
@@ -223,7 +223,7 @@ function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno
 
 	$fleet->atter_exenM = $dataRow[14] ? $dataRow[14] : 0;
 	$fleet->atter_exenK = $dataRow[15] ? $dataRow[15] : 0;
-	
+
 	//aprint($fleet);
 	return $fleet;
 }
@@ -259,7 +259,7 @@ if(postOrGet('compute')) {
 }
 
 echo '<a name="oben"></a><center>';
-echo '<h2>GN-Kampfsimulator v1.3</h2><p>Bitte beaeugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler!<br/>Die Bergungsressourcen aus Vorticks werden ggf. noch falsch berechnet - testet das gerne.<br/>Ferner zaehlt derzeit noch nur die orbitale erste Flotte Bergungsmaessig zum eigentlichen Verteidiger.<br/>Danke. /dv</p>';
+echo '<h2>GN-Kampfsimulator v1.3</h2><p>Die Endsummen sind derzeit teilweise falsch. Bitte beaeugt die Ergebnisse des Simulators kritisch und meldet unbedingt vermeintliche Fehler!<br/>Die Bergungsressourcen werden teilweise noch falsch berechnet.<br/>Ferner zaehlt derzeit noch nur die orbitale erste Flotte Bergungsmaessig zum eigentlichen Verteidiger.<br/>Danke. /dv</p>';
 echo '<form action="./main.php?modul=kampf" method="post">';
 echo '<input type="hidden" name="modul" value="kampf"/>';
 echo 'Anzahl Flotten: <input tabindex="1" type="text" size="4" maxlength="4" name="num_flotten" value="'.$num_flotten.'" /> <input tabindex="2" type="submit" value="W&auml;hlen" /><br />';
@@ -515,7 +515,7 @@ if($ticks<1)
 if(postOrGet('compute')) {
 	//sort gnsimu-
 	$gnsimu_m->sortFleets();
-	
+
 	if(postOrGet('preticks')) {
 		for($i = 0; $i < 2; $i++) {
 			//aprint('', 'before pre gunticks');
@@ -556,7 +556,7 @@ if(postOrGet('compute')) {
 		}
 		$gnsimu_m->currentTick++;
 	}
-
+	$gnsimu_m->finalize();
     $gnsimu_m->PrintOverView();
 
 	echo '<div style="text-align: right;"><a href="#oben">&raquo; nach oben</a></div>';
