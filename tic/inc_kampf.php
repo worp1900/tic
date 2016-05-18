@@ -363,7 +363,7 @@ if(count($usedscans) > 0) {
 
 		for($j = 1; $j <= 20; $j++) {
 			if(!isset($aufenthalt[$i]) || $aufenthalt[$i] == 0) {
-				$aufenthalt[$i] = ($typ[$j] == 'a') ? 5 : 20;
+				$aufenthalt[$i] = (!$typ[$j] && $j > 0 || $typ[$j] == 'a') ? 5 : 20;
 			}
 			echo '<option value="'.$j.'"'.(($aufenthalt[$i] == $j) ? ' selected="selected"' : '').'>'.$j.'</option>';
 		}
@@ -556,7 +556,7 @@ if(postOrGet('compute')) {
 		}
 		$gnsimu_m->currentTick++;
 	}
-	$gnsimu_m->finalize();
+
     $gnsimu_m->PrintOverView();
 
 	echo '<div style="text-align: right;"><a href="#oben">&raquo; nach oben</a></div>';
