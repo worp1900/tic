@@ -194,12 +194,11 @@ if(!$xgala || !$xplanet) {
 				</tr>
 <?php
 	$sql_e = "SELECT t, gen, erfasser_svs, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans_history WHERE rg = '".mysql_real_escape_string($xgala)."' AND rp = '".mysql_real_escape_string($xplanet)."' AND type = 1 ORDER BY t DESC LIMIT " . $limit;
-
 	$res_e = tic_mysql_query($sql_e) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_e = mysql_num_rows($res_e);
 	
 	$color = true;
-	for($i = 0; $i < $num_g; $i++) {
+	for($i = 0; $i < $num_e; $i++) {
 		$row = mysql_fetch_row($res_e);
 		$color = !$color;
 		
