@@ -1013,11 +1013,6 @@ function parseLine( $line_in) {
 			
 			if($scan_typ == 'Newsscan') {
 				unset($text_in);
-				function aprint($var) {
-					echo '<pre></code>';
-					print_r($var);
-					echo '</code></pre>';
-				}
 
 				//prepare data
 				$to_insert = array(	'erfasser_name'	=> $Benutzer['name'],

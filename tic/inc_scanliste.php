@@ -67,7 +67,7 @@ $hours = 36;
 <input type="hidden" name="modul" value="scanliste"/>
 <table width="100%">
 	<tr class="datatablehead">
-		<td colspan="4">Metas</td>
+		<td colspan="4">&nbsp;Metas&nbsp;</td>
 	</tr>
 	<tr class="fieldnormallight">
 		<td>
@@ -90,7 +90,7 @@ $hours = 36;
 		<td align="center"><input type="button" onclick="javascript:document.getElementById('meta').value=''" value="del"/></td>
 	</tr>
 	<tr class="datatablehead">
-		<td colspan="4">Allianzen</td>
+		<td colspan="4">&nbsp;Allianzen&nbsp;</td>
 	</tr>
 	<tr class="fieldnormallight">
 		<td>
@@ -102,7 +102,7 @@ $hours = 36;
 	for($i = 0; $i < $num; $i++) {
 		$meta = mysql_result($res, $i, 'm');
 		$ally = mysql_result($res, $i, 'a');
-		echo '<option value="'.$ally.'">'.$ally.' - '.$meta.'</option>';
+		echo '<option value="'.$ally.'">'.$ally.($meta ? ' - '.$meta : '').'</option>';
 	}
 ?>
 			</select>
@@ -114,7 +114,7 @@ $hours = 36;
 		<td align="center"><input type="button" onclick="javascript:document.getElementById('allianz').value=''" value="del"/></td>
 	</tr>
 	<tr class="datatablehead">
-		<td colspan="4">Galaxien</td>
+		<td colspan="4">&nbsp;Galaxien&nbsp;</td>
 	</tr>
 	<tr class="fieldnormallight">
 		<td>
@@ -126,7 +126,7 @@ $hours = 36;
 	for($i = 0; $i < $num; $i++) {
 		$gal = mysql_result($res, $i, 'g');
 		$ally = mysql_result($res, $i, 'a');
-		echo '<option value="'.$gal.'">'.$gal.' - '.$ally.'</option>';
+		echo '<option value="'.$gal.'">'.$gal. ($ally ? ' - '.$ally : '').'</option>';
 	}
 ?>
 			</select>
@@ -145,18 +145,18 @@ $hours = 36;
 <br/>
 <table width="100%">
 	<tr class="datatablehead">
-		<td>&nbsp;Meta&nbsp;</td>
-		<td>&nbsp;Allianz&nbsp;</td>
-		<td>&nbsp;Galaxie&nbsp;</td>
-		<td>&nbsp;Planet&nbsp;</td>
-		<td>&nbsp;Spieler&nbsp;</td>
-		<td colspan="2">&nbsp;Blocks&nbsp;</td>
-		<td colspan="2">&nbsp;Sektor&nbsp;</td>
-		<td colspan="2">&nbsp;Gesch&uuml;tze&nbsp;</td>
-		<td colspan="2">&nbsp;Einheiten&nbsp;</td>
-		<td colspan="2">&nbsp;Milit&auml;r&nbsp;</td>
-		<td colspan="2">&nbsp;Nachrichten&nbsp;</td>
-		<td>&nbsp;Scandb&nbsp;</td>
+		<td align="center">&nbsp;Meta&nbsp;</td>
+		<td align="center">&nbsp;Allianz&nbsp;</td>
+		<td align="center">&nbsp;Galaxie&nbsp;</td>
+		<td align="center">&nbsp;Planet&nbsp;</td>
+		<td align="center">&nbsp;Spieler&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Blocks&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Sektor&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Gesch&uuml;tze&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Einheiten&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Milit&auml;r&nbsp;</td>
+		<td align="center" colspan="2">&nbsp;Nachrichten&nbsp;</td>
+		<td align="center">&nbsp;Scandb&nbsp;</td>
 	</tr>
 <?php
 
@@ -172,11 +172,11 @@ $hours = 36;
 			s.spieler_planet p, 
 			s.spieler_name name, 
 			s.spieler_urlaub,
-			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans0.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t0,
-			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans1.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t1,
-			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans2.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t2,
-			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans3.zeit, '%H:%i %d.%m.%Y')))/-60, 0) t3,
-			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/-60, 0) t4,
+			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans0.zeit, '%H:%i %d.%m.%Y')))/60, 0) t0,
+			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans1.zeit, '%H:%i %d.%m.%Y')))/60, 0) t1,
+			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans2.zeit, '%H:%i %d.%m.%Y')))/60, 0) t2,
+			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans3.zeit, '%H:%i %d.%m.%Y')))/60, 0) t3,
+			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/60, 0) t4,
 			blocks.typ,
 			blocks.svs
 		FROM gn_spieler2 s 
@@ -225,6 +225,9 @@ $hours = 36;
 				$block_typ = '<i>unknown</i>';
 		}
 		
+		if(!$block_svs)
+			$block_typ = '';
+		
 //<|S> | ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=einheit|E> ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=mili|M> | ';
@@ -242,15 +245,15 @@ $hours = 36;
 		echo '	<td>&nbsp;' . $name . '&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ZahlZuText($block_svs) . '&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . $block_typ . '&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $age_s . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($age_s) . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=sektor" target="_blank"><b>Scan S</b></a>&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $age_g . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($age_g) . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=gesch" target="_blank"><b>Scan G</b></a>&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $age_e . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($age_e) . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=einheit" target="_blank"><b>Scan E</b></a>&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $age_m . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($age_m) . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=mili" target="_blank"><b>Scan M</b></a>&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $age_n . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ZahlZuText($age_n) . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
 		echo '	<td align="center"><a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=0">Details</a></td>';
 		echo '</tr>';

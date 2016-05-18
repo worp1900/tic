@@ -61,18 +61,18 @@ $hours = 36;
 		}
 		
 		echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
-		echo '	<td>' . $meta1 . '</td>';
-		echo '	<td>' . $ally1 . '</td>';
-		echo '	<td>' . $g1 . '</td>';
-		echo '	<td>' . $p1 . '</td>';
-		echo '	<td>' . $name1 . '</td>';
-		echo '	<td>' . $meta2 . '</td>';
-		echo '	<td>' . $ally2 . '</td>';
-		echo '	<td>' . $g2 . '</td>';
-		echo '	<td>' . $p2 . '</td>';
-		echo '	<td>' . $name2 . '</td>';
-		echo '	<td>' . $typ . '</td>';
-		echo '	<td>' . date('Y-m-d H:i', $t) . '</td>';
+		echo '	<td>&nbsp;' . $meta1 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $ally1 . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $g1 . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $p1 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $name1 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $meta2 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $ally2 . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $g2 . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $p2 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $name2 . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . $typ . '&nbsp;</td>';
+		echo '	<td>&nbsp;' . date('Y-m-d H:i', $t) . '&nbsp;</td>';
 		echo '</tr>';
 		
 		$color = !$color;
