@@ -7,13 +7,13 @@
 	function in_array_contains($needle, $haystack) {
 		if(!is_array($haystack) || !$needle)
 			return false;
-		
+
 		foreach($haystack as $v) {
 			if (strpos($v, $needle) !== false) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -183,19 +183,19 @@
 	<br />
 <?php
 if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
-	
+
 	$newsid = null;
 	if(isset($_GET['newsid']) && $_GET['newsid']) {
 		$newsid = $_GET['newsid'];
 	}
-	
+
 	$rg = $xgala;
 	$rp = $xplanet;
 	$sql = "select id, t, genauigkeit, erfasser_svs from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "'".($newsid ? ' AND id="'.mysql_real_escape_string($newsid).'"' : '')." ORDER BY t DESC LIMIT 1";
 	//aprint($sql);
 	$res_news = tic_mysql_query($sql);
 	$num_news = mysql_num_rows($res_news);
-	
+
 	if($num_news == 0) {
 		echo '<font color="#800000" size="-1"><b>Sorry - Keine News-Scans vorhanden.</b></font>';
 	} else {
@@ -219,17 +219,17 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			</tr>
 <?php
 			$highlight = array('Verteidigung', 'Angriff', 'ckzug');
-			
+
 			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
 			$res_news_entries = tic_mysql_query($sql);
 			$num_news_entries = mysql_num_rows($res_news_entries);
-			
+
 			$color = true;
 			for($j = 0; $k < $num_news_entries; $k++) {
 				$t = mysql_result($res_news_entries, $k, 't' );
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
-				
+
 				if(in_array_contains($typ, $highlight)) {
 					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
 				} else {
@@ -244,7 +244,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<?
 				$color = !$color;
 			}
-			
+
 			mysql_free_result($res_news_entries);
 		}
 ?>
@@ -252,7 +252,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 <?php
 	}
 	mysql_free_result($res_news);
-	
+
 } else {
 	//echo "sql=".$sql;
 	$SQL_Result = tic_mysql_query( $sql, $SQL_DBConn );
@@ -264,7 +264,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		if(mysql_num_rows($SQL_Result) > 0) {
 			$svs = mysql_result($SQL_Result, 0, 'svs');
 			$type = mysql_result($SQL_Result, 0, 'typ');
-			
+
 			switch($type) {
 				case 0:
 					$type = 'Sektor';
@@ -406,7 +406,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>MetExen</b></td>
 			<td class="fieldnormaldark"><b>KrisExen</b></td>
 			<td class="fieldnormaldark"><b>Schiffe</b></td>
-			<td class="fieldnormaldark"><b>Deffensiv</b></td>
+			<td class="fieldnormaldark"><b>Defensiv</b></td>
 			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for IRC</b></td>
 			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for Slack</b></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
@@ -445,13 +445,13 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	if($num_blocks == 0) {
 		echo '-';
 	}
-	
+
 	for($j = 0; $j < $num_blocks; $j++) {
 		$t = mysql_result($res_blocks, $j, 't' );
 		$svs = mysql_result($res_blocks, $j, 'svs' );
 		if(!$svs) $svs = '?';
 		$type = mysql_result($res_blocks, $j, 'typ' );
-		
+
 		echo date('Y-m-d H:i', $t) . ":\n  <b>" . $svs . "</b> SVS\n  Typ ";
 		switch($type) {
 			case 0:
@@ -483,7 +483,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$sql = "select * from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "'";
 	$res_news = tic_mysql_query($sql);
 	$num_news = mysql_num_rows($res_news);
-	
+
 	if($num_news == 0) {
 		echo '-';
 	} else {
@@ -494,7 +494,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		}
 	}
 	mysql_free_result($res_news);
-?>			
+?>
 			</td>
 		</tr>
 		<tr>
@@ -504,19 +504,19 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>SR</b></td>
 			<td class="fieldnormaldark"><b>AJ</b></td>
 <?php
-	$gscan = '00,10Gesch\FCtzscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
+	$gscan = '00,10Geschützscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
 	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr."\\n";
 	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj."\\n";
 	$gscan = $gscan.	'00,01Datum: 07,01'.$gzeit;
-	
+
 	$clepkill = 0;
 	$clepkill += floor($aj * 0.32);
 	$clepkill += floor($lo * 1.28);
-	$gscan_slack = '*Gesch\FCtze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
+	$gscan_slack = '*Geschütze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
 	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . '\\nMR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . '\\nAJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
 ?>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Gesch\FCtzscan</a>';?></td>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Gesch\FCtzscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Gesch&uuml;tzscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Gesch&uuml;tzscan</a>';?></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
@@ -536,12 +536,12 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 
 	$mili_slack = '*Milit\E4r* (' . $svs_m . 'SVS, ' . $mgen . '%, ' . $mzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
 	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2\\nJ\E4   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . '\\nBo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . '\\nFr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . '\\nZe:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . '\\nKr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . '\\nSc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . '\\nTr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . '\\nCl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . '\\nCa:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
-	
+
 	if($mzeit === '-') {
 		$mili_slack = '*Einheiten* (' . $svs_e . 'SVS, ' . $ugen . '%, ' . $uzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
 		$mili_slack .= '```J\E4ger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . '\\nFregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . '\\nKreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . '\\nTr\E4ger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . '\\nCancs:   ' . nformat($ca, 7) . '```';
 	}
-	
+
 ?>
 			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF.'\')" >Milit&auml;rscan</a>';?></td>
 			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $mili_slack . '\')">Milit&auml;rscan</a>';?></td>
