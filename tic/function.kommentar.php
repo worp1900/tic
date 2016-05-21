@@ -9,6 +9,7 @@
 		$num = mysql_num_rows(tic_mysql_query($sql, __FILE__, __LINE__));
  
 		if($Benutzer['rang'] >= $Rang_GC  || $num > 0) {
+			LogAction("Flottenkommentar: id='" . $_GET['del'] . "' gelöscht.");
 			$sql = "DELETE FROM gn4flottenbewegungen_kommentare WHERE id = '" . mysql_real_escape_string($_GET['del']) . "'";
 			//aprint($sql);
 			tic_mysql_query($sql, __FILE__, __LINE__);

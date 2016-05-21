@@ -210,7 +210,7 @@
 		//kommentare
 		$dsp .= "			<td bgcolor=\"".$htmlstyle['hell'.$farb_zusatz]."\">\n";
 
-		$comments_sql = "SELECT k.erfasser_g, k.erfasser_p, k.t, k.kommentar, u.name FROM gn4flottenbewegungen_kommentare k
+		$comments_sql = "SELECT k.id, k.erfasser_g, k.erfasser_p, k.t, k.kommentar, u.name FROM gn4flottenbewegungen_kommentare k
 left join gn4gnuser u on u.gala = k.erfasser_g AND u.planet = k.erfasser_p
 WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $koord_g . "' AND k.p = '" . $koord_p . "' ORDER BY k.t DESC";
 		$comments = tic_mysql_query($comments_sql, $SQL_DBConn); // or error("Error while bilding 'taktik' (step 2).", ERROR_SQL, false);
@@ -220,6 +220,7 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $koord_g . "' AND k.
 			$dsp .= '<table>';
 			for ($i = 0; $i < $comments_num; $i++) {
 				$t = mysql_result($comments, $i, 't');
+				$id = mysql_result($comments, $i, 'id');
 				$text = mysql_result($comments, $i, 'kommentar');
 				$erfasser_g = mysql_result($comments, $i, 'erfasser_g');
 				$erfasser_p = mysql_result($comments, $i, 'erfasser_p');
