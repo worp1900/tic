@@ -868,22 +868,23 @@ aprint(array(
 
 		//att
 		$i = 0;
-		foreach($this->AttFleets as $k=>$v) {
-			$key = $this->getFleetKey($v->g, $v->p, $i);
+		if(is_array($this->AttFleets)) {
+			foreach($this->AttFleets as $k=>$v) {
+				$key = $this->getFleetKey($v->g, $v->p, $i);
 
-			$this->playerFleetAtt[$key]['fleetids'][] = $k;
-			$this->playerFleetAtt[$key]['type'][] = 'a';
-			$this->playerFleetAtt[$key]['external'][] = true;
+				$this->playerFleetAtt[$key]['fleetids'][] = $k;
+				$this->playerFleetAtt[$key]['type'][] = 'a';
+				$this->playerFleetAtt[$key]['external'][] = true;
 
-			$this->AttFleets[$k]->extern = true;
+				$this->AttFleets[$k]->extern = true;
+			}
+
+			//create actual sort order
+			ksort($this->playerFleetAtt);
+			foreach($this->playerFleetAtt as $v)
+				foreach($v['fleetids'] as $fid)
+					$orderAtt[] = $fid;
 		}
-
-		//create actual sort order
-		ksort($this->playerFleetAtt);
-		foreach($this->playerFleetAtt as $v)
-			foreach($v['fleetids'] as $fid)
-				$orderAtt[] = $fid;
-
 
 		//debug
 		/*
