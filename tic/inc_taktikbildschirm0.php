@@ -221,9 +221,16 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $koord_g . "' AND k.
 			for ($i = 0; $i < $comments_num; $i++) {
 				$t = mysql_result($comments, $i, 't');
 				$text = mysql_result($comments, $i, 'kommentar');
-				$erfasser = mysql_result($comments, $i, 'name') . ' (' . mysql_result($comments, $i, 'erfasser_g') . ':' . mysql_result($comments, $i, 'erfasser_p') . ')';
+				$erfasser_g = mysql_result($comments, $i, 'erfasser_g');
+				$erfasser_p = mysql_result($comments, $i, 'erfasser_p');
+				$erfasser = mysql_result($comments, $i, 'name') . ' (' . $erfasser_g . ':' . $erfasser_p . ')';
 				
-				$dsp .= '<tr><td valign="top" bgcolor="'.$htmlstyle['dunkel'.$farb_zusatz].'" align="right">' . round(($t - time()) / 60, 0) . '</td><td style="font-size: 8pt;">' . $erfasser . '<br/><span style="font-size: 7pt;">' . str_replace("\n", "<br/>", $text) . '</span></td></tr>';
+				$dsp .= '<tr><td valign="top" bgcolor="'.$htmlstyle['dunkel'.$farb_zusatz].'" align="right">' . round(($t - time()) / 60, 0) . '</td>';
+				$dsp .= '<td style="font-size: 8pt;">' . $erfasser . ' ';
+				if($Benutzer['rang'] >= $Rang_GC || $erfasser_g == $Benutzer['galaxie'] && $erfasser_p == $Benutzer['planet']) {
+					$dsp .= '<a href="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar&del=' . $id . '" title="Löschen" onclick="return confirm(\'Bist Du Dir sicher?\')">[X]</a><br/>';
+				}
+				$dsp .= '<span style="font-size: 7pt;">' . str_replace("\n", "<br/>", $text) . '</span></td></tr>';
 			}
 			$dsp .= '</table>';
 		} else {

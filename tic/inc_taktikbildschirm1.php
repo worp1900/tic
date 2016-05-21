@@ -335,7 +335,7 @@
 
 		//kommentare
 		$dsp .= "			<td class=\"field".$farb_zusatz."ligtht\">\n";
-		$comments_sql = "SELECT k.erfasser_g, k.erfasser_p, k.t, k.kommentar, u.name FROM gn4flottenbewegungen_kommentare k
+		$comments_sql = "SELECT k.id, k.erfasser_g, k.erfasser_p, k.t, k.kommentar, u.name FROM gn4flottenbewegungen_kommentare k
 left join gn4gnuser u on u.gala = k.erfasser_g AND u.planet = k.erfasser_p
 WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p = '" . $user_p . "' ORDER BY k.t DESC";
 		
@@ -347,11 +347,19 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p
 		if($comments_num > 0) {
 			$dsp .= '<table>';
 			for ($i = 0; $i < $comments_num; $i++) {
+				$id = mysql_result($comments, $i, 'id');
 				$t = mysql_result($comments, $i, 't');
 				$text = mysql_result($comments, $i, 'kommentar');
-				$erfasser = mysql_result($comments, $i, 'name') . ' (' . mysql_result($comments, $i, 'erfasser_g') . ':' . mysql_result($comments, $i, 'erfasser_p') . ')';
+				$erfasser_g = mysql_result($comments, $i, 'erfasser_g');
+				$erfasser_p = mysql_result($comments, $i, 'erfasser_p');
+				$erfasser = mysql_result($comments, $i, 'name') . ' (' . $erfasser_g . ':' . $erfasser_p . ')';
 				
-				$dsp .= '<tr><td style="font-size: 8pt;" valign="top" align="right">' . round(($t - time()) / 60, 0) . '</td><td>' . $erfasser . '<br/><span style="font-size: 7pt;">' . str_replace("\n", "<br/>", $text) . '</span></td></tr>';
+				$dsp .= '<tr><td style="font-size: 8pt;" valign="top" align="right">' . round(($t - time()) / 60, 0) . '</td>';
+				$dsp .= '<td>' . $erfasser . ' ';
+				if($Benutzer['rang'] >= $Rang_GC || $erfasser_g == $Benutzer['galaxie'] && $erfasser_p == $Benutzer['planet']) {
+					$dsp .= '<a href="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar&del=' . $id . '" title="Löschen" onclick="return confirm(\'Bist Du Dir sicher?\')">[X]</a><br/>';
+				}
+				$dsp .= '<span style="font-size: 7pt;">' . str_replace("\n", "<br/>", $text) . '</span></td></tr>';
 			}
 			$dsp .= '</table>';
 		} else {
