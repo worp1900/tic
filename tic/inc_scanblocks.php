@@ -9,7 +9,7 @@ $hours = 36;
 		<td colspan="5">&nbsp;Scanner&nbsp;</td>
 		<td colspan="5">&nbsp;Ziel&nbsp;</td>
 		<td></td>
-		<td></td>
+		<td colspan="2"></td>
 	</tr>
 	<tr class="datatablehead">
 		<td>&nbsp;Meta&nbsp;</td>
@@ -24,6 +24,7 @@ $hours = 36;
 		<td>&nbsp;Spieler&nbsp;</td>
 		<td>&nbsp;Typ&nbsp;</td>
 		<td>&nbsp;Datum&nbsp;</td>
+		<td>&nbsp;Alter&nbsp;</td>
 	</tr>
 <?php
 	$sql = "SELECT s1.meta meta1, s1.allianz_name ally1, s2.meta meta2, s2.allianz_name ally2, s1.spieler_name name1, s2.spieler_name name2, b.sg, b.sp, b.t, b.g, b.p, b.typ
@@ -59,6 +60,8 @@ $hours = 36;
 			case 4: $typ = 'N'; break;
 			default: $typ = '<i>unknown</i>'; break;
 		}
+		$alter = round((time() - $t) / 60, 0);
+		$farbe = round((1 - $alter / 60 / $hours) * 255);
 		
 		echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
 		echo '	<td>&nbsp;' . $meta1 . '&nbsp;</td>';
@@ -73,6 +76,7 @@ $hours = 36;
 		echo '	<td>&nbsp;' . $name2 . '&nbsp;</td>';
 		echo '	<td>&nbsp;' . $typ . '&nbsp;</td>';
 		echo '	<td>&nbsp;' . date('Y-m-d H:i', $t) . '&nbsp;</td>';
+		echo '  <td align="right" style="color: white; background-color: rgb(' . $farbe . ', 0, 0);">&nbsp;' . ZahlZuText($alter) . '&nbsp;</td>';
 		echo '</tr>';
 		
 		$color = !$color;
