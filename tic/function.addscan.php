@@ -968,8 +968,8 @@ function parseLine( $line_in) {
             } // 2 scantyp geschütze
 
 			//aprint($zeilen);
-			if(strpos($zeilen[0], 'Scan Block') !== false) {
-				$datestr = substr(trim($zeilen[0]), 15, 34);
+			if(strpos(trim($zeilen[0]), 'Scan Block') !== false) {
+				$datestr = str_replace('.', ' ', substr(trim($zeilen[0]), 15, 34));
 				$tmp = explode(' ', trim($zeilen[1]));
 				$koords = explode(':', $tmp[0]);
 				$typ = $tmp[4];
@@ -1000,7 +1000,7 @@ function parseLine( $line_in) {
 				$sql = 'INSERT INTO `gn4scanblock` (
 						g, p, t, svs, sg, sp, sname, typ, suspicious
 					) SELECT 
-						"'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", UNIX_TIMESTAMP(STR_TO_DATE("'.$datestr.'","%d. %m %Y - %H %i")), NULL, "'.$koords[0].'", "'.$koords[1].'", "'.$Benutzer['name'].'", '.$typ.', 1
+						"'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", UNIX_TIMESTAMP(STR_TO_DATE("'.$datestr.'","%d %m %Y - %H %i")), NULL, "'.$koords[0].'", "'.$koords[1].'", "'.$Benutzer['name'].'", '.$typ.', 1
 					FROM DUAL
 					WHERE NOT EXISTS (
 						SELECT * FROM gn4scanblock WHERE g = "'.$Benutzer['galaxie'].'" AND p = "'.$Benutzer['planet'].'" AND sg = "'.$koords[0].'" AND sp = "'.$koords[1].'" AND t = UNIX_TIMESTAMP(STR_TO_DATE("'.$datestr.'","%d. %m %Y - %H %i")) AND typ = "'.$typ.'") LIMIT 1;';
