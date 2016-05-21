@@ -1,4 +1,9 @@
 <?php
+if($Benutzer['rang'] < $Rang_GC) {
+	aprint('Keine Berechtigung.');
+	die();
+}
+
 $hours = 36;
 ?>
 <center>
