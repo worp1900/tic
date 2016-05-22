@@ -16,7 +16,7 @@
 	//error_reporting(E_ALL); // zu testzwecken einschalten
 	ob_start("ob_gzhandler");
 
-	//header("Content-Type: text/html;charset=UTF-8");
+	header("Content-Type: text/html;charset=UTF-8");
 	
 	include("sessionhelpers.inc.php");
 	$_GET = injsafe($_GET);
@@ -146,7 +146,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
 	<head>
 		<title>TIC wird gewartet</title>
-		 <!--<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">-->
+		 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</head>
 	<body style="background-color:#000000">
 		<table height="100%" width="100%">

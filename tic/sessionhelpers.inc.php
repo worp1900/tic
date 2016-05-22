@@ -16,9 +16,10 @@ function injsafe($value) {
 function connect() {
     include('./accdata.php' );
     $SQL_DBConn = mysql_connect($db_info['host'], $db_info['user'], $db_info['password']);
+	mysql_query("SET NAMES 'utf8'", $SQL_DBConn);
     mysql_select_db($db_info['dbname'], $SQL_DBConn);
 
-    $SQL_Query = "SET CHARACTER SET latin1";
+    $SQL_Query = "SET CHARACTER SET utf8";
     @mysql_query($SQL_Query, $SQL_DBConn);
     return $SQL_DBConn;
 }

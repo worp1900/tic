@@ -20,6 +20,7 @@ include('./accdata.php' );
     // Verbindung zur Datenbank aufbauen
     $SQL_DBConn = mysql_connect($db_info['host'], $db_info['user'], $db_info['password']) or $error_code = 1;
     mysql_select_db($db_info['dbname'], $SQL_DBConn) or $error_code = 2;
+	mysql_query("SET NAMES 'utf8'", $SQL_DBConn);
 
     // Variablen laden
     include('./vars.php');

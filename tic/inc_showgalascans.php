@@ -4,12 +4,14 @@
   }
 </script>
 <?php
-	function in_array_contains($needle, $haystack) {
+	function in_array_contains($haystack, $needle) {
 		if(!is_array($haystack) || !$needle)
 			return false;
 
 		foreach($haystack as $v) {
-			if (strpos($v, $needle) !== false) {
+			$v = mb_convert_encoding($v, 'UTF-8', "auto");
+			$needle = mb_convert_encoding($needle, 'UTF-8', "auto");
+			if ($v == substr($needle, 0, strlen($v))) {
 				return true;
 			}
 		}
@@ -218,7 +220,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
 			</tr>
 <?php
-			$highlight = array('Verteidigung', 'Angriff', 'ckzug');
+			$highlight = array('Verteidigung', 'Angriff', 'Rückzug');
 
 			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
 			$res_news_entries = tic_mysql_query($sql);
@@ -230,7 +232,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
 
-				if(in_array_contains($typ, $highlight)) {
+				if(in_array_contains($highlight, $typ)) {
 					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
 				} else {
 					echo $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';

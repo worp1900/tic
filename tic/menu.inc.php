@@ -147,7 +147,7 @@
 		</table>
 	</td></tr>
 <?php
-if ($Benutzer['rang'] >= $Rang_GC) {
+if($Benutzer['rang'] >= $Rang_GC) {
 ?>
 	<tr>
 		<td>&nbsp;</td>
