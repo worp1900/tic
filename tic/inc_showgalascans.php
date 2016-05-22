@@ -232,6 +232,27 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
 
+				if(in_array_contains(array('Angriffsbericht'), $typ)) {
+					//convert content
+					$rows = explode("\n\n", trim($inhalt));
+					//aprint($rows, 'rows');
+					$inhalt = '';
+					$inhalt .= '<table border="1">';
+					foreach($rows as $r) {
+						$inhalt .= '<tr>';
+						$columns = explode("\n", trim($r));
+						//aprint($columns, 'columns');
+						foreach($columns as $c) {
+							$inhalt .= '<td>'.$c.'</td>';
+						}
+						$inhalt .= '</tr>';
+					}
+					$inhalt .= '<tr></tr>';
+					$inhalt .= '</table>';
+					
+					//aprint($inhalt);
+				}
+				
 				if(in_array_contains($highlight, $typ)) {
 					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
 				} else {
