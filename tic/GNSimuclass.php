@@ -649,8 +649,10 @@ aprint(array(
 		//  abschuesse + total res
 		$total_abschuesse_pri_deffer = array();
 		$total_abschuesse_ext_deffer = array();
+		$total_abschuesse_ext_deffer_num = array();
 		$total_abschuesse_pri_deffer_overall = array(0, 0);
 		$total_abschuesse_ext_deffer_overall = array(0, 0);
+		$total_abschuesse_ext_deffer_overall_num = 0;
 
 		//komplett res (atter+deffer)
 		$totalResM = 0;
@@ -671,6 +673,10 @@ aprint(array(
 
 				$total_abschuesse_ext_deffer_overall[0] += $tmp[0];
 				$total_abschuesse_ext_deffer_overall[1] += $tmp[1];
+				
+				//anzahl
+				$total_abschuesse_ext_deffer_num[$i] += array_sum($this->DeffFleets[$i]->abschuesseThisTick);
+				$total_abschuesse_ext_deffer_overall_num += array_sum($this->DeffFleets[$i]->abschuesseThisTick);
 			} else {
 				$total_abschuesse_pri_deffer[$i][0] += $tmp[0];
 				$total_abschuesse_pri_deffer[$i][1] += $tmp[1];
@@ -687,10 +693,13 @@ aprint(array(
 	'$total_abschuesse_pri_deffer_overall' => $total_abschuesse_pri_deffer_overall,
 	'$total_abschuesse_ext_deffer_overall' => $total_abschuesse_ext_deffer_overall,
 
+	'$total_abschuesse_ext_deffer_overall_num' => $total_abschuesse_ext_deffer_overall_num,
+	'$total_abschuesse_ext_deffer_num' => $total_abschuesse_ext_deffer_num,
+
 	'$totalResM' => $totalResM,
 	'$totalResK' => $totalResK,
 
-	'$this->DeffFleets' => $this->DeffFleets,
+	//'$this->DeffFleets' => $this->DeffFleets,
 ));
 */
 		//  verteilung auf die flotten
@@ -698,16 +707,17 @@ aprint(array(
 			//nur relavant für extern
 			if($this->DeffFleets[$i]->extern) {
 				//aprint($tmp, 'ext fleet ' . $i);
-				if(array_sum($tmp) > 0) {
-					$fraction = array_sum($total_abschuesse_ext_deffer[$i]) / array_sum($total_abschuesse_ext_deffer_overall);
-					$this->DeffFleets[$i]->bergungM += round($fraction * $totalResM * 0.4, 0);
-					$this->DeffFleets[$i]->bergungK += round($fraction * $totalResK * 0.4, 0);
+				if($total_abschuesse_ext_deffer_num[$i] > 0) {
+					$fraction = $total_abschuesse_ext_deffer_num[$i] / $total_abschuesse_ext_deffer_overall_num;
+					$this->DeffFleets[$i]->bergungM += round($fraction * $totalResM * 0.2, 0);
+					$this->DeffFleets[$i]->bergungK += round($fraction * $totalResK * 0.2, 0);
 /*
 aprint(array(
 	'totalResM' => $totalResM,
 	'totalResK' => $totalResK,
-	'$total_abschuesse_ext_deffer[$i]' => $total_abschuesse_ext_deffer[$i],
-	'$total_abschuesse_ext_deffer_overall' => $total_abschuesse_ext_deffer_overall,
+	'$total_abschuesse_ext_deffer_num[$i]' => $total_abschuesse_ext_deffer_num[$i],
+	'$total_abschuesse_ext_deffer_overall_num' => $total_abschuesse_ext_deffer_overall_num,
+	'$fraction' => $fraction,
 	'$this->DeffFleets[$i]->bergungM' => $this->DeffFleets[$i]->bergungM,
 	'$this->DeffFleets[$i]->bergungK' => $this->DeffFleets[$i]->bergungK,
 ), 'bergung ' . $i);
@@ -1050,10 +1060,7 @@ aprint(array(
 		echo '</tr>';
 
 		//	M Bergung
-		echo '<tr class="fieldnormallight"><td title="Bei externen
-		Verteidigern gehen weitere 40% auf diese.&#013;Ausgenomen sind
-		Zerstörungen durch Vortick-Geschützfeuer.">Bergungsmetall
-		(?)</td><td	bgcolor="#ccccff">-'.ZahlZuText($this->bergungPrimeDeffer[0]).'<br/>(-'.ZahlZuText($this->bergungPrimeDeffer[0] + $this->bergungExternalDeffer[0]).')</td>';
+		echo '<tr class="fieldnormallight"><td title="Der Angegriffene erh&auml;lt 40% Bergungsressourcen.&#013;Bei externen Verteidigern gehen weitere 20% auf diese.&#013;Ausgenomen sind Zerst&ouml;rungen durch Vortick-Gesch&uuml;tzfeuer.">Bergungsmetall (?)</td><td	bgcolor="#ccccff">-'.ZahlZuText($this->bergungPrimeDeffer[0]).'<br/>(-'.ZahlZuText($this->bergungPrimeDeffer[0] + $this->bergungExternalDeffer[0]).')</td>';
 
 		echo '<td bgcolor="white"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
@@ -1062,9 +1069,7 @@ aprint(array(
 
 		echo '</tr>';
 		//	K Bergung
-		echo '<tr class="fieldnormallight"><td title="Bei externen
-		Verteidigern gehen weitere 40% auf diese.">Bergungskristall
-		(?)</td><td	bgcolor="#ccccff">-'.ZahlZuText($this->bergungPrimeDeffer[1]).'<br/>-('.ZahlZuText($this->bergungPrimeDeffer[1] + $this->bergungExternalDeffer[1]).')</td>';
+		echo '<tr class="fieldnormallight"><td title="Der Angegriffene erh&auml;lt 40% Bergungsressourcen.&#013;Bei externen Verteidigern gehen weitere 20% auf diese.&#013;Ausgenomen sind Zerst&ouml;rungen durch Vortick-Gesch&uuml;tzfeuer.">Bergungskristall (?)</td><td	bgcolor="#ccccff">-'.ZahlZuText($this->bergungPrimeDeffer[1]).'<br/>-('.ZahlZuText($this->bergungPrimeDeffer[1] + $this->bergungExternalDeffer[1]).')</td>';
 
 		echo '<td bgcolor="white"></td>';
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
