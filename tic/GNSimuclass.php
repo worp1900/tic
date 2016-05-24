@@ -644,64 +644,37 @@ aprint(array(
 			}//if totaldeff i > 0
 		}//for todel schiffe
 
-
+//aprint('Die Bergungsressourcen sind noch fehlerhaft.', 'INFO');
 		//bergungsres
 		//  abschuesse + total res
-		$total_abschuesse_pri_deffer = array();
-		$total_abschuesse_ext_deffer = array();
 		$total_abschuesse_ext_deffer_num = array();
-		$total_abschuesse_pri_deffer_overall = array(0, 0);
-		$total_abschuesse_ext_deffer_overall = array(0, 0);
 		$total_abschuesse_ext_deffer_overall_num = 0;
 
 		//komplett res (atter+deffer)
 		$totalResM = 0;
 		$totalResK = 0;
+
+		$tmp = $this->calcResForShipsArray($ToDestroyDeff);
+		$totalResM += $tmp[0];
+		$totalResK += $tmp[1];
+
+		$tmp = $this->calcResForShipsArray($ToDestroyAtt);
+		$totalResM += $tmp[0];
+		$totalResK += $tmp[1];
+		
+		foreach($this->AttFleets as $v) {
+			$totalResM -= 1500 * ($v->atter_exenM + $v->atter_exenK);
+			$totalResK -= 1000 * ($v->atter_exenM + $v->atter_exenK);
+		}
+		
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
-			//abschuesse
-			$tmp = $this->calcResForShipsArray($this->DeffFleets[$i]->abschuesseThisTick);
-			//eigene verluste
-			$tmp2 = $this->calcResForShipsArray($this->DeffFleets[$i]->LostShips);
-
-			//komplett res atter+deffer
-			$totalResM += $tmp[0] + $tmp2[0];
-			$totalResK += $tmp[1] + $tmp2[1];
-
 			if($this->DeffFleets[$i]->extern) {
-				$total_abschuesse_ext_deffer[$i][0] += $tmp[0];
-				$total_abschuesse_ext_deffer[$i][1] += $tmp[1];
-
-				$total_abschuesse_ext_deffer_overall[0] += $tmp[0];
-				$total_abschuesse_ext_deffer_overall[1] += $tmp[1];
-				
 				//anzahl
 				$total_abschuesse_ext_deffer_num[$i] += array_sum($this->DeffFleets[$i]->abschuesseThisTick);
 				$total_abschuesse_ext_deffer_overall_num += array_sum($this->DeffFleets[$i]->abschuesseThisTick);
-			} else {
-				$total_abschuesse_pri_deffer[$i][0] += $tmp[0];
-				$total_abschuesse_pri_deffer[$i][1] += $tmp[1];
-
-				$total_abschuesse_pri_deffer_overall[0] += $tmp[0];
-				$total_abschuesse_pri_deffer_overall[1] += $tmp[1];
 			}
 		}//for fleets
-/*
-aprint(array(
-	'$total_abschuesse_pri_deffer' => $total_abschuesse_pri_deffer,
-	'$total_abschuesse_ext_deffer' => $total_abschuesse_ext_deffer,
 
-	'$total_abschuesse_pri_deffer_overall' => $total_abschuesse_pri_deffer_overall,
-	'$total_abschuesse_ext_deffer_overall' => $total_abschuesse_ext_deffer_overall,
-
-	'$total_abschuesse_ext_deffer_overall_num' => $total_abschuesse_ext_deffer_overall_num,
-	'$total_abschuesse_ext_deffer_num' => $total_abschuesse_ext_deffer_num,
-
-	'$totalResM' => $totalResM,
-	'$totalResK' => $totalResK,
-
-	//'$this->DeffFleets' => $this->DeffFleets,
-));
-*/
 		//  verteilung auf die flotten
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
 			//nur relavant für extern
@@ -711,6 +684,9 @@ aprint(array(
 					$fraction = $total_abschuesse_ext_deffer_num[$i] / $total_abschuesse_ext_deffer_overall_num;
 					$this->DeffFleets[$i]->bergungM += round($fraction * $totalResM * 0.2, 0);
 					$this->DeffFleets[$i]->bergungK += round($fraction * $totalResK * 0.2, 0);
+
+					$this->bergungExternalDeffer[0] += $this->DeffFleets[$i]->bergungM;
+					$this->bergungExternalDeffer[1] += $this->DeffFleets[$i]->bergungK;
 /*
 aprint(array(
 	'totalResM' => $totalResM,
@@ -722,17 +698,19 @@ aprint(array(
 	'$this->DeffFleets[$i]->bergungK' => $this->DeffFleets[$i]->bergungK,
 ), 'bergung ' . $i);
 */
-					$this->bergungExternalDeffer[0] += $this->DeffFleets[$i]->bergungM;
-					$this->bergungExternalDeffer[1] += $this->DeffFleets[$i]->bergungK;
 				}
 			}
 		}
 		//intern ist immer fester satz.
-		$this->DeffFleets[0]->bergungM = $totalResM * 0.4;
-		$this->DeffFleets[0]->bergungK = $totalResK * 0.4;
+		$this->DeffFleets[0]->bergungM += $totalResM * 0.4;
+		$this->DeffFleets[0]->bergungK += $totalResK * 0.4;
 		$this->bergungPrimeDeffer[0] += $this->DeffFleets[0]->bergungM;
 		$this->bergungPrimeDeffer[1] += $this->DeffFleets[0]->bergungK;
-
+aprint(array(
+	'bergungPrimeDeffer' => $this->bergungPrimeDeffer,
+	'bergungExternalDeffer' => $this->bergungExternalDeffer,
+	
+));
 
 		//traeger-kapazitaetsverlute
 		$this->finalize();
