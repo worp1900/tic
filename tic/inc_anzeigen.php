@@ -76,7 +76,7 @@
               </font></TD>
           </TR>
           <TR>
-            <TD><font size="-1">Scanverstärker:</font></TD>
+            <TD><font size="-1">Scanverst&auml;rker:</font></TD>
             <TD><font size="-1">
               <?=$zeig_svs?>
               </font></TD>
@@ -101,7 +101,7 @@
           </TR>
 
           <TR>
-            <TD><font size="-1">ScanEinträge im TIC:</font></TD>
+            <TD><font size="-1">ScanEintr&auml;ge im TIC:</font></TD>
             <TD><font size="-1"><?=$zeit_scaneintraege?>
               </font></TD>
           </TR>
@@ -187,7 +187,7 @@
                             $disptime = mysql_result($SQL_Result, $n, 'eta') * $Ticks['lange'] - $tick_abzug;
                             $disptime = getime4display( $disptime );
                             echo '<TD><font size="-1">ETA: </td><td><B>'.$disptime.'</B></font></TD>';
-                            echo '<TD><font size="-1">Angriffslänge: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
+                            echo '<TD><font size="-1">Angriffsl&auml;e: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
                             echo '<TD><font size="-1">Flotte: </td><td>'.$flottennr[mysql_result($SQL_Result, $n, 'flottennr')].'</font></TD>';
                             echo '<TD><font size="-1">'.$scan.'</font> <td>';
                             /* anstelle von */
@@ -198,12 +198,12 @@
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="action" VALUE="flotteloeschen">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Löschen"> </form></td><td>';
+                            echo '<INPUT TYPE="submit" VALUE="L&ouml;schen"> </form></td><td>';
                             echo '<FORM ACTION="./main.php" METHOD="POST">';
                             echo '<INPUT TYPE="hidden" NAME="modul" VALUE="flotteaendern">';
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Ändern"> </form>';
+                            echo '<INPUT TYPE="submit" VALUE="&Auml;dern"> </form>';
                             echo '</TD></TR>';
                         }
                         echo '  </TABLE>';
@@ -255,7 +255,7 @@
                             $disptime = mysql_result($SQL_Result, $n, 'eta') * $Ticks['lange'] - $tick_abzug;
                             $disptime = getime4display( $disptime );
                             echo '<TD><font size="-1">ETA:</td><td><B>'.$disptime.'</B></font></TD>';
-                            echo '<TD><font size="-1">Verteidigungslänge:</td><td> <B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
+                            echo '<TD><font size="-1">Verteidigungsl&auml;e:</td><td> <B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
                             echo '<TD><font size="-1">Flotte:</td><td> '.$flottennr[mysql_result($SQL_Result, $n, 'flottennr')].'</font></TD>';
                             echo '<TD><font size="-1">'.$scan.'</font></td><td>';
 //                            if ($Benutzer['rang'] > $Rang_GC || !($Benutzer['rang'] <= $Rang_GC && $Benutzer['galaxie'] != $zeig_galaxie)) echo ', <A HREF="./main.php?modul=anzeigen&id='.$id.'&action=flotteloeschen&flottenid='.mysql_result($SQL_Result, $n, 'id').'">Löschen</A>, <A HREF="./main.php?modul=flotteaendern&id='.$id.'&flottenid='.mysql_result($SQL_Result, $n, 'id').'">&Auml;ndern</A>';
@@ -264,12 +264,12 @@
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="action" VALUE="flotteloeschen">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Löschen"> </form></td><td>';
+                            echo '<INPUT TYPE="submit" VALUE="L&ouml;schen"> </form></td><td>';
                             echo '<FORM ACTION="./main.php" METHOD="POST">';
                             echo '<INPUT TYPE="hidden" NAME="modul" VALUE="flotteaendern">';
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Ändern"> </form>';
+                            echo '<INPUT TYPE="submit" VALUE="&Auml;dern"> </form>';
                             echo '</TD></TR>';
                         }
                         echo '  </TABLE>';
@@ -331,7 +331,7 @@
                             $disptime = mysql_result($SQL_Result, $n, 'eta') * $Ticks['lange'] - $tick_abzug;
                             $disptime = getime4display( $disptime );
                             echo '<TD><font size="-1">ETA: </td><td><B>'.$disptime.'</B></font></TD>';
-                            echo '<TD><font size="-1">Angriffslänge: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
+                            echo '<TD><font size="-1">Angriffsl&auml;nge: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
                             echo '<TD><font size="-1">Flotte: </td><td>'.$flottennr[mysql_result($SQL_Result, $n, 'flottennr')].'</font></TD>';
                             echo '<TD><font size="-1">'.$scan.'</font><td>';
 //                            if ($Benutzer['rang'] > $Rang_GC || !($Benutzer['rang'] <= $Rang_GC && $Benutzer['galaxie'] != $zeig_galaxie)) echo ', <A HREF="./main.php?modul=anzeigen&id='.$id.'&action=flotteloeschen&flottenid='.mysql_result($SQL_Result, $n, 'id').'">Löschen</A>, <A HREF="./main.php?modul=flotteaendern&id='.$id.'&flottenid='.mysql_result($SQL_Result, $n, 'id').'">Ändern</A>';
@@ -340,19 +340,19 @@
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="action" VALUE="flotteloeschen">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Löschen"> </form></td><td>';
+                            echo '<INPUT TYPE="submit" VALUE="L&ouml;schen"> </form></td><td>';
                             echo '<FORM ACTION="./main.php" METHOD="POST">';
                             echo '<INPUT TYPE="hidden" NAME="modul" VALUE="flotteaendern">';
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Ändern"> </form>';
+                            echo '<INPUT TYPE="submit" VALUE="&Auml;ndern"> </form>';
                             echo '</TD></TR>';
                         }
                         echo '  </TABLE>';
                         if (!$zeig_deff == 0)
-                            echo '<BR><A HREF="./main.php?modul=anzeigen&id='.$id.'&need_galaxie='.$zeig_galaxie.'&need_planet='.$zeig_planet.'">[ Es wird Verteidigung benötigt! ]</A><BR>';
+                            echo '<BR><A HREF="./main.php?modul=anzeigen&id='.$id.'&need_galaxie='.$zeig_galaxie.'&need_planet='.$zeig_planet.'">[ Es wird Verteidigung ben&ouml;tigt! ]</A><BR>';
                         else
-                            echo '<BR><A HREF="./main.php?modul=anzeigen&id='.$id.'&needno_galaxie='.$zeig_galaxie.'&needno_planet='.$zeig_planet.'">[ Es wird keine Verteidigung benötigt! ]</A><BR>';
+                            echo '<BR><A HREF="./main.php?modul=anzeigen&id='.$id.'&needno_galaxie='.$zeig_galaxie.'&needno_planet='.$zeig_planet.'">[ Es wird keine Verteidigung ben&ouml;tigt! ]</A><BR>';
 //                        echo '<BR><A HREF="./main.php?modul=kampfsimulator&txtKampfGalaxie='.$zeig_galaxie.'&txtKampfPlanet='.$zeig_planet.'">Kampfsimulation ansehen</A><BR><BR>';
                         echo '</P></CENTER>';
                     }
@@ -403,7 +403,7 @@
                             $disptime = mysql_result($SQL_Result, $n, 'eta') * $Ticks['lange'] - $tick_abzug;
                             $disptime = getime4display( $disptime );
                             echo '<TD><font size="-1">ETA: </td><td><B>'.$disptime.'</B></font></TD>';
-                            echo '<TD><font size="-1">Verteidigungslänge: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
+                            echo '<TD><font size="-1">Verteidigungsl&auml;e: </td><td><B>'.getime4display(mysql_result($SQL_Result, $n, 'flugzeit') * $Ticks['lange']).'</B></font></TD>';
                             echo '<TD><font size="-1">Flotte: </td><td>'.$flottennr[mysql_result($SQL_Result, $n, 'flottennr')].'</font></TD>';
                             echo '<TD><font size="-1">'.$scan.'</font><td>';
 //                            if ($Benutzer['rang'] > $Rang_GC || !($Benutzer['rang'] <= $Rang_GC && $Benutzer['galaxie'] != $zeig_galaxie)) echo ', <A HREF="./main.php?modul=anzeigen&id='.$id.'&action=flotteloeschen&flottenid='.mysql_result($SQL_Result, $n, 'id').'">Löschen</A>, <A HREF="./main.php?modul=flotteaendern&id='.$id.'&flottenid='.mysql_result($SQL_Result, $n, 'id').'">Ändern</A>';
@@ -412,12 +412,12 @@
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="action" VALUE="flotteloeschen">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Löschen"> </form></td><td>';
+                            echo '<INPUT TYPE="submit" VALUE="L&ouml;schen"> </form></td><td>';
                             echo '<FORM ACTION="./main.php" METHOD="POST">';
                             echo '<INPUT TYPE="hidden" NAME="modul" VALUE="flotteaendern">';
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Ändern"> </form>';
+                            echo '<INPUT TYPE="submit" VALUE="&Auml;dern"> </form>';
                             echo '</TD></TR>';
                         }
                         echo '  </TABLE>';
@@ -449,7 +449,7 @@
     </TR>
     <TR>
       <TD>
-        <P CLASS="dunkel"><B><font size="-1">Rückflug:</font></B></P>
+        <P CLASS="dunkel"><B><font size="-1">R&uuml;ckflug:</font></B></P>
       </TD>
     </TR>
     <TR>
@@ -458,10 +458,10 @@
                     $SQL_Result = tic_mysql_query('SELECT * FROM `gn4flottenbewegungen` WHERE ( modus="0" or modus="3" or modus="4" ) AND angreifer_galaxie="'.$zeig_galaxie.'" AND angreifer_planet="'.$zeig_planet.'" ORDER BY eta;', $SQL_DBConn) or $error_code = 4;
                     $SQL_Num = mysql_num_rows($SQL_Result);
                     if ($SQL_Num == 0)
-                        echo '<P CLASS="hell">Es befindet sich keine Flotte auf dem Rückflug.</P>';
+                        echo '<P CLASS="hell">Es befindet sich keine Flotte auf dem R&uuml;ckflug.</P>';
                     else {
                         echo '<CENTER><P CLASS="hell">';
-                        echo '  Folgende Flotten sind auf dem Rückflug:';
+                        echo '  Folgende Flotten sind auf dem R&uuml;ckflug:';
                         echo '  <TABLE>';
                         for ($n = 0; $n < $SQL_Num; $n++) {
                             echo '<TR><TD><font size="-1">Name: <B>'.mysql_result($SQL_Result, $n, 'verteidiger_galaxie').':'.mysql_result($SQL_Result, $n, 'verteidiger_planet').'</B></font></TD>';
@@ -478,12 +478,12 @@
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="action" VALUE="flotteloeschen">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Löschen"> </form></td><td>';
+                            echo '<INPUT TYPE="submit" VALUE="L&ouml;schen"> </form></td><td>';
                             echo '<FORM ACTION="./main.php" METHOD="POST">';
                             echo '<INPUT TYPE="hidden" NAME="modul" VALUE="flotteaendern">';
                             echo '<INPUT TYPE="hidden" NAME="id" VALUE="'.$id.'">';
                             echo '<INPUT TYPE="hidden" NAME="flottenid" VALUE="'.mysql_result($SQL_Result, $n, 'id').'">';
-                            echo '<INPUT TYPE="submit" VALUE="Ändern"> </form>';
+                            echo '<INPUT TYPE="submit" VALUE="&Auml;dern"> </form>';
                             echo '</TD></form></TR>';
                         }
                         echo '  </TABLE>';

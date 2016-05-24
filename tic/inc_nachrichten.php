@@ -39,7 +39,7 @@
                     echo '<form action="./main.php?modul=nachrichten" method="post">';
                             echo '<input type="hidden" name="id" value="'.mysql_result($SQL_Result, $n, 'id').'" />';
                             echo '<input type="hidden" name="action" value="nachrichtloeschen" />';
-                            echo '<Input type="submit" value="Löschen" />';
+                            echo '<Input type="submit" value="L&ouml;schen" />';
                     echo '</form></td></tr>';
                 }
                 echo '  <tr>';

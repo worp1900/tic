@@ -29,7 +29,7 @@
 				<input type="hidden" name="action" value="addscan" />
 				<b>Scanimport:</b><br/>
 				<textarea type="text" name="txtScan" style="width: 200px; height: 40px"></textarea><br/>
-				<a href="main.php?modul=<?=$_GET['modul'];?>&mode=<?=$_GET['mode'];?>&action=updatefleett" onclick="return confirm('Dies aktualisiert den Zeitstempel des letzten Taktikscreen Imports f&uuml;r Galaxie <?=$Benutzer['galaxie'];?>.\n\nBist Du Dir sicher, dass sich nichts ge&auml;ndert hat?')">&raquo; Flottenbewegungen gleich</a> <input type="submit" value="go!"/>
+				<a href="main.php?modul=<?=(isset($_GET['modul']) ? $_GET['modul'] : '');?>&mode=<?=$_GET['mode'];?>&action=updatefleett" onclick="return confirm('Dies aktualisiert den Zeitstempel des letzten Taktikscreen Imports f&uuml;r Galaxie <?=$Benutzer['galaxie'];?>.\n\nBist Du Dir sicher, dass sich nichts ge&auml;ndert hat?')">&raquo; Flottenbewegungen gleich</a> <input type="submit" value="go!"/>
 			</form>
 		</td>
 		<td align="right" valign="top" style="white-space:nowrap;">

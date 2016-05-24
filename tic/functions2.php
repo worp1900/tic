@@ -23,7 +23,7 @@
 function mysql_multi_query($senden, $typ = 0, $array = -1) {
 	global $SQL_DBConn;
 
-	if (is_array($senden)) {
+	if(is_array($senden)) {
 		for ($i0 = 0; $i0 < count($senden); $i0++) {
 			$query[$i0] = mysql_query($senden[$i0], $SQL_DBConn) or die(mysql_errno()." - ".mysql_error());
 			if ($typ == 1) {
@@ -130,6 +130,7 @@ class scan_speichern {
 			if ($sek['schiffe'] == 0) { $this ->mili($scan, 0); }
 		}
 	}
+	
 	function unit($scan, $unit, $pruefen = 1) {
 		if ($pruefen == 1) { $this->unit_check($unit); }
 		if ($this->debug == 1) {
@@ -159,6 +160,7 @@ class scan_speichern {
 			}
 		}
 	}
+	
 	function g($scan, $g) {
 		$this->g_check($g);
 		if ($this->debug == 1) {
@@ -188,6 +190,7 @@ class scan_speichern {
 			}
 		}
 	}
+	
 	function mili($scan, $mili) {
 		global $scan_teil;
 
@@ -234,6 +237,7 @@ class scan_speichern {
 			}
 		}
 	}
+	
 	function sek_check($sek) {
 		global $scan_teil;
 
@@ -247,6 +251,7 @@ class scan_speichern {
 		if ($fehler == 0) { $this->is_scan = 1; }
 		$this->fehler_aus($fehler);
 	}
+	
 	function unit_check($unit) {
 		global $scan_teil;
 
@@ -260,6 +265,7 @@ class scan_speichern {
 		if ($fehler == 0) { $this->is_scan = 1; }
 		$this->fehler_aus($fehler);
 	}
+	
 	function g_check($g) {
 		global $scan_teil;
 
@@ -272,6 +278,7 @@ class scan_speichern {
 		if ($fehler == 0) { $this->is_scan = 1; }
 		$this->fehler_aus($fehler);
 	}
+	
 	function mili_check($mili) {
 		global $scan_teil;
 
@@ -284,6 +291,7 @@ class scan_speichern {
 		if ($fehler == 0) { $this->is_scan = 1; }
 		$this->fehler_aus($fehler);
 	}
+	
 	function fehler_aus($fehler) {
 		if ($fehler != 0) {
 			$typ = array("", "Sektorscan", "Einheitenscan", "Gesch&uuml;tzscan", "Milit&auml;rscan");
@@ -302,6 +310,7 @@ class scan_speichern {
 		}
 		$this->fehler = $fehler;
 	}
+	
 	function add_nick_to_db($gala, $planet, $name) {
 		if ($this ->debug == 1) {
 			print_r($scan);
@@ -313,6 +322,7 @@ class scan_speichern {
 			//mysql_multi_query($query);
 		}
 	}
+	
 	function log($fehler) {
 		$handle = fopen ($this->log_datei, "a");
 		if ($handle !== false) {
@@ -320,6 +330,6 @@ class scan_speichern {
 			fclose ($handle);
 		}
 	}
-}
+}//class scan
 
 ?>

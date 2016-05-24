@@ -147,6 +147,9 @@
                   <td class="datatablehead">Daten aus GN einf&uuml;gen(Clipboard)</td>
                 </tr>
                 <tr>
+                  <td style="background-color: rgb(200, 200, 0)"><!--Bei Fehlern des Imports bitte bei derVernichter meldemn!<br/>//--><b>Es wurde berichtet der Mili-Import sei kaputt,<br/>bitte zur Not "per Hand" machen und Fehler melden.</b></td>
+                </tr>
+                <tr>
                   <td bgcolor="#ccccec"><font color="#303030" size="-1"><a href="help/scaneingabe.html">weiter
                     Infos und Hilfe zum Thema &quot;Scans ...&quot;</a></font></td>
                 </tr>

@@ -14,7 +14,7 @@
 
 <TABLE>
   <TR>
-    <TD BGCOLOR=#333333><font color="#FFFFFF" size="-1"><B>Flottenbewegung hinzufügen</B></font></TD>
+    <TD BGCOLOR=#333333><font color="#FFFFFF" size="-1"><B>Flottenbewegung hinzuf&uuml;gen</B></font></TD>
   </TR>
   <TR>
     <TD>
@@ -39,7 +39,7 @@
                 echo '  <OPTION VALUE="1">1. Flotte</OPTION>';
                 echo '  <OPTION VALUE="2">2. Flotte</OPTION>';
                 echo '</SELECT> ';
-                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzufügen</A>';
+                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzuf&uuml;gen</A>';
             } elseif ($_POST['selected'] == 'wirdangegriffen') {
                 echo '<INPUT TYPE="hidden" NAME="modus" VALUE="angreifen">';
                 echo '<INPUT TYPE="hidden" NAME="txt_Verteidiger_Galaxie" VALUE="'.$zeig_galaxie.'">';
@@ -53,7 +53,7 @@
                 echo '  <OPTION VALUE="1">1. Flotte</OPTION>';
                 echo '  <OPTION VALUE="2">2. Flotte</OPTION>';
                 echo '</SELECT> ';
-                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzufügen</A>';
+                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzuf&uuml;gen</A>';
             } elseif ($_POST['selected'] == 'verteidigt') {
                 echo '<INPUT TYPE="hidden" NAME="modus" VALUE="verteidigen">';
                 echo '<INPUT TYPE="hidden" NAME="txt_Angreifer_Galaxie" VALUE="'.$zeig_galaxie.'">';
@@ -67,7 +67,7 @@
                 echo '  <OPTION VALUE="1">1. Flotte</OPTION>';
                 echo '  <OPTION VALUE="2">2. Flotte</OPTION>';
                 echo '</SELECT> ';
-                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzufügen</A>';
+                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzuf&uuml;gen</A>';
             } elseif ($_POST['selected'] == 'wirdverteidigt') {
                 echo '<INPUT TYPE="hidden" NAME="modus" VALUE="verteidigen">';
                 echo '<INPUT TYPE="hidden" NAME="txt_Verteidiger_Galaxie" VALUE="'.$zeig_galaxie.'">';
@@ -81,13 +81,13 @@
                 echo '  <OPTION VALUE="1">1. Flotte</OPTION>';
                 echo '  <OPTION VALUE="2">2. Flotte</OPTION>';
                 echo '</SELECT> ';
-                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzufügen</A>';
+                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzuf&uuml;gen</A>';
             } elseif ($_POST['selected'] == 'rueckflug') {
                 echo '<INPUT TYPE="hidden" NAME="modus" VALUE="rueckflug">';
                 echo '<INPUT TYPE="hidden" NAME="txt_Angreifer_Galaxie" VALUE="'.$zeig_galaxie.'">';
                 echo '<INPUT TYPE="hidden" NAME="txt_Angreifer_Planet" VALUE="'.$zeig_planet.'">';
                 echo '<INPUT TYPE="hidden" NAME="lst_Flugzeit" VALUE="0">';
-                echo 'Flotte befindet sich auf dem Rückflug von <INPUT TYPE="text" NAME="txt_Verteidiger_Galaxie" SIZE="4" MAXLENGTH=4> : <INPUT TYPE="text" NAME="txt_Verteidiger_Planet" SIZE="2" MAXLENGTH=2> . ETA: <SELECT NAME="lst_ETA" SIZE="1">';
+                echo 'Flotte befindet sich auf dem R&uuml;ckflug von <INPUT TYPE="text" NAME="txt_Verteidiger_Galaxie" SIZE="4" MAXLENGTH=4> : <INPUT TYPE="text" NAME="txt_Verteidiger_Planet" SIZE="2" MAXLENGTH=2> . ETA: <SELECT NAME="lst_ETA" SIZE="1">';
                 for ($n = $Ticks['angriffsflug']; $n >= 0; $n--)
                     echo '<OPTION VALUE="'.$n.'">'.getime4display($n * $Ticks['lange'] - $tick_abzug).'</OPTION>';
                 echo '</SELECT> ';
@@ -96,7 +96,7 @@
                 echo '  <OPTION VALUE="1">1. Flotte</OPTION>';
                 echo '  <OPTION VALUE="2">2. Flotte</OPTION>';
                 echo '</SELECT> ';
-                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzufügen</A>';
+                echo '<A HREF="javascript:document.frmFlottenbewegung.submit()">Hinzuf&uuml;gen</A>';
             }
         ?>
         </font>

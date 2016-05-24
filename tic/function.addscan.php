@@ -125,9 +125,7 @@ function parseLine( $line_in) {
 			$daten = explode(' ', trim($zeilen[0]));		// Sektorscan Ergebnis (Genauigkeit:100%)
 			$scan_typ = trim($daten[0]);
 
-			if (ereg("(Flottenbewegungen[^·]*·  Nachricht an die gesamte Galaxie senden ··»)", $txtScanOrg, $ereg_tmp) or preg_match('/DC.Publisher/', urldecode($txtScanOrg))) { // 3
-
-
+			if (preg_match("/(Flottenbewegungen[^Â·]*Â·  Nachricht an die gesamte Galaxie senden Â·Â·Â»)/u", $txtScanOrg, $ereg_tmp) or preg_match('/DC.Publisher/', urldecode($txtScanOrg))) { // 3
 				$html = urldecode($txtScanOrg);
 				$flottenbewegungen = array();
 				if (preg_match('/DC.Publisher/', $html)) { // 4: Wir haben HTML-Code bekommen!
@@ -206,7 +204,6 @@ function parseLine( $line_in) {
 
 
 					$text_in = $ereg_tmp[1];
-
 					$from_opera = false;
 					if (ereg(chr(9).chr(9).chr(13).chr(10)."Sektor".chr(9), $text_in)) { // 5
 						$from_opera = true;
@@ -219,7 +216,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace( "Greift an", "Greift_an", $text_in );
 					$text_in = str_replace( "Wird angegriffen von", "Wird_angegriffen_von", $text_in );
 					$text_in = str_replace( "Wird verteidigt von", "Wird_verteidigt_von", $text_in );
-					$text_in = str_replace( "·  Nachricht an die gesamte Galaxie senden ··»", "·__Nachricht_an_die_gesamte_Galaxie_senden_··»", $text_in );
+					$text_in = str_replace( "Â·  Nachricht an die gesamte Galaxie senden Â·Â·Â»", "Â·__Nachricht_an_die_gesamte_Galaxie_senden_Â·Â·Â»", $text_in );
 					$text_in = str_replace( " *", "", $text_in );
 					$text_in = str_replace( " Min", "m", $text_in );
 					$text_in = str_replace( " Std", "s", $text_in );
@@ -229,7 +226,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace(chr(32).chr(13).chr(10).chr(32).chr(13).chr(10), chr(32).chr(13).chr(10), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10), chr(13).chr(10), $text_in );
 					$text_in = preg_replace( "/(\d+\:\d+)[ ".chr(9)."]([^".chr(10).chr(13)."])/", "$1-$2", $text_in );
-					$text_in = preg_replace( "/Rückflug".chr(13).chr(10)."\((\d+\:\d+)-([^".chr(10).chr(13)."]*)\)/", "Rückflug-$1-$2", $text_in );
+					$text_in = preg_replace( "/RÃ¼ckflug".chr(13).chr(10)."\((\d+\:\d+)-([^".chr(10).chr(13)."]*)\)/", "RÃ¼ckflug-$1-$2", $text_in );
 					$text_in = str_replace(chr(32), chr(9), $text_in );
 					$text_in = str_replace(chr(13).chr(10).chr(9), chr(9), $text_in );
 					$text_in = str_replace("-".chr(9), chr(9), $text_in );
@@ -243,19 +240,46 @@ function parseLine( $line_in) {
 					$break_it = 0;
 					do { // 5
 						$break = true;
-						if ( ereg ( "([^".chr(9).chr(13).chr(10)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*".chr(9)."[^".chr(9)."]*)".chr(13).chr(10), $text_reg, $line_reg) ) { // 6
-							if ( ereg ( "([^".chr(9).chr(10).chr(13)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)".chr(9)."([^".chr(9)."]*)", $line_reg[1], $cells) and sizeof($cells) == 10) { // 7
+						if ( ereg ( "([^\t\r\n]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*\t[^\t]*)\r\n", $text_reg, $line_reg) ) { // 6
+							if ( ereg ( "([^\t\r\n]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)", $line_reg[1], $cells) and sizeof($cells) == 10) { // 7
 								$temparray = $cells;
 								array_shift($temparray);
 								array_push($taktik, $temparray);
 							} // 7
-							$text_reg = ereg_replace( quotemeta($line_reg[1]).chr(13).chr(10), "", $text_reg);
+							$text_reg = ereg_replace( quotemeta($line_reg[1])."\r\n", "", $text_reg);
 							$break = false;
 						} // 6
 						$break_it++;
 					} while (($break == false) && ($break_it < 25)); // 5
+					
+					
+					//possibly chrome
+					$gal = null;
+					preg_match_all('/Flottenbewegungen.+?(\d+)/s', $text_in, $gal);
+					$sql = "SELECT count(*) num FROM gn4accounts WHERE galaxie='".$gal[1][0]."'";
+					$num = mysql_result(tic_mysql_query($sql, __FILE__, __LINE__), 0, 'num');
+					if(count($taktik)-1 != $num) {
+						aprint('using chrome. not implemented yet. <a href="main.php">main.php</a>');
+						aprint($text_in, 'input');
+						$taktik = array();
+						preg_match_all('/(\d+):(\d+).(\w+)( \*)?\t/', $text_in, $players);
+						$coords = $players[2];
+						$names = $players[3];
+						aprint(array($coords, $names), 'players');
+						
+						$split = preg_split('/\d+:\d+.\w+( \*)?\t/', $text_in, -1);
+						
+						foreach($split as $k=>$v) {
+							$split[$k] = explode("\r\n", $v);
+						}
+						aprint($split, 'split');
+						
+						exit();
+					}
 
+//aprint($taktik);
 	// Erstellen der einzelnen Flottenbewegungen
+					$doNotRelocate = true;
 					include("function.updatefleett.php");
 	
 					$this_galaxy = 0;
@@ -284,8 +308,8 @@ function parseLine( $line_in) {
 								} // 8
 								for ($ii = 0; $ii < sizeof($flotten); $ii++) { // 8
 									$modus = 1;
-									if ( ereg ( "Rückflug-", $flotten[$ii]) ) { // 9
-										$flotten[$ii] = str_replace("Rückflug-", "", $flotten[$ii]);
+									if ( ereg ( "RÃ¼ckflug-", $flotten[$ii]) ) { // 9
+										$flotten[$ii] = str_replace("RÃ¼ckflug-", "", $flotten[$ii]);
 										$modus += 2;
 									} // 9
 									if ( ereg ( "([^:]*):([^-]*)-(.*)", $flotten[$ii], $ftemp) ) { // 9
@@ -297,8 +321,8 @@ function parseLine( $line_in) {
 								} // 8
 							} // 7
 							if ( $taktik[$i][3] != "" ) { // --> Verteidigung // 7
-								$flotten = explode(chr(13).chr(10), $taktik[$i][3]);
-								$etas = explode(chr(13).chr(10), $taktik[$i][4]);
+								$flotten = explode("\r\n", $taktik[$i][3]);
+								$etas = explode("\r\n", $taktik[$i][4]);
 								for ($ii = 0; $ii < sizeof($etas); $ii++) { // 8
 									if (strpos($etas[$ii], ":")>0) { // 9
 										if (ereg("00:00", $etas[$ii])) { // 10
@@ -314,8 +338,8 @@ function parseLine( $line_in) {
 								} // 8
 								for ($ii = 0; $ii < sizeof($flotten); $ii++) { // 8
 									$modus = 2;
-									if ( ereg ( "Rückflug-", $flotten[$ii]) ) { // 9
-										$flotten[$ii] = str_replace("Rückflug-", "", $flotten[$ii]);
+									if ( ereg ( "RÃ¼ckflug-", $flotten[$ii]) ) { // 9
+										$flotten[$ii] = str_replace("RÃ¼ckflug-", "", $flotten[$ii]);
 										$modus += 2;
 									} // 9
 									if ( ereg ( "([^:]*):([^-]*)-(.*)", $flotten[$ii], $ftemp) ) { // 9
@@ -381,7 +405,7 @@ function parseLine( $line_in) {
 							} // 7 
 						} // 6
 					} // 5
-				}; // 4
+				} // 4
 				$SQL_Query = 'SELECT * FROM `gn4flottenbewegungen` WHERE (angreifer_galaxie='.$this_galaxy.' OR verteidiger_galaxie='.$this_galaxy.') ORDER BY eta;';
 				$SQL_Result = tic_mysql_query( $SQL_Query, $SQL_DBConn) or die('<br>mist - n db-error!!!');
 
@@ -441,9 +465,9 @@ function parseLine( $line_in) {
 
 			} // 3
 
-			if (ereg("(Galaxiemitglieder[^·]*·  Nachricht an die gesamte Galaxie senden ··»)", $txtScanOrg, $ereg_tmp) || 
+			if (ereg("(Galaxiemitglieder[^Â·]*Â·  Nachricht an die gesamte Galaxie senden Â·Â·Â»)", $txtScanOrg, $ereg_tmp) || 
 					ereg("Galaxiemitglieder.*Nachricht an die gesamte Galaxie senden", urldecode($txtScanOrg), $throwaway)) { // 3
-				$text_in = $ereg_tmp[1];
+					$text_in = $ereg_tmp[1];
 				$html = urldecode($txtScanOrg);
 				if (preg_match('/DC.Publisher/', $html)) { // 4: Wir haben HTML-Code bekommen!
 					preg_match('/<td class="welcometext">Willkommen.*?([0-9]+):[0-9]+\)\!<\/td>/i', $html, $mm);
@@ -504,7 +528,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace( "Extraktoren [Metall/Kristall]", "Extraktoren", $text_in );
 					$text_in = str_replace( " / ", "/", $text_in );
 					$text_in = str_replace( " *", "", $text_in );
-					$text_in = str_replace( "·  Nachricht an die gesamte Galaxie senden ··»", "·__Nachricht_an_die_gesamte_Galaxie_senden_··»", $text_in );
+					$text_in = str_replace( "Â·  Nachricht an die gesamte Galaxie senden Â·Â·Â»", "Â·__Nachricht_an_die_gesamte_Galaxie_senden_Â·Â·Â»", $text_in );
 					$text_in = str_replace(chr(32).chr(9), chr(9), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10).chr(32).chr(13).chr(10), chr(32).chr(13).chr(10), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10), chr(13).chr(10), $text_in );
@@ -554,7 +578,7 @@ function parseLine( $line_in) {
 			} // 3
 
             if ( $scan_typ == 'Flottenzusammensetzung' ) { // 3
-                $scan_gen = 99;
+			$scan_gen = 99;
                 $daten = parseLine( $zeilen[0] );
                 $scan_rn = trim( $daten[2] );
                 $scan_rg = trim( $daten[3] );                       // Koordinaten: 233:20
@@ -734,7 +758,9 @@ function parseLine( $line_in) {
                     $SQL_Result = tic_mysql_query('DELETE FROM `gn4scans` WHERE rg="'.$scan_rg.'" AND rp="'.$scan_rp.'" AND type="'.$scan_type.'";', $SQL_DBConn);
                     $insert_names = 'glo, glr, gmr, gsr, ga, gr';
                     $insert_values = '"'.$scan_glo.'", "'.$scan_glr.'", "'.$scan_gmr.'", "'.$scan_gsr.'", "'.$scan_ga.'", "'.$scan_gr.'"';
-                    $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
+                    $sql = 'INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');';
+aprint($sql);
+					$SQL_Result = tic_mysql_query($sql, $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
 
                 } // 4
             } else {    // sec, mili, unit, news, gscan // 3
@@ -798,7 +824,7 @@ function parseLine( $line_in) {
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
             } // 3
 
-			if ($scan_typ == 'Militärscan') { // 3
+			if ($scan_typ == 'MilitÃ¤can') { // 3
 				$scan_type = 2;
 					for($n = 0; $n <= 50; $n++) { // 4
 						if (!isset($zeilen[$n])) $zeilen[$n] = '0';
@@ -863,7 +889,7 @@ function parseLine( $line_in) {
 						case 'Im': // orbit
 							$scan_status1 = 0;
 							break;
-						case 'Rückflug':
+						case 'RÃ¼ckflug':
 							$scan_status1 = 3 ;
 							break;
 						case 'Angriffsflug':
@@ -880,7 +906,7 @@ function parseLine( $line_in) {
 						case 'Im': // orbit
 							$scan_status2 = 0;
 							break;
-						case 'Rückflug':
+						case 'RÃ¼ckflug':
 							$scan_status2 = 3;
 							break;
 						case 'Angriffsflug':
@@ -948,7 +974,7 @@ function parseLine( $line_in) {
 					$insert_values = '"'.$scan_sfj.'", "'.$scan_sfb.'", "'.$scan_sff.'", "'.$scan_sfz.'", "'.$scan_sfkr.'", "'.$scan_sfsa.'", "'.$scan_sft.'", "'.$scan_sfko.'", "'.$scan_sfka.'", "'.$scan_sfsu.'"';
 					$SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
 				} // 2
-            if ($scan_typ == 'Geschützscan') { // 2
+            if ($scan_typ == 'GeschÃ¼tzscan') { // 2
                 $scan_type = 3;
                 $daten = parseLine( $zeilen[3]);            // Leichtes Orbitalgeschütz 400
                 $scan_glo = trim($daten[4]);
@@ -991,7 +1017,7 @@ function parseLine( $line_in) {
 					$typ = 2;
 				} else if(strpos($typ, "tz") !== false) {
 					$typ = 3;
-				} else if(strpos($typ, "Nachrichten") !== false) {
+				} else if(strpos($typ, "Nachrichten") !== false || strpos($typ, "Newsscan") !== false) {
 					$typ = 4;
 				}else {
 					$typ = -1;
