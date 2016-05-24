@@ -334,14 +334,14 @@
 		$dsp .= "			</td>\n";
 
 		//kommentare
-		$dsp .= "			<td class=\"field".$farb_zusatz."ligtht\">\n";
+		$dsp .= "			<td class=\"field".$farb_zusatz."light\">\n";
 		$comments_sql = "SELECT k.id, k.erfasser_g, k.erfasser_p, k.t, k.kommentar, u.name FROM gn4flottenbewegungen_kommentare k
 left join gn4gnuser u on u.gala = k.erfasser_g AND u.planet = k.erfasser_p
 WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p = '" . $user_p . "' ORDER BY k.t DESC";
 		
 		//echo $comments_sql;
 		
-		$comments = tic_mysql_query($comments_sql, $SQL_DBConn); // or error("Error while bilding 'taktik' (step 2).", ERROR_SQL, false);
+		$comments = tic_mysql_query($comments_sql, __FILE__, __LINE__); // or error("Error while bilding 'taktik' (step 2).", ERROR_SQL, false);
 		$comments_num = mysql_num_rows($comments);
 
 		if($comments_num > 0) {
@@ -354,8 +354,8 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p
 				$erfasser_p = mysql_result($comments, $i, 'erfasser_p');
 				$erfasser = mysql_result($comments, $i, 'name') . ' (' . $erfasser_g . ':' . $erfasser_p . ')';
 				
-				$dsp .= '<tr><td style="font-size: 8pt;" valign="top" align="right">' . round(($t - time()) / 60, 0) . '</td>';
-				$dsp .= '<td>' . $erfasser . ' ';
+				$dsp .= '<tr><td class="field'.$farb_zusatz.'dark" style="font-size: 8pt;" valign="top" align="right">' . round(($t - time()) / 60, 0) . '</td>';
+				$dsp .= '<td class="field'.$farb_zusatz.'light">' . $erfasser . ' ';
 				if($Benutzer['rang'] >= $Rang_GC || $erfasser_g == $Benutzer['galaxie'] && $erfasser_p == $Benutzer['planet']) {
 					$dsp .= '<a href="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar&del=' . $id . '" title="Löschen" onclick="return confirm(\'Bist Du Dir sicher?\')">[X]</a><br/>';
 				}
@@ -366,7 +366,7 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p
 			$dsp .= '-';
 		}
 		$dsp .= "			</td>\n";
-		$dsp .= '			<td class="field'.$farb_zusatz.'light" valign="bottom" align="right"><a href="#" onclick="document.getElementById(\'add_'.$user_g.'_'.$user_p.'\').style.display=\'block\';">add</a><br/><form method="post" action="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar" id="add_'.$user_g.'_'.$user_p.'" style="display: none"><textarea name="kommentar" rows="4" cols="20"></textarea><input type="hidden" name="kommentar_g" value="'.$user_g.'"/><input type="hidden" name="kommentar_p" value="'.$user_p.'"/><br/><input type="submit" value="Hinzuf&uuml;gen"/></form></td>'."\n";
+		$dsp .= '			<td class="field'.$farb_zusatz.'dark" valign="bottom" align="right"><a href="#" onclick="document.getElementById(\'add_'.$user_g.'_'.$user_p.'\').style.display=\'block\';">add</a><br/><form method="post" action="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar" id="add_'.$user_g.'_'.$user_p.'" style="display: none"><textarea name="kommentar" rows="4" cols="20"></textarea><input type="hidden" name="kommentar_g" value="'.$user_g.'"/><input type="hidden" name="kommentar_p" value="'.$user_p.'"/><br/><input type="submit" value="Hinzuf&uuml;gen"/></form></td>'."\n";
 
 
 
