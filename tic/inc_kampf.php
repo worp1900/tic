@@ -11,6 +11,8 @@
 ########################################
 */
 
+//error_reporting(E_ALL);
+
 include("GNSimuclass.php");
 $ticks = postOrGet('ticks') ? postOrGet('ticks') : 5;
 
@@ -338,18 +340,11 @@ if(count($usedscans) > 0) {
 <?php
 	for($i = 1; $i <= $num_flotten; $i++) {
 		echo '	<td>
-		<select tabindex="'.(600+$i).'" name="ankunft['.$i.']">
-			<option value="1"'.((isset($ankunft[$i]) && $ankunft[$i] == 1) ? ' selected="selected"' : '').'>1</option>
-			<option value="2"'.((isset($ankunft[$i]) && $ankunft[$i] == 2) ? ' selected="selected"' : '').'>2</option>
-			<option value="3"'.((isset($ankunft[$i]) && $ankunft[$i] == 3) ? ' selected="selected"' : '').'>3</option>
-			<option value="4"'.((isset($ankunft[$i]) && $ankunft[$i] == 4) ? ' selected="selected"' : '').'>4</option>
-			<option value="5"'.((isset($ankunft[$i]) && $ankunft[$i] == 5) ? ' selected="selected"' : '').'>5</option>
-			<option value="6"'.((isset($ankunft[$i]) && $ankunft[$i] == 6) ? ' selected="selected"' : '').'>6</option>
-			<option value="7"'.((isset($ankunft[$i]) && $ankunft[$i] == 7) ? ' selected="selected"' : '').'>7</option>
-			<option value="8"'.((isset($ankunft[$i]) && $ankunft[$i] == 8) ? ' selected="selected"' : '').'>8</option>
-			<option value="9"'.((isset($ankunft[$i]) && $ankunft[$i] == 9) ? ' selected="selected"' : '').'>9</option>
-			<option value="10"'.((isset($ankunft[$i]) && $ankunft[$i] == 10) ? ' selected="selected"' : '').'>10</option>
-		</select>
+		<select tabindex="'.(600+$i).'" name="ankunft['.$i.']">';
+		for($j = 1; $j <= 20; $j++) {
+			echo '<option value="'.$j.'"'.((isset($ankunft[$i]) && $ankunft[$i] == $j) ? ' selected="selected"' : '').'>'.$j.'</option>';
+		}
+		echo '</select>
 	</td>';
 	}
 ?>
