@@ -220,7 +220,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
 			</tr>
 <?php
-			$highlight = array('Verteidigung', 'Angriff', 'Rückzug');
+			$highlight = array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss');
 
 			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
 			$res_news_entries = tic_mysql_query($sql);
@@ -232,7 +232,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
 
-				if(in_array_contains(array('Angriffsbericht'), $typ)) {
+				if(in_array_contains(array('Angriffsbericht', 'Verteidigungsbericht', 'Artilleriebeschuss'), $typ)) {
 					//convert content
 					$rows = explode("\n\n", trim($inhalt));
 					//aprint($rows, 'rows');
@@ -249,16 +249,19 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					}
 					$inhalt .= '<tr></tr>';
 					$inhalt .= '</table>';
-					
+
 					//aprint($inhalt);
 				}
-				
+
 				if(in_array_contains($highlight, $typ)) {
 					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
 				} else {
 					echo $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';
 				}
 
+				//@^(\d+):(\d+).+?Flotte (\d).+wird in (\d+:\d+|\d+ Minuten|\d+ Ticks)@mg
+				$inhalt = preg_replace('@(\\d+):(\\d+) ([\\w-\.]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@([\\w-\.]+) \((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
 				?>
 					<td valign="top"><?=date('Y-m-d H:i', $t);?> -<?=(round((time()-$t)/60, 0));?>min</td>
 					<td valign="top" align="left"><?=$typ;?></td>
