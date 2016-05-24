@@ -4,6 +4,8 @@
 ON DUPLICATE KEY UPDATE t=unix_timestamp(now()), erfasser='" . $Benutzer['name'] . "';";
 	tic_mysql_query($sql, $SQL_DBConn);
 
-header('Location: ' . $_SERVER['HTTP_REFERER']);
+if(!isset($doNotRelocate)) {
+	header('Location: ' . $_SERVER['HTTP_REFERER']);
+}
 
 ?>
