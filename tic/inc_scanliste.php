@@ -9,10 +9,10 @@ $hours = 36;
 	$to_be_scanned_meta = array();
 
 	$where = ' (0 ';
-	
+
 	if($_GET['meta']) {
 		$metas = explode(';', $_GET['meta']);
-		
+
 		foreach($metas as $v) {
 			$v = trim($v);
 			$v = str_replace('?', '_', $v);
@@ -21,10 +21,10 @@ $hours = 36;
 			}
 		}
 	}
-	
+
 	if($_GET['allianz']) {
 		$allies = explode(';', $_GET['allianz']);
-		
+
 		foreach($allies as $v) {
 			$v = trim($v);
 			$v = str_replace('?', '_', $v);
@@ -33,10 +33,10 @@ $hours = 36;
 			}
 		}
 	}
-	
+
 	if($_GET['galaxie']) {
 		$galas = explode(';', $_GET['galaxie']);
-		
+
 		foreach($galas as $v) {
 			$v = trim($v);
 			if(strlen($v) > 0) {
@@ -44,14 +44,14 @@ $hours = 36;
 			}
 		}
 	}
-	
+
 	$where .= ')';
 
 	$sql = "SELECT spieler_galaxie g, spieler_planet p FROM gn_spieler2 WHERE " . $where;
 
 	$res = tic_mysql_query($sql) or tic_mysql_error(__FILE__, __LINE__);
 	$num = mysql_num_rows($res);
-	
+
 	for($i = 0; $i < $num; $i++) {
 		$g = mysql_result($res, $i, 'g');
 		$p = mysql_result($res, $i, 'p');
@@ -59,7 +59,7 @@ $hours = 36;
 		if(!in_array($key, $to_be_scanned))
 			$to_be_scanned[] = $key;
 	}
-	
+
 //aprint($to_be_scanned);
 
 	?>
@@ -165,12 +165,12 @@ $hours = 36;
 		$v = explode(':', $v);
 		$where .= ' OR (s.spieler_galaxie = '.$v[0].' AND s.spieler_planet = '.$v[1].')';
 	}
-	$sql = "SELECT 
-			s.meta, 
-			s.allianz_name ally, 
-			s.spieler_galaxie g, 
-			s.spieler_planet p, 
-			s.spieler_name name, 
+	$sql = "SELECT
+			s.meta,
+			s.allianz_name ally,
+			s.spieler_galaxie g,
+			s.spieler_planet p,
+			s.spieler_name name,
 			s.spieler_urlaub,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans0.zeit, '%H:%i %d.%m.%Y')))/60, 0) t0,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans1.zeit, '%H:%i %d.%m.%Y')))/60, 0) t1,
@@ -179,7 +179,7 @@ $hours = 36;
 			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/60, 0) t4,
 			blocks.typ,
 			blocks.svs
-		FROM gn_spieler2 s 
+		FROM gn_spieler2 s
 		LEFT JOIN gn4scans scans0 ON scans0.type = 0 AND scans0.rg = s.spieler_galaxie AND scans0.rp = s.spieler_planet
 		LEFT JOIN gn4scans scans1 ON scans1.type = 1 AND scans1.rg = s.spieler_galaxie AND scans1.rp = s.spieler_planet
 		LEFT JOIN gn4scans scans2 ON scans2.type = 2 AND scans2.rg = s.spieler_galaxie AND scans2.rp = s.spieler_planet
@@ -196,7 +196,7 @@ $hours = 36;
 
 	$res = tic_mysql_query($sql) or tic_mysql_error(__FILE__, __LINE__);
 	$num = mysql_num_rows($res);
-	
+
 	$color = true;
 	for($i = 0; $i < $num; $i++) {
 		$meta = mysql_result($res, $i, 'meta');
@@ -214,7 +214,7 @@ $hours = 36;
 
 		$block_svs = mysql_result($res, $i, 'svs');
 		$block_typ = mysql_result($res, $i, 'typ');
-		
+
 		switch($block_typ) {
 			case 0: $block_typ = 'S'; break;
 			case 1: $block_typ = 'E'; break;
@@ -224,16 +224,16 @@ $hours = 36;
 			default:
 				$block_typ = '<i>unknown</i>';
 		}
-		
+
 		if(!$block_svs)
 			$block_typ = '';
-		
+
 //<|S> | ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=einheit|E> ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=mili|M> | ';
 //		$postdata .= '<http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=gesch|G> ';
-//		$postdata .= '<http://www.galaxy-network.net/#game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=news|N>		
-		
+//		$postdata .= '<http://www.galaxy-network.net/#game/waves.php?action=Scannen&c1=' . $gal . '&c2=' . $plani . '&typ=news|N>
+
 		if($umode)
 			echo '<tr title="Urlaub" bgcolor="#ccaaaa">';
 		else
@@ -254,10 +254,10 @@ $hours = 36;
 		echo '	<td align="right">&nbsp;' . ($age_m ? ZahlZuText($age_m) : '-') . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=mili" target="_blank"><b>Scan M</b></a>&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ($age_n ? ZahlZuText($age_n) : '-') . '&nbsp;</td>';
-		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
+		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news&news_kampf=1&news_scan=1&news_spenden=1&news_galaxy=1&news_allianz=1&news_tausch=1" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
 		echo '	<td align="center"><a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=0">Details</a></td>';
 		echo '</tr>';
-		
+
 		$color = !$color;
 	}
 ?>
