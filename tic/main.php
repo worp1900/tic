@@ -146,7 +146,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
 	<head>
 		<title>TIC wird gewartet</title>
-		 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</head>
 	<body style="background-color:#000000">
 		<table height="100%" width="100%">
@@ -195,7 +195,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
 	<head>
 		<title>TIC - <?=$MetaInfo['name']?></title>
-		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<meta http-equiv="refresh" content="900; URL=./main.php?<?=(isset($_GET['auto']) ? "" : "auto").($_SERVER['QUERY_STRING'] != "" ? (isset($_GET['auto']) ? "" : "&amp;").str_replace("&", "&amp;", $_SERVER['QUERY_STRING']) : "")?>" />
 		<link rel="stylesheet" href="./tic.css" type="text/css" />
 		<script language="javascript" type="text/javascript">
