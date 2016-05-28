@@ -87,10 +87,10 @@ if(!$xgala || !$xplanet) {
 	$name = @mysql_result($res_name, 0, 'name');
 
 	$playerStr = $xgala . ':' . $xplanet . ' ' . $name;
-	
+
 
 	?>
-	<p><center><b><?php echo $playerStr; ?></b> - <a href="#sek">&raquo; Sektor</a> <a href="#deff">&raquo; Gesch&uuml;tze</a> <a href="#unit">&raquo; Einheiten</a> <a href="#mili">&raquo; Milit&auml;r</a> <a href="#news">&raquo; Nachrichten</a> <a href="javascript:history.back();"><b>zur&uuml;ck</b></a></center></p>
+	<p><center><b><?php echo $playerStr; ?></b><br/><a href="#sek">&raquo; Sektor</a><br/> <a href="#deff">&raquo; Gesch&uuml;tze</a> <a href="#unit">&raquo; Einheiten</a> <br/> <a href="#mili">&raquo; Milit&auml;r</a> <a href="#news">&raquo; Nachrichten</a><br/> <a href="https://gntic.de/x/player.php?name=<?=$name;?>" target="_blank">&raquo; Statistiken</a> <a href="javascript:history.back();"><b>&raquo; zur&uuml;ck</b></a></center></p>
 			<a name="sek"></a>
 			<table width="100%">
 				<tr>
@@ -111,12 +111,12 @@ if(!$xgala || !$xplanet) {
 
 	$res_s = tic_mysql_query($sql_s) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_s = mysql_num_rows($res_s);
-	
+
 	$color = true;
 	for($i = 0; $i < $num_s; $i++) {
 		$row = mysql_fetch_row($res_s);
 		$color = !$color;
-		
+
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td>'.date('Y-m-d H:i:s', $row[0]).'</td>';
 		echo '	<td>'.$row[1].'%</td>';
@@ -152,12 +152,12 @@ if(!$xgala || !$xplanet) {
 
 	$res_g = tic_mysql_query($sql_g) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_g = mysql_num_rows($res_g);
-	
+
 	$color = true;
 	for($i = 0; $i < $num_g; $i++) {
 		$row = mysql_fetch_row($res_g);
 		$color = !$color;
-		
+
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td>'.date('Y-m-d H:i:s', $row[0]).'</td>';
 		echo '	<td>'.$row[1].'%</td>';
@@ -196,12 +196,12 @@ if(!$xgala || !$xplanet) {
 	$sql_e = "SELECT t, gen, erfasser_svs, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu FROM gn4scans_history WHERE rg = '".mysql_real_escape_string($xgala)."' AND rp = '".mysql_real_escape_string($xplanet)."' AND type = 1 ORDER BY t DESC LIMIT " . $limit;
 	$res_e = tic_mysql_query($sql_e) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_e = mysql_num_rows($res_e);
-	
+
 	$color = true;
 	for($i = 0; $i < $num_e; $i++) {
 		$row = mysql_fetch_row($res_e);
 		$color = !$color;
-		
+
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td>'.date('Y-m-d H:i:s', $row[0]).'</td>';
 		echo '	<td>'.$row[1].'%</td>';
@@ -245,12 +245,12 @@ if(!$xgala || !$xplanet) {
 
 	$res_m = tic_mysql_query($sql_m) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_m = mysql_num_rows($res_m);
-	
+
 	$color = true;
 	for($i = 0; $i < $num_m; $i++) {
 		$row = mysql_fetch_row($res_m);
 		$color = !$color;
-		
+
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td rowspan="3">'.date('Y-m-d H:i:s', $row[0]).'</td>';
 		echo '	<td rowspan="3">'.$row[1].'%</td>';
@@ -313,12 +313,12 @@ if(!$xgala || !$xplanet) {
 
 	$res_n = tic_mysql_query($sql_n) or die(tic_mysql_error(__FILE__,__LINE__));
 	$num_n = mysql_num_rows($res_n);
-	
+
 	$color = true;
 	for($i = 0; $i < $num_n; $i++) {
 		$row = mysql_fetch_row($res_n);
 		$color = !$color;
-		
+
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td>'.date('Y-m-d H:i:s', $row[0]).'</td>';
 		echo '	<td>'.$row[1].'%</td>';
