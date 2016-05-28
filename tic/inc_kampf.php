@@ -66,6 +66,7 @@ if(postOrGet('referenz')) {
 		$mysql_senden[3] = 'SELECT id, gen, unix_timestamp(STR_TO_DATE(zeit,  \'%H:%i %d.%m.%Y\' )) as t, sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su, sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su FROM gn4scans WHERE rg="'.$g[$i].'" AND rp="'.$p[$i].'" AND type="2" LIMIT 1;';
 		$mysql_senden[4] = "SELECT name FROM gn4gnuser WHERE gala = '".$g[$i]."' AND planet = '".$p[$i]."' LIMIT 1";
 		$res = mysql_multi_query($mysql_senden, 1);
+//aprint($res);
 
 		if(!isset($res[4]['name'])) {
 			$res[4]['name'] = '<i>unknown</i>';
@@ -201,6 +202,7 @@ if(postOrGet('referenz')) {
 			}
 		}
 	}
+
 }
 function createFleet($dataRow, $aufenthalt, $ankunft, $isAtt, $txt, $g, $p, $fno) {
 	$fleet = new Fleet();

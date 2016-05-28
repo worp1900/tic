@@ -32,8 +32,8 @@
 		</tr>
 <?
 	$help_scan = "Hier klicken um die Scans einzusehen.<br /><br />";
-	$help_fleet = "Hier klicken um die Flottennummer zu ändern.<br /><br />";
-	$help_safe = "Hier klicken um den Status zu ändern.<br /><br />";
+	$help_fleet = "Hier klicken um die Flottennummer zu &auml;ern.<br /><br />";
+	$help_safe = "Hier klicken um den Status zu &auml;ndern.<br /><br />";
 
 	
 	function addScanblockInfo($blocks, &$tooltip_scan) {
@@ -85,9 +85,9 @@
 // ------------------
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=scans&txtScanGalaxie=".$user_g."&txtScanPlanet=".$user_p."\"><img src=\"./bilder/default/scan.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Scans erfassen\" title=\"Scans erfassen\"></a></td>\n";
 		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=showgalascans&xgala=".$user_g."&xplanet=".$user_p."&displaytype=0\"><img src=\"./bilder/default/ship.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffe anzeigen\" title=\"Schiffe anzeigen\"></a></td>\n";
-		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=anzeigen&id=".$SQL_Row_user['id']."\"><img src=\"./bilder/default/move.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffsbewegungen ändern\" title=\"Schiffsbewegungen ändern\"></a></td>\n";
+		$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=anzeigen&id=".$SQL_Row_user['id']."\"><img src=\"./bilder/default/move.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Schiffsbewegungen &auml;ern\" title=\"Schiffsbewegungen &auml;ern\"></a></td>\n";
 		//$dsp .= "			<td class=\"field".$farb_zusatz."dark\"><a href=\"./main.php?modul=vergleich&xgala=".$user_g."&xplanet=".$user_p."\"><img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegenüberstellung anzeigen\" title=\"Flottengegenüberstellung anzeigen\">X</a></td>\n";
-		$dsp .= "			<td class=\"field".$farb_zusatz."dark\">" . getKampfSimuLinksForTarget($user_g, $user_p, "<img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegenüberstellung anzeigen\" title=\"Flottengegenüberstellung anzeigen\"></a>")  ."</td>\n";
+		$dsp .= "			<td class=\"field".$farb_zusatz."dark\">" . getKampfSimuLinksForTarget($user_g, $user_p, "<img src=\"./bilder/default/swords.gif\" width=\"20\" height=\"20\" border=\"0\" alt=\"Flottengegen&uuml;berstellung anzeigen\" title=\"Flottengegen&uuml;berstellung anzeigen\"></a>")  ."</td>\n";
 
 		$tooltip_scan = ($Benutzer['help']?$help_scan:"")."<b>Scans von ".$user_g.":".$user_p." ".$user_n."</b><br />";
 		$scan = getScanData($user_g, $user_p);
@@ -357,7 +357,7 @@ WHERE k.t > UNIX_TIMESTAMP(NOW()) - 60*15*40 AND k.g = '" . $user_g . "' AND k.p
 				$dsp .= '<tr><td class="field'.$farb_zusatz.'dark" style="font-size: 8pt;" valign="top" align="right">' . round(($t - time()) / 60, 0) . '</td>';
 				$dsp .= '<td class="field'.$farb_zusatz.'light">' . $erfasser . ' ';
 				if($Benutzer['rang'] >= $Rang_GC || $erfasser_g == $Benutzer['galaxie'] && $erfasser_p == $Benutzer['planet']) {
-					$dsp .= '<a href="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar&del=' . $id . '" title="Löschen" onclick="return confirm(\'Bist Du Dir sicher?\')">[X]</a><br/>';
+					$dsp .= '<a href="main.php?modul=taktikbildschirm&mode='.$_GET['mode'].'&action=kommentar&del=' . $id . '" title="L&ouml;schen" onclick="return confirm(\'Bist Du Dir sicher?\')">[X]</a><br/>';
 				}
 				$dsp .= '<span style="font-size: 7pt;">' . str_replace("\n", "<br/>", $text) . '</span></td></tr>';
 			}
