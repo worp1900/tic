@@ -44,8 +44,8 @@ class Fleet
 	var $atter_exenM;
 	var $atter_exenK;
 
-	var $bergungM;
-	var $bergungK;
+	var $bergungM = 0;
+	var $bergungK = 0;
 
 	var $g;
 	var $p;
@@ -662,9 +662,11 @@ aprint(array(
 		$totalResM += $tmp[0];
 		$totalResK += $tmp[1];
 		
-		foreach($this->AttFleets as $v) {
-			$totalResM -= 1500 * ($v->atter_exenM + $v->atter_exenK);
-			$totalResK -= 1000 * ($v->atter_exenM + $v->atter_exenK);
+		if(is_array($this->AttFleets)) {
+			foreach($this->AttFleets as $v) {
+				$totalResM -= 1500 * ($v->StolenExenMthisTick + $v->StolenExenKthisTick);
+				$totalResK -= 1000 * ($v->StolenExenMthisTick + $v->StolenExenKthisTick);
+			}
 		}
 		
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
@@ -689,6 +691,10 @@ aprint(array(
 					$this->bergungExternalDeffer[1] += $this->DeffFleets[$i]->bergungK;
 /*
 aprint(array(
+	'$ToDestroyDeff' => $ToDestroyDeff,
+	'$ToDestroyAtt' => $ToDestroyAtt,
+	'$this->calcResForShipsArray($ToDestroyDeff)' => $this->calcResForShipsArray($ToDestroyDeff),
+	'$this->calcResForShipsArray($ToDestroyAtt)' => $this->calcResForShipsArray($ToDestroyAtt),
 	'totalResM' => $totalResM,
 	'totalResK' => $totalResK,
 	'$total_abschuesse_ext_deffer_num[$i]' => $total_abschuesse_ext_deffer_num[$i],
@@ -704,14 +710,15 @@ aprint(array(
 		//intern ist immer fester satz.
 		$this->DeffFleets[0]->bergungM += $totalResM * 0.4;
 		$this->DeffFleets[0]->bergungK += $totalResK * 0.4;
-		$this->bergungPrimeDeffer[0] += $this->DeffFleets[0]->bergungM;
-		$this->bergungPrimeDeffer[1] += $this->DeffFleets[0]->bergungK;
+		$this->bergungPrimeDeffer[0] = $this->DeffFleets[0]->bergungM;
+		$this->bergungPrimeDeffer[1] = $this->DeffFleets[0]->bergungK;
+/*
 aprint(array(
 	'bergungPrimeDeffer' => $this->bergungPrimeDeffer,
 	'bergungExternalDeffer' => $this->bergungExternalDeffer,
 	
 ));
-
+*/
 		//traeger-kapazitaetsverlute
 		$this->finalize();
 
@@ -1115,8 +1122,8 @@ aprint(array(
 		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
 			$key = $this->getFleetKey($this->DeffFleets[$i]->g, $this->DeffFleets[$i]->p, $i);
-			if(!in_array(0, $this->playerFleetDeff[$key]['fleetids']))
-				echo '<td colspan="2">-'.ZahlZuText($verluste[$i][0] / 2) .'</td>';
+			if(is_array($this->playerFleetDeff[$key]['fleetids']) && !in_array(0, $this->playerFleetDeff[$key]['fleetids']))
+				echo '<td colspan="2">-'.ZahlZuText($this->calcResForShipsArray($this->DeffFleets[$i]->LostShips)[0] / 2) .'</td>';
 			else
 				echo '<td colspan="2" bgcolor="white"></td>';
 		}
@@ -1127,12 +1134,8 @@ aprint(array(
 		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
 			$key = $this->getFleetKey($this->DeffFleets[$i]->g, $this->DeffFleets[$i]->p, $i);
-			if(!$this->DeffFleets[$i]->g || !$this->DeffFleets[$i]->p) {
-				$key = 'z' . $x;
-				$x++;
-			}
-			if(!in_array(0, $this->playerFleetDeff[$key]['fleetids']))
-				echo '<td colspan="2">-'.ZahlZuText($verluste[$i][1] / 2) .'</td>';
+			if(is_array($this->playerFleetDeff[$key]['fleetids']) && !in_array(0, $this->playerFleetDeff[$key]['fleetids']))
+				echo '<td colspan="2">-'. ZahlZuText($this->calcResForShipsArray($this->DeffFleets[$i]->LostShips)[1] / 2) .'</td>';
 			else
 				echo '<td colspan="2" bgcolor="white"></td>';
 		}
