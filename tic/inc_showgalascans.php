@@ -242,7 +242,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td class="fieldnormaldark"><b>Newsscan: </b></td>
 				<td class="fieldnormaldark"><b><?=date('Y-m-d H:i', $t);?></b></td>
 				<td class="fieldnormaldark"><b><?=$gen;?>%</b></td>
-				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b> - <a  title="Bezahle 2.000 Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$g;?>&transfer2=<?=$p;?>&summe=8000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; <?=$g.':'.$p;?></a></td>
+				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b> - <a  title="Bezahle <?=ZahlZuText(round(8000 * $scanbezahlungfaktor, 0));?> Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$g;?>&transfer2=<?=$p;?>&summe=<?=round(8000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; <?=$g.':'.$p;?></a></td>
 			</tr>
 <?php
 			$highlight = array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss', 'Artilleriesysteme');
@@ -508,7 +508,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
 			<td class="fieldnormaldark" title="F&uuml;r einen erfolgreichen Scan werden SV/SB ben&ouml;tigt:&#013;* Sektor 1-1.5&#013;* Einheiten/Gesch&uuml;tze 1.5-2.0&#013;* Milit&auml;r/News 2.0-2.5"><b>Scanblocks</b><i>(?)</i></td>
 			<td class="fieldnormaldark"><b>News</b></td>
 		</tr>
@@ -533,7 +533,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?=$sgen;?></td>
 			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
-			<td class="fieldnormallight"><a  title="Bezahle 2.000 Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$sek_g;?>&transfer2=<?=$sek_p;?>&summe=2000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$sek_g ? $sek_g.':'.$sek_p : '';?></a></td>
+			<td class="fieldnormallight"><a  title="Bezahle <?=ZahlZuText(round(2000 * $scanbezahlungfaktor, 0));?> Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$sek_g;?>&transfer2=<?=$sek_p;?>&summe=<?=round(2000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$sek_g ? $sek_g.':'.$sek_p : '';?></a></td>
 			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt"><pre>
 <?php
 	$sql_block = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' AND suspicious IS NULL ORDER BY t DESC LIMIT 3";
@@ -556,23 +556,23 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		switch($type) {
 			case 0:
 				echo 'S';
-				echo ' <a title="Bezahle 2.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe=2000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(2000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(2000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 1:
 				echo 'E';
-				echo ' <a title="Bezahle 4.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe=4000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 2:
 				echo 'M';
-				echo ' <a title="Bezahle 8.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe=8000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 3:
 				echo 'G';
-				echo ' <a title="Bezahle 4.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe=4000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 4:
 				echo 'N';
-				echo ' <a title="Bezahle 8.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe=8000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
 				break;
 			default:
 			break;
@@ -597,7 +597,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			$newsid = mysql_result($res_news, $j, 'id');
 			$n_g = mysql_result($res_news, $j, 'erfasser_g');
 			$n_p = mysql_result($res_news, $j, 'erfasser_p');
-			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid='.$newsid.'">' . date('Y-m-d H:i', $t) . '</a> <a title="Bezahle 8.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$n_g.'&transfer2='.$n_p.'&summe=8000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$n_g.':'.$n_p.'</a><br/>';
+			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid='.$newsid.'">' . date('Y-m-d H:i', $t) . '</a> <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$n_g.'&transfer2='.$n_p.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$n_g.':'.$n_p.'</a><br/>';
 		}
 	}
 	mysql_free_result($res_news);
@@ -627,7 +627,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
 		</tr>
 		<tr>
 			<td class="fieldnormallight"><?php echo $lo; ?></td>
@@ -656,7 +656,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $ggen; ?></td>
 			<td class="fieldnormallight"><?=$svs_g;?></td>
 			<td class="fieldnormallight"><?php echo $gzeit; ?></td>
-			<td class="fieldnormallight"><a title="Bezahle 4.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$ges_g;?>&transfer2=<?=$ges_p;?>&summe=4000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$ges_g ? $ges_g.':'.$ges_p : '';?></a></td>
+			<td class="fieldnormallight"><a title="Bezahle <?=ZahlZuText(round(4000 * $scanbezahlungfaktor, 0));?> Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$ges_g;?>&transfer2=<?=$ges_p;?>&summe=<?=round(4000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$ges_g ? $ges_g.':'.$ges_p : '';?></a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>J&auml;ger</b></td>
@@ -671,7 +671,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
 		</tr>
 		<tr bgcolor="#ddddfd">
 			<td><b><?php echo $ja; ?></b></td>
@@ -686,7 +686,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td><b><?php echo $ugen; ?></b></td>
 			<td><b><?=$svs_e;?></td>
 			<td><b><?php echo $uzeit; ?></b></td>
-			<td class="fieldnormallight"><a  title="Bezahle 4.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$ein_g;?>&transfer2=<?=$ein_p;?>&summe=4000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$ein_g ? $ein_g.':'.$ein_p : '';?></a></td>
+			<td class="fieldnormallight"><a  title="Bezahle <?=ZahlZuText(round(4000 * $scanbezahlungfaktor, 0));?> Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$ein_g;?>&transfer2=<?=$ein_p;?>&summe=<?=round(4000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$ein_g ? $ein_g.':'.$ein_p : '';?></a></td>
 		</tr>
 		<tr class="fieldnormallight">
 			<td><?php echo $ja0; ?></td>
@@ -701,7 +701,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td rowspan="3"><?php echo $mgen; ?></td>
 			<td rowspan="3"><?=$svs_m;?></td>
 			<td rowspan="3"><?php echo $mzeit; ?></td>
-			<td rowspan="3"><a title="Bezahle 8.000 Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$mil_g;?>&transfer2=<?=$mil_p;?>&summe=8000&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$mil_g ? $mil_g.':'.$mil_p : '';?></a></td>
+			<td rowspan="3"><a title="Bezahle <?=ZahlZuText(round(8000 * $scanbezahlungfaktor, 0));?> Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$mil_g;?>&transfer2=<?=$mil_p;?>&summe=<?=round(8000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$mil_g ? $mil_g.':'.$mil_p : '';?></a></td>
 		</tr>
 		<tr class="fieldnormallight">
 			<td><?php echo $ja1; ?></td>
