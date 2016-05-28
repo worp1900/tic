@@ -21,6 +21,48 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 	$num = mysql_num_rows($res);
 
 	$link = '';
+	
+	//home fleet
+	$sql = 'SELECT 
+			angreifer_galaxie g, 
+			angreifer_planet p,
+			flugzeit,
+			flottennr,
+			floor((ruckflug_ende - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
+			"d"
+			FROM gn4flottenbewegungen WHERE angreifer_galaxie = "' . $rg . '" AND angreifer_planet = "' . $rp . '" ORDER BY flottennr';
+	//aprint($sql);
+	$res2 = tic_mysql_query($sql) or die(tic_mysql_error(__FILE__,__LINE__));
+	$num2 = mysql_num_rows($res2);
+	$offset = 0;
+	if($num2 > 0) {
+		$home_fleets = array(
+			0 => 0,
+			1 => 0,
+			2 => 0
+		);
+		
+		for($i = 0; $i < $num2; $i++) {
+			$f = mysql_result($res2, $i, "flottennr");
+			$ankunft = mysql_result($res2, $i, "tick") + 1;
+			if($f == 0) {
+				//uncertain
+				$home_fleets[$offset] = $ankunft;
+			} else {
+				$home_fleets[$f] = $ankunft;
+			}
+		}
+		for($i = 0; $i < count($home_fleets); $i++) {
+			$f = ($i == 0) ? 3 : $i;
+				
+			$link .= '&g['.($i).']='.$rg.'&p['.($i).']='.$rp.'&typ['.($i).']=d&f['.($i).']='.$f.'&ankunft['.($i).']='.$home_fleets[$i];
+			$offset++;
+		}
+	} else {
+		$link .= '&g[0]='.$rg.'&rp[0]='.$rp;
+	}
+	
+	//deffer & atter
 	$ticks = 0;
 	for($i = 0; $i < $num; $i++) {
 		$f = mysql_result($res, $i, "flottennr");
@@ -29,12 +71,12 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$typ = mysql_result($res, $i, "typ");
 		$ankunft = mysql_result($res, $i, "tick") + 1;
 		$dauer = mysql_result($res, $i, "flugzeit");
-		$link .= '&g['.($i+1).']='.$g.'&p['.($i+1).']='.$p.'&typ['.($i+1).']='.$typ.'&f['.($i+1).']='.$f.'&ankunft['.($i+1).']='.$ankunft.'&aufenthalt['.($i+1).']='.$dauer;
+		$link .= '&g['.($i+$offset).']='.$g.'&p['.($i+$offset).']='.$p.'&typ['.($i+$offset).']='.$typ.'&f['.($i+$offset).']='.$f.'&ankunft['.($i+$offset).']='.$ankunft.'&aufenthalt['.($i+$offset).']='.$dauer;
 		
 		$ticks = ($typ == 'a' && ($ankunft + $dauer > $ticks)) ? $ankunft + $dauer -1 : $ticks;
 	}
 
-	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.$num.'&g[0]='.$rg.'&p[0]='.$rp.$link.'#oben">'.$linkName.'</a>';;
+	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.($num + $offset - 1).$link.'#oben">'.$linkName.'</a>';;
 }
 
 function GetScans($SQL_DBConn, $galaxie, $planet) {
