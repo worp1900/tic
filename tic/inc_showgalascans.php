@@ -1,9 +1,25 @@
+<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.10/dist/clipboard.min.js"></script>
 <script>
-  function copyToClipboard(text) {
-    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-  }
+	var clipboard = new Clipboard('.btn');
+	clipboard.on('success', function(e) {
+		e.clearSelection();
+	});
+
+	clipboard.on('error', function(e) {
+		console.error('Action:', e.action);
+		console.error('Trigger:', e.trigger);
+	});
 </script>
 <?php
+	function createCopyLink($linktext, $copycontent, $linkattributes = null) {
+		$id = 'x'. substr(md5(rand()), 0, 31);
+		$r = '';
+		$r .= '<textarea id="' . $id . '" style="width: 1px; height: 1px; border: none;">' . $copycontent . '</textarea>';
+		$r .= '<a href="#" ' . $linkattributes . ' class="btn" data-clipboard-target="#' . $id . '">' . $linktext . '</a>';
+
+		return $r;
+	}
+
 	function in_array_contains($haystack, $needle) {
 		if(!is_array($haystack) || !$needle)
 			return false;
@@ -207,11 +223,18 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td colspan="15" class="datatablehead">NEWS: <?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="javascript:history.back();">zur&uuml;ck</a></td>
 			</tr>
 <?php
-		for($j = 0; $j < $num_news; $j++) {
-			$id = mysql_result($res_news, $j, 'id' );
-			$t = mysql_result($res_news, $j, 't' );
-			$gen = mysql_result($res_news, $j, 'genauigkeit' );
-			$svs = mysql_result($res_news, $j, 'erfasser_svs' );
+		$copystr = '';
+
+		for($k = 0; $k < $num_news; $k++) {
+			$id = mysql_result($res_news, $k, 'id' );
+			$t = mysql_result($res_news, $k, 't' );
+			$gen = mysql_result($res_news, $k, 'genauigkeit' );
+			$svs = mysql_result($res_news, $k, 'erfasser_svs' );
+
+			if($k == 0) {
+				$copystr .= '*News* (' . $svs . 'SVS, ' . $gen . '%, ' . date('H:i d.m.Y', $t) . ') - *' . trim($rname) . ' ' . $rg . ':' . $rp . '* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid=' . $id;
+				$copystr .= '```';
+			}
 ?>
 			<tr>
 				<td class="fieldnormaldark"><b>Newsscan: </b></td>
@@ -220,27 +243,39 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b></td>
 			</tr>
 <?php
-			$highlight = array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss');
+			$highlight = array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss', 'Artilleriesysteme');
 
-			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by t desc";
+			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by id asc";
 			$res_news_entries = tic_mysql_query($sql);
 			$num_news_entries = mysql_num_rows($res_news_entries);
 
 			$color = true;
+			
+			if($num_news_entries == 0) {
+				if($id < 155) {
+					echo '<tr><td colspan="4">Sorry, aufgrund eines technischen Fehlers sind diese Eintr&auml;ge permanent nicht verf&uuml;bar.</td></tr>';
+				} else {
+				echo '<tr><td colspan="4">Sorry, keine Eintr&auml;ge gefunden.</td></tr>';
+				}
+			}
 			for($j = 0; $k < $num_news_entries; $k++) {
 				$t = mysql_result($res_news_entries, $k, 't' );
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
 
-				if(in_array_contains(array('Angriffsbericht', 'Verteidigungsbericht', 'Artilleriebeschuss'), $typ)) {
+				if(in_array_contains(array('Angriffsbericht', 'Verteidigungsbericht', 'Artilleriebeschuss', 'Artilleriesysteme'), $typ)) {
 					//convert content
 					$rows = explode("\n\n", trim($inhalt));
+					if(count($rows) == 1)
+						$rows = explode("\n", trim($inhalt));
 					//aprint($rows, 'rows');
 					$inhalt = '';
 					$inhalt .= '<table border="1">';
 					foreach($rows as $r) {
 						$inhalt .= '<tr>';
 						$columns = explode("\n", trim($r));
+						if(count($columns) == 1)
+							$columns = explode("\t", trim($r));
 						//aprint($columns, 'columns');
 						foreach($columns as $c) {
 							$inhalt .= '<td>'.$c.'</td>';
@@ -259,11 +294,27 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					echo $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';
 				}
 
+				if(in_array_contains($highlight, $typ) && time() - $t < 10*60*60) {
+					if(!in_array_contains(array('Artilleriebeschuss', 'Verteidigungsbericht', 'Angriffsbericht'), $typ))
+						$copystr .= "\n" . ZahlZuText(round((time()-$t)/60, 0)) . 'min   ' . $typ . ': ' . $inhalt;
+					else
+						$copystr .= "\n" . ZahlZuText(round((time()-$t)/60, 0)) . 'min   ' . $typ . ': *snip*';
+				}
+
 				//@^(\d+):(\d+).+?Flotte (\d).+wird in (\d+:\d+|\d+ Minuten|\d+ Ticks)@mg
-				$inhalt = preg_replace('@(\\d+):(\\d+) ([\\w-\.]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
-				$inhalt = preg_replace('@([\\w-\.]+) \((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@(\\d+):(\\d+) ([\\w-\.äöü]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@([\\w-\.äöü]+) \((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
 				?>
-					<td valign="top"><?=date('Y-m-d H:i', $t);?> -<?=(round((time()-$t)/60, 0));?>min</td>
+					<td valign="top"><?php
+					if($t > 0) {
+						echo date('Y-m-d H:i', $t);
+						echo ' - ';
+						echo ZahlZuText(round((time()-$t)/60, 0));
+						echo 'min';
+					} else {
+						echo '<i>?</i>';
+					}
+					?></td>
 					<td valign="top" align="left"><?=$typ;?></td>
 					<td valign="top" align="left" colspan="2"><pre style="font-size: 8pt;"><?=$inhalt;?></pre></td>
 				</tr>
@@ -273,7 +324,16 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 
 			mysql_free_result($res_news_entries);
 		}
+
+		$copystr .= "```";
 ?>
+			<tr class="datatablehead">
+				<td colspan="4">&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="1" bgcolor="dbdbbb">&nbsp;Copy for:&nbsp;</td>
+				<td colspan="1" bgcolor="#fdfddd" class="fielnormallight">&nbsp;<?php echo createCopyLink('Slack', $copystr);?>&nbsp;</td>
+			</tr>
 		</table>
 <?php
 	}
@@ -311,7 +371,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$type = '<i>unbekannt</i>';
 			}
 
-			echo '<b><font color="red">Scanblock ' . $type . ' mit ' . $svs . ' SVS!</font></b><br/>';
+			echo '<b><font color="red">Scanblock ' . $type . ' mit ' . ZahlZuText($svs) . ' SVS!</font></b><br/>';
 		}
 
 		echo '<font color="#800000" size="-1"><b>Sorry - Keine Scans vorhanden. Vielleicht im <a href="main.php?auto&modul=scanarchiv&xgala='.$_GET['xgala'].'&xplanet='.$_GET['xplanet'].'">&raquo; Archiv</a>.</b></font>';
@@ -448,17 +508,17 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $s; ?></td>
 			<td class="fieldnormallight"><?php echo $d; ?></td>
 <?php
-	$sektor = '00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
-	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a."\\n";
-	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Gesch\FCtze: 07,01'.$d."\\n";
-	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke."\\n";
+	$sektor = '00,10Sektorscan (01,10 '.$sgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\n";
+	$sektor = $sektor.	'00,01Punkte: 07,01'.(($pts != '-') ? number_format($pts, 0, ',', '.') : $pts).' 00,01Astros: 07,01'.$a."\n";
+	$sektor = $sektor.	'00,01Schiffe: 07,01'.$s.' 00,01Gesch\FCtze: 07,01'.$d."\n";
+	$sektor = $sektor.	'00,01Metall-Exen: 07,01'.$me.' 00,01Kristall-Exen: 07,01'.$ke."\n";
 	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit;
 
-	$sektor_slack = '*Sektor* ('.$svs_s.'SVS, ' . $sgen . '%, ' . $szeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-	$sektor_slack .= '```Punkte:  ' . xformat($pts) . '\\nExen:    M ' . xformat($me) . ', K ' . xformat($ke) . '; Sum ' . xformat($me + $ke) . '\\nSchiffe: ' . xformat($s) . '\\nDeff:    ' . xformat($d) . '```';
+	$sektor_slack = '*Sektor* ('.$svs_s.'SVS, ' . $sgen . '%, ' . $szeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
+	$sektor_slack .= '```Punkte:  ' . xformat($pts) . "\n".'Exen:    M ' . xformat($me) . ', K ' . xformat($ke) . '; Sum ' . xformat($me + $ke) . "\n".'Schiffe: ' . xformat($s) . "\n".'Deff:    ' . xformat($d) . '```';
 ?>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $sektor . '\')">Sektorscan</a>';?></td>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $sektor_slack . '\')">Sektorscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Sektor', $sektor);?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Sektor', $sektor_slack);?></td>
 			<td class="fieldnormallight"><?=$sgen;?></td>
 			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
@@ -506,7 +566,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			</td>
 			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt">
 <?php
-	$sql = "select * from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "'";
+	$sql = "select * from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' order by t desc";
 	$res_news = tic_mysql_query($sql);
 	$num_news = mysql_num_rows($res_news);
 
@@ -530,19 +590,19 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>SR</b></td>
 			<td class="fieldnormaldark"><b>AJ</b></td>
 <?php
-	$gscan = '00,10Geschützscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
-	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr."\\n";
-	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj."\\n";
+	$gscan = '00,10Geschützscan (01,10 '.$ggen.'%00,10 ) - '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\n";
+	$gscan = $gscan.	'00,01Rubium: 07,01'.$lo.' 00,01Pulsar: 07,01'.$lr.' 00,01Coon: 07,01'.$mr."\n";
+	$gscan = $gscan.	'00,01Centurion: 07,01'.$sr.' 00,01Horus: 07,01'.$aj."\n";
 	$gscan = $gscan.	'00,01Datum: 07,01'.$gzeit;
 
 	$clepkill = 0;
 	$clepkill += floor($aj * 0.32);
 	$clepkill += floor($lo * 1.28);
-	$gscan_slack = '*Geschütze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . '\\nMR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . '\\nAJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
+	$gscan_slack = '*Geschütze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
+	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . "\n".'MR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . "\n".'AJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
 ?>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$gscan.'\')" >Gesch&uuml;tzscan</a>';?></td>
-			<td bgcolor="#fdfddd" colspan="2"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $gscan_slack . '\')">Gesch&uuml;tzscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Gesch&uuml;tze', $gscan);?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Gesch&uuml;tze', $gscan_slack);?></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
@@ -554,23 +614,23 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?php echo $sr; ?></td>
 			<td class="fieldnormallight"><?php echo $aj; ?></td>
 <?php
-	$MiliH = '00,10Milit\E4rscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\\n";
-	$Orbit = 		'00,1Orbit: 07,01'.$ja0.' 00,1Leo 07,01'.$bo0.' 00,1Aquilae 07,01'.$fr0.' 00,1Fornax 07,01'.$ze0.' 00,1Draco 07,01'.$kr0.' 00,1Goron 07,01'.$sl0.' 00,1Pentalin 07,01'.$tr0.' 00,1Zenit 07,01'.$ka0.' 00,1Cleptor 07,01'.$ca0.' 00,1Cancri'."\\n";
-	$Flotte1 = 		'00,01Flotte1: 07,01'.$ja1.' 00,01Leo 07,01'.$bo1.' 00,01Aquilae 07,01'.$fr1.' 00,01Fornax 07,01'.$ze1.' 00,01Draco 07,01'.$kr1.' 00,01Goron 07,01'.$sl1.' 00,01Pentalin 07,01'.$tr1.' 00,01Zenit 07,01'.$ka1.' 00,01Cleptor 07,01'.$ca1.' 00,01Cancri'."\\n";
-	$Flotte2 = 		'00,01Flotte2: 07,01'.$ja2.' 00,01Leo 07,01'.$bo2.' 00,01Aquilae 07,01'.$fr2.' 00,01Fornax 07,01'.$ze2.' 00,01Draco 07,01'.$kr2.' 00,01Goron 07,01'.$sl2.' 00,01Pentalin 07,01'.$tr2.' 00,01Zenit 07,01'.$ka2.' 00,01Cleptor 07,01'.$ca2.' 00,01Cancri'."\\n";
+	$MiliH = '00,10Milit\E4rscan (01,10 '.$mgen.'%00,10 ) '.$rname.' (01,10'.$rg.':'.$rp.'00,10)'."\n";
+	$Orbit = 		'00,1Orbit: 07,01'.$ja0.' 00,1Leo 07,01'.$bo0.' 00,1Aquilae 07,01'.$fr0.' 00,1Fornax 07,01'.$ze0.' 00,1Draco 07,01'.$kr0.' 00,1Goron 07,01'.$sl0.' 00,1Pentalin 07,01'.$tr0.' 00,1Zenit 07,01'.$ka0.' 00,1Cleptor 07,01'.$ca0.' 00,1Cancri'."\n";
+	$Flotte1 = 		'00,01Flotte1: 07,01'.$ja1.' 00,01Leo 07,01'.$bo1.' 00,01Aquilae 07,01'.$fr1.' 00,01Fornax 07,01'.$ze1.' 00,01Draco 07,01'.$kr1.' 00,01Goron 07,01'.$sl1.' 00,01Pentalin 07,01'.$tr1.' 00,01Zenit 07,01'.$ka1.' 00,01Cleptor 07,01'.$ca1.' 00,01Cancri'."\n";
+	$Flotte2 = 		'00,01Flotte2: 07,01'.$ja2.' 00,01Leo 07,01'.$bo2.' 00,01Aquilae 07,01'.$fr2.' 00,01Fornax 07,01'.$ze2.' 00,01Draco 07,01'.$kr2.' 00,01Goron 07,01'.$sl2.' 00,01Pentalin 07,01'.$tr2.' 00,01Zenit 07,01'.$ka2.' 00,01Cleptor 07,01'.$ca2.' 00,01Cancri'."\n";
 	$MiliF = 		'00,01Datum: 07,01'.$mzeit;
 
-	$mili_slack = '*Milit\E4r* (' . $svs_m . 'SVS, ' . $mgen . '%, ' . $mzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2\\nJ\E4   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . '\\nBo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . '\\nFr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . '\\nZe:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . '\\nKr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . '\\nSc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . '\\nTr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . '\\nCl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . '\\nCa:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
+	$mili_slack = '*Militär* (' . $svs_m . 'SVS, ' . $mgen . '%, ' . $mzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
+	$mili_slack .= '```       Orbit  Flotte 1  Flotte 2'."\n".'Jä   ' . nformat($ja0, 7) . '   ' . nformat($ja1, 7) . '   ' . nformat($ja2, 7) . "\n".'Bo:  ' . nformat($bo0, 7) . '   ' . nformat($bo1, 7) . '   ' . nformat($bo2, 7) . "\n".'Fr:  ' . nformat($fr0, 7) . '   ' . nformat($fr1, 7) . '   ' . nformat($fr2, 7) . "\n".'Ze:  ' . nformat($ze0, 7) . '   ' . nformat($ze1, 7) . '   ' . nformat($ze2, 7) . "\n".'Kr:  ' . nformat($kr0, 7) . '   ' . nformat($kr1, 7) . '   ' . nformat($kr2, 7) . "\n".'Sc:  ' . nformat($sl0, 7) . '   ' . nformat($sl1, 7) . '   ' . nformat($sl2, 7) . "\n".'Tr:  ' . nformat($tr0, 7) . '   ' . nformat($tr1, 7) . '   ' . nformat($tr2, 7) . "\n".'Cl:  ' . nformat($ka0, 7) . '   ' . nformat($ka1, 7) . '   ' . nformat($ka2, 7) . "\n".'Ca:  ' . nformat($ca0, 7) . '   ' . nformat($ca1, 7) . '   ' . nformat($ca2, 7) . '```';
 
 	if($mzeit === '-') {
-		$mili_slack = '*Einheiten* (' . $svs_e . 'SVS, ' . $ugen . '%, ' . $uzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '\\n';
-		$mili_slack .= '```J\E4ger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . '\\nFregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . '\\nKreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . '\\nTr\E4ger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . '\\nCancs:   ' . nformat($ca, 7) . '```';
+		$mili_slack = '*Einheiten* (' . $svs_e . 'SVS, ' . $ugen . '%, ' . $uzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
+		$mili_slack .= '```Jäger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . "\n".'Fregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . "\n".'Kreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . "\n".'Träger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . "\n".'Cancs:   ' . nformat($ca, 7) . '```';
 	}
 
 ?>
-			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\''.$MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF.'\')" >Milit&auml;rscan</a>';?></td>
-			<td colspan="2" bgcolor="#fdfddd"><?php echo '<a href="javascript:void(0);" onclick="copyToClipboard(\'' . $mili_slack . '\')">Milit&auml;rscan</a>';?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Milit&auml;r', $MiliH.$Orbit.$Flotte1.$Flotte2.$MiliF);?></td>
+			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Milit&auml;r', $mili_slack);?></td>
 			<td class="fieldnormallight"><?php echo $ggen; ?></td>
 			<td class="fieldnormallight"><?=$svs_g;?></td>
 			<td class="fieldnormallight"><?php echo $gzeit; ?></td>
