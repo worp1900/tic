@@ -1087,7 +1087,7 @@ aprint(array(
 		$exen_gesamt_jetzt = $this->Exen_K + $this->Exen_M;
 		$exen_vorher = $exen_gesamt_jetzt + $exenverlust_gesamt;
 		$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
-		echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#ccccff">'.ZahlZuText($kosten_neubau_exen).'</td>';
+		echo '<tr class="fieldnormallight"><td title="Ausgehend von nunmehr '.$exen_gesamt_jetzt.' Extraktoren kostet die Wiederherstellung auf '.$exen_vorher.' den folgenden Betrag.">+ Exen-Neubau (?)</td><td bgcolor="#ccccff">'.ZahlZuText($kosten_neubau_exen).'<br/></td>';
 		echo '<td colspan="'.(1+2*count($this->DeffFleets)).'" bgcolor="white"></td>';
 
 		$x = 0;
@@ -1099,15 +1099,17 @@ aprint(array(
 			} else {
 				$neueExen = 0;
 				$exen_vorher = 0;
+				$verluste = 0;
 				if(is_array($this->playerFleetAtt[$key]['fleetids'])) {
 					foreach($this->playerFleetAtt[$key]['fleetids'] as $v) {
 						$neueExen += $this->AttFleets[$v]->StolenExenM + $this->AttFleets[$v]->StolenExenK;
 						$exen_vorher += $this->AttFleets[$v]->atter_exenM + $this->AttFleets[$v]->atter_exenK;
+						$verluste += $verlusteAtt[$v][0] + $verlusteAtt[$v][1];
 					}
 				}
 				$exen_gesamt_jetzt = $exen_vorher + $neueExen;
 				$kosten_neubau_exen = ($exen_vorher*($exen_vorher+1) - ($exen_gesamt_jetzt*($exen_gesamt_jetzt+1))) / 2 * 65;
-				echo '<td title="Von '.ZahlZuText($exen_vorher).' Extraktoren kostet der Bau von '.ZahlZuText($neueExen).' auf gesamt '.ZahlZuText($exen_gesamt_jetzt).' Extraktoren diesen Betrag Metall." colspan="'.(2*count($this->playerFleetAtt[$key]['fleetids'])).'">' . ZahlZuText($kosten_neubau_exen) . ' <i>(?)</i></td>';
+				echo '<td title="Von '.ZahlZuText($exen_vorher).' Extraktoren kostet der Bau von '.ZahlZuText($neueExen).' auf gesamt '.ZahlZuText($exen_gesamt_jetzt).' Extraktoren diesen Betrag Metall." colspan="'.(2*count($this->playerFleetAtt[$key]['fleetids'])).'">' . ZahlZuText($kosten_neubau_exen) . ' <i>(?)</i><br/><i>('.ZahlZuText($neueExen > 0 ? $verluste/$neueExen : 0).' M/E)</i></td>';
 				$alteExen = 0;
 			}
 		}

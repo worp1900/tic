@@ -1,4 +1,25 @@
 <?PHP
+
+function addShortUrl($url) {
+	global $SQL_DBConn;
+	
+	//does thid link exist?
+	$sql = 'SELECT uuid FROM gn4shorturls WHERE url LIKE "'.mysql_real_escape_string($url).'"';
+	$res = tic_mysql_query($sql);
+	$num = mysql_num_rows($res);
+	if($num > 0) {
+		$id = mysql_result($res, 0, 'uuid');
+		tic_mysql_query('UPDATE gn4shorturls SET t = UNIX_TIMESTAMP(NOW()) WHERE uuid = "'.$id.'"');
+		return $pfadzumtick . 'main.php?modul=short&id='.$id;
+	}
+	
+	//nope, create new.
+	$id = uniqid(null, true);
+	$sql = 'INSERT INTO gn4shorturls (uuid, url, t) VALUES ("'.$id.'", "'.$url.'", UNIX_TIMESTAMP(NOW()))';
+	$res = tic_mysql_query($sql, __FILE__, __LINE__);
+	return $pfadzumtick . 'main.php?modul=short&id='.$id;
+}
+
 function createCopyLink($linktext, $copycontent, $linkattributes = null) {
 	$id = 'x'. substr(md5(rand()), 0, 31);
 	$r = '';

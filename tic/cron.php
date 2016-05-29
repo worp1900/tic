@@ -30,6 +30,10 @@ $div_ticks = $null_ticks - $alt_ticks;
 // cron Berechnungen
 if($div_ticks > 0)
 {
+	//30days
+	tic_mysql_query('DELETE FROM gn4shorturls WHERE t < UNIX_TIMESTAMP(NOW()) - 60*60*24*30');
+	
+	
     $SQL_Result = tic_mysql_query('SELECT * FROM `gn4flottenbewegungen`  ORDER BY id;', $SQL_DBConn) or die(mysql_errno()." - ".mysql_error());
     $SQL_Num = mysql_num_rows($SQL_Result);
 

@@ -19,7 +19,7 @@ $ticks = postOrGet('ticks') ? postOrGet('ticks') : 5;
 //aprint($_POST);
 
 function postOrGet($name) {
-	if(isset($_POST[$name]))
+	if(isset($_POST[$name]) && !empty($_POST[$name]))
 		return $_POST[$name];
 	if(isset($_GET[$name]))
 		return $_GET[$name];
@@ -557,10 +557,34 @@ if(postOrGet('compute')) {
     $gnsimu_m->PrintOverView();
 
 	echo '<div style="text-align: right;"><a href="#oben">&raquo; nach oben</a></div>';
-/*aprint(array(
-	'Att' => $gnsimu_m->AttFleets,
-	'Deff' => $gnsimu_m->DeffFleets
-), 'Fleets');*/
+
+$tmpstr = '';
+foreach(postOrGet('g') as $k=>$v) {
+	$tmpstr .= '&g['.$k.']='.$v;
+}
+foreach(postOrGet('p') as $k=>$v) {
+	$tmpstr .= '&p['.$k.']='.$v;
+}
+foreach(postOrGet('d') as $k=>$v) {
+	foreach($v as $k2 => $v2) {
+		$tmpstr .= '&d['.$k.']['.$k2.']='.$v2;
+	}
+}
+foreach(postOrGet('aufenthalt') as $k=>$v) {
+	$tmpstr .= '&aufenthalt['.$k.']='.$v;
+}
+foreach(postOrGet('ankunft') as $k=>$v) {
+	$tmpstr .= '&ankunft['.$k.']='.$v;
+}
+foreach(postOrGet('typ') as $k=>$v) {
+	$tmpstr .= '&typ['.$k.']='.$v;
+}
+foreach(postOrGet('f') as $k=>$v) {
+	$tmpstr .= '&f['.$k.']='.$v;
+}
+
+$short = addShortUrl($pfadzumtick . 'main.php?modul=kampf&preticks='.postOrGet('preticks').'&ticks='.postOrGet('ticks').'&num_flotten='.postOrGet('num_flotten').'&compute=doIt'.$tmpstr);
+echo '<div style="text-align: right;"><a href="'.$short.'">&raquo; Link zu dieser Simulation</a></div>';
 }
 
 ?>
