@@ -6,37 +6,6 @@
 <?php
 	$limit = 20;
 
-	function xformat($number) {
-		if(is_numeric($number))
-			return number_format($number);
-		return $number;
-	}
-
-	function nformat($number, $totalLen) {
-		$out = $number = xformat($number);
-		$lenNum = strlen($out);
-
-		for($lenNum; $lenNum < $totalLen; $lenNum++) {
-			$out = " " . $out;
-		}
-
-		return $out;
-	}
-
-	function getscannames( $scantype ) {
-		$sn = explode( ' ', $scantype );
-		$res = '';
-		$snarr = array( 'Sektor', 'Einheiten', 'Milit&auml;r', 'Gesch&uuml;tze' );
-		for ( $j=0; $j< count( $sn )-1; $j++ ) {
-			$idx = $sn[$j];
-			if ( $j < count( $sn )-2 )
-				$res .= $snarr[ $idx ].' / ';
-			else
-				$res .= $snarr[ $idx ];
-		}
-		return $res;
-	}
-
 	if(!isset($xgala)) {
 		if(isset($_GET['xgala']))
 			$xgala = $_GET['xgala'];
