@@ -11,61 +11,6 @@
 	});
 </script>
 <?php
-	function createCopyLink($linktext, $copycontent, $linkattributes = null) {
-		$id = 'x'. substr(md5(rand()), 0, 31);
-		$r = '';
-		$r .= '<textarea id="' . $id . '" style="width: 1px; height: 1px; border: none;">' . $copycontent . '</textarea>';
-		$r .= '<a href="#" ' . $linkattributes . ' class="btn" data-clipboard-target="#' . $id . '">' . $linktext . '</a>';
-
-		return $r;
-	}
-
-	function in_array_contains($haystack, $needle) {
-		if(!is_array($haystack) || !$needle)
-			return false;
-
-		foreach($haystack as $v) {
-			$v = mb_convert_encoding($v, 'UTF-8', "auto");
-			$needle = mb_convert_encoding($needle, 'UTF-8', "auto");
-			if ($v == substr($needle, 0, strlen($v))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	function xformat($number) {
-		if(is_numeric($number))
-			return number_format($number);
-		return $number;
-	}
-
-	function nformat($number, $totalLen) {
-		$out = $number = xformat($number);
-		$lenNum = strlen($out);
-
-		for($lenNum; $lenNum < $totalLen; $lenNum++) {
-			$out = " " . $out;
-		}
-
-		return $out;
-	}
-
-	function getscannames( $scantype ) {
-		$sn = explode( ' ', $scantype );
-		$res = '';
-		$snarr = array( 'Sektor', 'Einheiten', 'Milit&auml;r', 'Gesch&uuml;tze' );
-		for ( $j=0; $j< count( $sn )-1; $j++ ) {
-			$idx = $sn[$j];
-			if ( $j < count( $sn )-2 )
-				$res .= $snarr[ $idx ].' / ';
-			else
-				$res .= $snarr[ $idx ];
-		}
-		return $res;
-	}
-
 	if(!isset($xgala)) {
 		if(isset($_GET['xgala']))
 			$xgala = $_GET['xgala'];
@@ -628,7 +573,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$clepkill += floor($aj * 0.32);
 	$clepkill += floor($lo * 1.28);
 	$gscan_slack = '*Geschütze* ('.$svs_g.'SVS, ' . $ggen . '%, ' . $gzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
-	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '\t  LR:  ' . nformat($lr, 7) . "\n".'MR:  ' . nformat($mr, 7) . '\t  SR:  ' . nformat($sr, 7) . "\n".'AJ:  ' . nformat($aj, 7) . '\t  Max Clepkill: ' . nformat($clepkill, 7) . '```';
+	$gscan_slack .= '```LO:  ' .  nformat($lo, 7) . '	  LR:  ' . nformat($lr, 7) . "\n".'MR:  ' . nformat($mr, 7) . '	  SR:  ' . nformat($sr, 7) . "\n".'AJ:  ' . nformat($aj, 7) . '	  Max Clepkill: ' . nformat($clepkill, 7) . '```';
 ?>
 			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Gesch&uuml;tze', $gscan);?></td>
 			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Gesch&uuml;tze', $gscan_slack);?></td>
