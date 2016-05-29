@@ -1,25 +1,6 @@
 <?
-// Ticks
-
-//	$Ticks['angriffsflug'] = 30;
-//	$Ticks['angriff'] = 5;
-//	$Ticks['verteidigungsflug'] = 22;
-//	$Ticks['verteidigen'] = 25;
-//	$Ticks['lange'] = 15
-
 	$tickm = $Ticks['lange'];
 
-/*
-	Änderungen für TIC mit hh:mm
-	alle Vorkommen von
-	($n * $tickm - $tick_abzug)
-	ersetzen durch
-	(($n * $tickm - $tick_abzug)<0?"00:00":sprintf("%02d:%02d",(($n * $tickm - $tick_abzug)/60),(($n * $tickm - $tick_abzug)%60)))
-	und alle Vorkommen von
-	($n * $tickm)
-	ersetzen durch
-	sprintf("%02d:%02d",(int)(($n * $tickm)/60),(int)(($n * $tickm)%60))
-*/
     if (isset($_GET['id'])) $_POST['id']=$_GET['id'];
     if (isset($_GET['flottenid'])) $_POST['flottenid']=$_GET['flottenid'];
 	if (!isset($_POST['flottenid'])) $_POST['flottenid'] = '';

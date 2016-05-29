@@ -114,6 +114,10 @@
 			$SQL_names = "modus, ticid, angreifer_galaxie, angreifer_planet, verteidiger_galaxie, verteidiger_planet, eta, flugzeit, flottennr, ankunft, flugzeit_ende, ruckflug_ende, erfasser, erfasst_am";
 			$SQL_values = '"'.$Benutzer['ticid'].'", "'.$txt_Angreifer_Galaxie.'", "'.$txt_Angreifer_Planet.'", "'.$txt_Verteidiger_Galaxie.'", "'.$txt_Verteidiger_Planet.'", "'.$lst_ETA.'", "'.$lst_Flugzeit.'", "'.$lst_Flotte.'","'.$_ankunft.'", "'.$_flugzeit.'", "'.$_ruckflug.'", "'.$erfasser.'", "'.date("H").':'.date("i").' Uhr am '.date("d").'.'.date("m").'.'.date("Y").'"';
 
+			$logstr = 'Flotte hinzugef&uuml;gt ('.$txt_Angreifer_Galaxie.':'.$txt_Angreifer_Planet.'-#'.$lst_Flotte.'->'.$txt_Verteidiger_Galaxie.':'.$txt_Verteidiger_Planet.' modus='.$modus.' eta='.$lst_ETA.')';
+			LogAction($logstr, LOG_SETSAFE);
+
+			
 			if ($modus == 'angreifen') {
 				$SQL_Result = tic_mysql_query('INSERT INTO `gn4flottenbewegungen` ('.$SQL_names.', tparser, save, reported_to_slack)	VALUES ("1", '.$SQL_values.', '.$tparser.', '.$txt_not_safe.', ' . $txt_reported_to_slack . ');', $SQL_DBConn) or $error_code = 7;
 			} elseif ($modus == 'verteidigen') {

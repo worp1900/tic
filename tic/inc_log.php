@@ -1,5 +1,5 @@
 <?php
-	DEFINE('LOG_PER_PAGE', 15);
+	DEFINE('LOG_PER_PAGE', 50);
 	DEFINE('LOG_PAGES_CONTIGUOUS', 9);
 
 	function constructPageIndex($base_url, $start, $max_value, $num_per_page) {
@@ -67,7 +67,7 @@
 	}
 	else
 	{
-		$typetostring = array(LOG_SYSTEM => "System", LOG_ERROR => "Scriptfehler", LOG_SETSAFE => "Safe/Unsafe setzen");
+		$typetostring = array(LOG_SYSTEM => "System", LOG_ERROR => "Scriptfehler", LOG_SETSAFE => "Flotten&auml;nderungen");
 
 		if($Benutzer['rang'] < RANG_STECHNIKER)
 			$SQL_where = " ticid = ".$Benutzer['ticid'];
@@ -79,7 +79,7 @@
 			$style = array("dark", "light");
 			
 			$start = (isset($_GET['start']) ? $_GET['start'] : 0);
-			$SQL_Result = tic_mysql_query("SELECT COUNT(id) FROM gn4log WHERE".$SQL_where." AND type='".$_GET['type']."'") or die(tic_mysql_error(__FILE__,__LINE__));
+			$SQL_Result = tic_mysql_query("SELECT COUNT(id) FROM gn4log WHERE".$SQL_where." AND type='".$_GET['type']."'", __FILE__, __LINE__);
 			$count = mysql_fetch_row($SQL_Result);
 			if($count[0] < $start)
 				$start = 0;
@@ -97,10 +97,10 @@
 			}
 			if($i == 0)
 			{
-				echo "<tr class=\"fieldnormallight\"><td colspan=\"4\">Es sind keine Logeinträge fr diesen Typ vorhanden.</td></tr>";
+				echo "<tr class=\"fieldnormallight\"><td colspan=\"4\">Es sind keine Logeintr&auml; fr diesen Typ vorhanden.</td></tr>";
 			}
 					echo "<tr><td colspan=\"4\">Seite: ".constructPageIndex("?modul=log&amp;type=".$_GET['type'], $start, $count[0], LOG_PER_PAGE)."</td></tr>\n";
-			echo "</table>[<a href=\"?modul=log\">Zurück</a>]";
+			echo "</table>[<a href=\"?modul=log\">Zur&uuml;ck</a>]";
 		}
 		else
 		{
