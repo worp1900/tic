@@ -79,7 +79,6 @@
 ?>
 	<h2>Scanausgaben</h2>
 	<table width="100%" cellspacing="0" cellpadding="0">
-		<tr><td class="datatablehead">Scanausgaben</td></tr>
 		<tr><td>
 			<table width="100%" cellspacing="3" cellpadding="0">
 				<tr class="fieldnormallight">
@@ -89,7 +88,6 @@
 							<input type="hidden" name="displaytype" value="0" />
 							<table width="100%" cellspacing="0" cellpadding="3">
 								<tr><td class="datatablehead">Spezieller Planet</td></tr>
-								<tr><td>Einzelner Planet</td></tr>
 								<tr><td>Gala:Planet <input type="text" name="xgala" size="4" value="<?=(isset($xgala) ? $xgala : "")?>" /> : <input type="text" name="xplanet" size="2" value="<?=(isset($xplanet) ? $xplanet : "")?>" /></td></tr>
 								<tr><td align="right"><input type="submit" value="Anzeigen" /></td></tr>
 							</table>
@@ -101,50 +99,74 @@
 							<input type="hidden" name="displaytype" value="1" />
 							<table width="100%" cellspacing="0" cellpadding="3">
 								<tr><td class="datatablehead">Galaxie anzeigen</td></tr>
-								<tr><td>Nachbar-Galas:</td></tr>
 								<tr><td>Galaxie:<input type="button" name="Verweis" value="&lt;&lt;" onclick="self.location.href='./main.php?modul=showgalascans&amp;action=findgala&amp;displaytype=1&amp;direction=previous&amp;xgala=<?= (isset($xgala) ? $xgala : "") ?>'" /><input type="text" name="xgala" size="4" value="<?= (isset($xgala) ? $xgala : "") ?>" /><input type="button" name="Verweis" value="&gt;&gt;" onclick="self.location.href='./main.php?modul=showgalascans&amp;action=findgala&amp;displaytype=1&amp;direction=next&amp;xgala=<?= (isset($xgala) ? $xgala : "") ?>'" /></td></tr>
 								<tr><td align="right"><input type="submit" value="Anzeigen" /></td></tr>
 							</table>
 						</form>
 					</td>
-					<td valign="top" width="40%">
-						<form name="form3" method="post" action="./main.php?modul=showgalascans&amp;displaytype=1&amp;xgala=<?=(isset($xgala) ? $xgala : "")?>&amp;xplanet=<?=(isset($xplanet) ? $xplanet : "")?>">
-							<table width="100%" cellspacing="0" cellpadding="3">
-								<tr><td class="datatablehead">Suche Planeten</td></tr>
-								<tr><td>
-									<select name="qvar">
-										<option value="pts,0"<?= ( isset($_GET['qvar']) && $_GET['qvar']== "pts,0" )?" selected":"" ?>>Punkte</option>
-										<option value="sfsu,1"<?= ( isset($_GET['qvar']) && $_GET['qvar']== "sfsu,1" )?" selected":"" ?>>Schutzies</option>
-										<option value="ga,3"<?= ( isset($_GET['qvar']) && $_GET['qvar']== "ga,3" )?" selected":"" ?>>Abfangj&auml;ger</option>
-										<option value="me,0"<?= ( isset($_GET['qvar']) && $_GET['qvar']== "me,0" )?" selected":"" ?>>Metall-Exen</option>
-										<option value="ke,0"<?= ( isset($_GET['qvar']) && $_GET['qvar']== "ke,0" )?" selected":"" ?>>Kristall-Exen</option>
-									</select>
-									<select name="qoperator">
-										<option value="&gt;"<?= ( isset($_GET['qoperator']) && $_GET['qoperator']== ">" )?" selected":"" ?>>gr&ouml;&szlig;er</option>
-										<option value="&lt;"<?= ( !isset($_GET['qoperator']) || $_GET['qoperator']== "<" )?" selected":"" ?>>kleiner</option>
-									</select>
-									<select name="qlimit">
-										<option value="0"<?= (isset($_GET['qlimit']) && $_GET['qlimit'] == 0)?" selected":"" ?> >alle</option>
-										<option value="1"<?= (isset($_GET['qlimit']) && $_GET['qlimit'] == 1)?" selected":"" ?> >keine TICler</option>
-										<option value="2"<?= (isset($_GET['qlimit']) && $_GET['qlimit'] == 2)?" selected":"" ?> >nur TICler</option>
-									</select>
-								</td></tr>
-								<tr><td>Kriterium: <input type="text" name="qval" value="<?php if(isset($_GET['qval'])) echo '"'.$_GET['qval'].'"'; ?>" /></td></tr>
-								<tr><td align="right">(&lt;=10 Treffer) <input type="submit" value="Anzeigen" /></td></tr>
-							</table>
-						</form>
-					</td>
 				</tr>
 			</table>
-		</td></tr>
+		</td>
+		</tr>
 	</table>
-	<form action="./main.php?modul=scans" method="post">
-		<input type="hidden" name="txtScanGalaxie" value="<?= (isset($xgala) ? $xgala : "") ?>" />
-		<input type="hidden" name="txtScanPlanet" value="<?= (isset($xplanet) ? $xplanet : "") ?>" />
-		<input type="submit" value="Zur Datenerfassung" />
-	</form>
+	
 	<br />
 <?php
+if($xgala) {
+	echo '<table width="100%">
+		<tr class="datatablehead" style="text-align: center;">
+			<td>&nbsp;Meta&nbsp;</td>
+			<td>&nbsp;Allianz&nbsp;</td>
+			<td>&nbsp;Galaxie&nbsp;</td>
+			<td>&nbsp;Planet&nbsp;</td>
+			<td>&nbsp;Name&nbsp;</td>
+			<td>&nbsp;Punkte&nbsp;</td>
+			<td>&nbsp;Approx. Exen <i title="Die Extraktoren werden aus Punktedifferenzen berechnet. Hier fließen Steuern nicht mit ein.">(?)</i>&nbsp;</td>
+			<td>&nbsp;Approx. Fleetpkt <i title="Die Flottenpunkte werden aus den gesch&auml;tzten Extraktoren berechnet.">(?)</i>&nbsp;</td>
+			<td>&nbsp;Asteroiden&nbsp;</td>
+			<td>&nbsp;Timestamp&nbsp;</td>
+			<td>&nbsp;Mehr&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>';
+	//				0			1					2				3				4					5				6		7			8	9	10		11
+	$sql2 = 'SELECT spieler_name, spieler_galaxie, spieler_planet, spieler_punkte, spieler_asteroiden, spieler_urlaub, exen, allianz_name, meta, t, fleetpkt, valid FROM gn_spieler2 WHERE spieler_galaxie = "' . mysql_real_escape_string($xgala) . '"';
+	$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+	$num2 = mysql_num_rows($res2);
+	if($num2 == 0) {
+		echo '<tr class="fieldnormallight"><td colspan="11">Diese Galaxie exitiert (wahrscheinlich) nicht.</td></tr>';
+	} else {
+		$color = false;
+		for($k = 0; $k < $num2; $k++) {
+			$row = mysql_fetch_row($res2);
+			//aprint($row);
+			$color = !$color;
+			echo'	<tr class="fieldnormal' . ($color ? 'light' : 'dark') . '" ' . ($row[5] == 1 ? 'style="background-color: darkgray" title="Urlaub"' : '') . '>';
+			if($k == 0) {
+				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[8].'&nbsp;';
+				if($row[8]) echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&meta='.urlencode($row[8]).'%3B">&raquo; Scanliste</a></i>&nbsp;';
+				echo '</td>';
+				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[7].'&nbsp;';
+				if($row[7]) echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&allianz='.urlencode($row[7]).'%3B">&raquo; Scanliste</a></i>&nbsp;';
+				echo '</td>';
+				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[1].'&nbsp;';
+				echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&galaxie='.$row[1].'%3B">&raquo; Scanliste</a></i>&nbsp;';
+				echo '</td>';
+			} 
+			echo '		<td align="right">&nbsp;'.$row[2].'&nbsp;</td>
+					<td align="left">&nbsp;'.$row[0].'&nbsp;</td>
+					<td align="right">&nbsp;'.ZahlZuText($row[3]).'&nbsp;</td>
+					<td align="right">&nbsp;'.($row[11] ? ZahlZuText($row[6]) : '-').'&nbsp;</td>
+					<td align="right">&nbsp;'.($row[11] ? ZahlZuText($row[10]) : '-').'&nbsp;</td>
+					<td align="right">&nbsp;'.ZahlZuText($row[4]).'&nbsp;</td>
+					<td>&nbsp;'.$row[9].'&nbsp;</td>
+					<td>&nbsp;<a href="../x/player.php?name='.$row[0].'" target="_blank">&raquo; Statistik</a>&nbsp;</td>
+					<td>&nbsp;<a href="#plani'.$row[2].'">&raquo; nach unten</a>&nbsp;</td>
+				</tr>';
+		}//for each member
+	}
+		echo '</table><br/><hr/><br/>';
+}//galaxieanfrage
+
 if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 
 	$newsid = null;
@@ -445,6 +467,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			if ( $rpnext != $rp ) {
 //num archiv
 
+	echo '	<a name="plani'.$rp.'"></a>';
 ?>
 	<table width="100%">
 		<tr>
