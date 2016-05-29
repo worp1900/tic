@@ -25,6 +25,8 @@ function connect() {
 }
 
 function check_user($name, $pass) {
+	$name = mysql_real_escape_string($name);
+	$pass = mysql_real_escape_string($pass);
 	$SQL_Query = "SELECT ip, versuche FROM `gn4accounts` WHERE name='".$name."' LIMIT 1;";
 	$SQL_Result_iplock = mysql_query($SQL_Query) or die(mysql_errno()." - ".mysql_error());
 	$iplock = mysql_fetch_assoc($SQL_Result_iplock);
