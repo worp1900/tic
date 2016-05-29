@@ -29,9 +29,11 @@
     define("RANG_STECHNIKER", 5);
 
     // Scantypen
-    $ScanTyp[0] = 'Unbekannt';
-    $ScanTyp[1] = 'Militaerscan';
-    $ScanTyp[2] = 'Newsscan';
+    $ScanTyp[0] = 'Sektorscan';
+    $ScanTyp[1] = 'Einheitenscan';
+    $ScanTyp[2] = 'Milit&aauml;rscan';
+    $ScanTyp[3] = 'Gesch&uuml;tzscan';
+    $ScanTyp[4] = 'Nachrichtenscan';
 
     // Attplaner Typen von Bytehoppers 20.07.05
     $PlanerTyps[0] = "AllyScanner";
@@ -67,7 +69,7 @@
     // Ticks
     $Ticks['angriffsflug'] = 30;
     $Ticks['angriff'] = 5;
-    $Ticks['verteidigungsflug'] = 24;
+    $Ticks['verteidigungsflug'] = 27;
     $Ticks['verteidigen'] = 20;
 
     //Zeitformat
@@ -80,7 +82,7 @@
     define("LOG_SETSAFE", 2);
 
     $Ticks['lange'] = 15;
-	$SQL_Result = mysql_query('SELECT value FROM gn4vars WHERE name="tickdauer";', $SQL_DBConn);
+	$SQL_Result = mysql_query('SELECT value FROM gn4vars WHERE name="tickdauer";', __FILE__, __LINE__);
 	if(mysql_num_rows($SQL_Result) == 1) {
 		$Ticks['lange'] = mysql_result($SQL_Result,0,'value');
 	}
@@ -129,5 +131,55 @@ $scan_teil = array(
 );
 $scan_teil['mili'] = $scan_teil['unit'];
 
-include './globalvars2.php';
+//***
+
+    // Schiffe
+    $Schiffe[0] = 'j';      // Jï¿½er
+    $Schiffe[1] = 'b';      // Bomber
+    $Schiffe[2] = 'f';      // Fregatte
+    $Schiffe[3] = 'z';      // Zerstï¿½er
+    $Schiffe[4] = 'kr';     // Kreuzer
+    $Schiffe[5] = 'sa';     // Schlachtschiff
+    $Schiffe[6] = 't';      // Trï¿½erschiff
+    $Schiffe[7] = 'ko';     // Kommandoschiff
+    $Schiffe[8] = 'ka';     // Kaperschiff
+    $Schiffe[9] = 'su';     // Schutzschiff
+
+    $SF[0] = 'Jaeger';
+    $SF[1] = 'Bomber';
+    $SF[2] = 'Fregatte';
+    $SF[3] = 'Zerstoerer';
+    $SF[4] = 'Kreuzer';
+    $SF[5] = 'Schlachtschiff';
+    $SF[6] = 'Traegerschiff';
+    $SF[7] = 'Kommandoschiff';
+    $SF[8] = 'Kaperschiff';
+    $SF[9] = 'Schutzschiff';
+
+    // Defensiveinheiten
+    $Defensiv[0] = 'lo';    // Leichtes Orbitalgeschtz
+    $Defensiv[1] = 'lr';    // Leichtes Raumgeschtz
+    $Defensiv[2] = 'mr';    // Mittleres Raumgeschtz
+    $Defensiv[3] = 'sr';    // Schweres Raumgeschtz
+    $Defensiv[4] = 'a';     // Abfangjï¿½er
+    $Defensiv[5] = 'r';     // Raumbasis
+
+    $DF[0] = 'Leichtes Geschütz - Rubium';
+    $DF[1] = 'Mittleres Geschütz - Pulsar';
+    $DF[2] = 'Mittleres Geschütz - Coon';
+    $DF[3] = 'Schweres Geschütz - Centurio';
+    $DF[4] = 'Abfangjäger - Horus';
+//
+    $EF[0] = 'Metall-Extraktoren';
+    $EF[1] = 'Kristall-Extraktoren';
+    $EF[2] = 'Punkte';
+    $EF[3] = 'Schiffe';
+    $EF[4] = 'Deff-Einheiten';
+
+    $PIC[0] = 'scanwarn.gif';
+    $PIC[1] = 'scanok.gif';
+    $PIC[2] = 'scanold.gif';
+
+    $ATTOVERALL = 3;
+
 ?>
