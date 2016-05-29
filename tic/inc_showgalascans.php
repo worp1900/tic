@@ -267,6 +267,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 
 				if(in_array_contains(array('Angriffsbericht', 'Verteidigungsbericht', 'Artilleriebeschuss', 'Artilleriesysteme'), $typ)) {
 					//convert content
+					$inhalt = str_replace("\r", "\n", $inhalt);
 					$rows = explode("\n\n", trim($inhalt));
 					if(count($rows) == 1)
 						$rows = explode("\n", trim($inhalt));
@@ -276,8 +277,9 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					foreach($rows as $r) {
 						$inhalt .= '<tr>';
 						$columns = explode("\n", trim($r));
-						if(count($columns) == 1)
+						if(count($columns) == 1) {
 							$columns = explode("\t", trim($r));
+						}
 						//aprint($columns, 'columns');
 						foreach($columns as $c) {
 							$inhalt .= '<td>'.$c.'</td>';
@@ -304,8 +306,10 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				}
 
 				//@^(\d+):(\d+).+?Flotte (\d).+wird in (\d+:\d+|\d+ Minuten|\d+ Ticks)@mg
-				$inhalt = preg_replace('@(\\d+):(\\d+) ([\\w-\.äöü]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
-				$inhalt = preg_replace('@([\\w-\.äöü]+) \((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@^(?:Kommandant! )?(\\d+):(\\d+).([\\w-\.äöü]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@^(?:Kommandant! )?([\\w-\.äöü]+).(\\d+):(\\d+)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+				$inhalt = preg_replace('@([\\w-\.äöü]+).\((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+								
 				?>
 					<td valign="top"><?php
 					if($t > 0) {
@@ -471,6 +475,10 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$ka2	= mysql_result($SQL_Result, $i, 'sf2ka' );
 					$ca2	= mysql_result($SQL_Result, $i, 'sf2su' );
 					$svs_m  = mysql_result($SQL_Result, $i, 'erfasser_svs');
+					$ziel1 =  mysql_result($SQL_Result, $i, 'ziel1');
+					$ziel2 =  mysql_result($SQL_Result, $i, 'ziel2');
+					$status1 = mysql_result($SQL_Result, $i, 'status1');
+					$status2 = mysql_result($SQL_Result, $i, 'status2');
 					break;
 				case 3: // geschtz
 					$ges_p = mysql_result($SQL_Result, $i, 'p' );
@@ -534,7 +542,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormallight"><?=$svs_s;?></td>
 			<td class="fieldnormallight"><?=$szeit;?></td>
 			<td class="fieldnormallight"><a  title="Bezahle <?=ZahlZuText(round(2000 * $scanbezahlungfaktor, 0));?> Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$sek_g;?>&transfer2=<?=$sek_p;?>&summe=<?=round(2000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$sek_g ? $sek_g.':'.$sek_p : '';?></a></td>
-			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt"><pre>
+			<td class="fieldnormallight" rowspan="9" valign="top" align="left" style="font-size: 8pt"><pre>
 <?php
 	$sql_block = "SELECT * FROM gn4scanblock WHERE g = '" . mysql_real_escape_string($rg) . "' AND p = '" . mysql_real_escape_string($rp) . "' AND suspicious IS NULL ORDER BY t DESC LIMIT 3";
 	$res_blocks = tic_mysql_query($sql_block);
@@ -583,7 +591,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	mysql_free_result($res_blocks);
 ?>
 			</td>
-			<td class="fieldnormallight" rowspan="8" valign="top" align="left" style="font-size: 8pt">
+			<td class="fieldnormallight" rowspan="9" valign="top" align="left" style="font-size: 8pt">
 <?php
 	$sql = "select * from gn4scans_news where ziel_g = '" . mysql_real_escape_string($rg) . "' and ziel_p = '" . mysql_real_escape_string($rp) . "' order by t desc";
 	$res_news = tic_mysql_query($sql);
@@ -701,7 +709,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td rowspan="3"><?php echo $mgen; ?></td>
 			<td rowspan="3"><?=$svs_m;?></td>
 			<td rowspan="3"><?php echo $mzeit; ?></td>
-			<td rowspan="3"><a title="Bezahle <?=ZahlZuText(round(8000 * $scanbezahlungfaktor, 0));?> Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$mil_g;?>&transfer2=<?=$mil_p;?>&summe=<?=round(8000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$mil_g ? $mil_g.':'.$mil_p : '';?></a></td>
+			<td rowspan="4"><a title="Bezahle <?=ZahlZuText(round(8000 * $scanbezahlungfaktor, 0));?> Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$mil_g;?>&transfer2=<?=$mil_p;?>&summe=<?=round(8000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank"><?=$mil_g ? $mil_g.':'.$mil_p : '';?></a></td>
 		</tr>
 		<tr class="fieldnormallight">
 			<td><?php echo $ja1; ?></td>
@@ -724,6 +732,30 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td><?php echo $tr2; ?></td>
 			<td><?php echo $ka2; ?></td>
 			<td><?php echo $ca2; ?></td>
+		</tr>
+		<tr class="fieldnormallight">
+			<td class="fieldnormaldark" colspan="2"><b>Flotte 1:</b></td>
+			<td colspan="2"><?php 
+				switch($status1) {
+					case '0': echo 'Im'; break;
+					case '1': echo 'Angriff'; break;
+					case '2': echo 'Verteidigung'; break;
+					case '3': echo 'R&uuml;ckflug'; break;
+					default: echo '<i>unknown</i>'; break;
+				}
+			?></td>
+			<td colspan="2"><?=$ziel1;?></td>
+			<td class="fieldnormaldark" colspan="2"><b>Flotte 2:</b></td>
+			<td colspan="2"><?php 
+				switch($status2) {
+					case '0': echo 'Im'; break;
+					case '1': echo 'Angriff'; break;
+					case '2': echo 'Verteidigung'; break;
+					case '3': echo 'R&uuml;ckflug'; break;
+					default: echo '<i>unknown</i>'; break;
+				}
+			?></td>
+			<td colspan="2"><?=$ziel2;?></td>
 		</tr>
 	</table>
 <?php
