@@ -82,7 +82,7 @@
     define("LOG_SETSAFE", 2);
 
     $Ticks['lange'] = 15;
-	$SQL_Result = mysql_query('SELECT value FROM gn4vars WHERE name="tickdauer";', __FILE__, __LINE__);
+	$SQL_Result = mysql_query('SELECT value FROM gn4vars WHERE name="tickdauer";');
 	if(mysql_num_rows($SQL_Result) == 1) {
 		$Ticks['lange'] = mysql_result($SQL_Result,0,'value');
 	}
@@ -180,6 +180,6 @@ $scan_teil['mili'] = $scan_teil['unit'];
     $PIC[1] = 'scanok.gif';
     $PIC[2] = 'scanold.gif';
 
-    $ATTOVERALL = 3;
+    $ATTOVERALL = 4;
 
 ?>

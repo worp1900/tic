@@ -1,4 +1,60 @@
 <?PHP
+function createCopyLink($linktext, $copycontent, $linkattributes = null) {
+	$id = 'x'. substr(md5(rand()), 0, 31);
+	$r = '';
+	$r .= '<textarea id="' . $id . '" style="width: 1px; height: 1px; border: none;">' . $copycontent . '</textarea>';
+	$r .= '<a href="#" ' . $linkattributes . ' class="btn" data-clipboard-target="#' . $id . '">' . $linktext . '</a>';
+
+	return $r;
+}
+
+function in_array_contains($haystack, $needle) {
+	if(!is_array($haystack) || !$needle)
+		return false;
+
+	foreach($haystack as $v) {
+		$v = mb_convert_encoding($v, 'UTF-8', "auto");
+		$needle = mb_convert_encoding($needle, 'UTF-8', "auto");
+		if ($v == substr($needle, 0, strlen($v))) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function xformat($number) {
+	if(is_numeric($number))
+		return number_format($number);
+	return $number;
+}
+
+function nformat($number, $totalLen) {
+	$out = $number = xformat($number);
+	$lenNum = strlen($out);
+
+	for($lenNum; $lenNum < $totalLen; $lenNum++) {
+		$out = " " . $out;
+	}
+
+	return $out;
+}
+
+function getscannames( $scantype ) {
+	$sn = explode( ' ', $scantype );
+	$res = '';
+	$snarr = array( 'Sektor', 'Einheiten', 'Milit&auml;r', 'Gesch&uuml;tze' );
+	for ( $j=0; $j< count( $sn )-1; $j++ ) {
+		$idx = $sn[$j];
+		if ( $j < count( $sn )-2 )
+			$res .= $snarr[ $idx ].' / ';
+		else
+			$res .= $snarr[ $idx ];
+	}
+	return $res;
+}
+
+	
 function print_r_tree($data)
 {
     // capture the output of print_r
@@ -346,8 +402,8 @@ function printselect($nr) {
 }
 
 function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
-	include './globalvars2.php';
-
+	global $ATTOVERALL, $SF, $DF, $PIC, $EF;
+	
 	$SQL = "SELECT * FROM gn4scans WHERE rg=".$galaxie." and rp=".$planet." order by type ASC, id DESC;";
 	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
 	$SQL_Num = mysql_num_rows($SQL_Result);
@@ -363,7 +419,7 @@ function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 	$ggen ="";
 
 	//blocks
-	$sql = "SELECT t, svs, typ FROM gn4scanblock WHERE g='".$galaxie."' AND p='".$planet."' ORDER BY t DESC";
+	$sql = "SELECT t, svs, typ FROM gn4scanblock WHERE g='".$galaxie."' AND p='".$planet."' ORDER BY t DESC limit 5";
 	$res = tic_mysql_query($sql, $SQL_DBConn);
 	$num = mysql_num_rows($res);
 
@@ -519,6 +575,27 @@ function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 		}
 	}
 
+	//latest news (if available)
+	$res = tic_mysql_query("select n.genauigkeit gen, n.t newsfrom, e.t, e.typ, e.inhalt
+							from gn4scans_news n 
+							left join gn4scans_news_entries e on e.news_id = n.id
+							where n.ziel_g = '".$galaxie."' and n.ziel_p = '".$planet."' and n.t = (select max(t) from gn4scans_news where n.ziel_g = 48 and n.ziel_p = 1)
+							order by t desc");
+	$num = mysql_num_rows($res);
+	if($num > 0) {
+		$gen = mysql_result($res, 0, 'gen');
+		$tfrom = mysql_result($res, 0, 'newsfrom');
+		$output .= '<b>Latest News: '.date('H:i d.m.Y', $tfrom).' '.$gen.'%</b><br/>';
+		for($i = 0; $i < $num; $i++) {
+			$t = mysql_result($res, $i, 't');
+			$typ = mysql_result($res, $i, 'typ');
+			$inthalt = mysql_result($res, $i, 'inhalt');
+			if(time() - $t < 7*60*60 && in_array_contains(array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss', 'Artilleriesysteme'), $typ)) {
+				$output .= date('Y-m-d H:i', $t) . ' '. $typ .'<br>';
+			}
+		}
+	}
+	
 	if ($output != '') {
 		$output .= '<br>';
 	} else {
@@ -610,14 +687,12 @@ function InfoText($Text) {
 
 function Get_Scan3($SQL_DBConn,$v_gala,$v_plan, $help, $punkte) {
 	$output = OnMouseFlotte($v_gala, $v_plan,$punkte,"");
-	//   $output="<a href=\"./main.php?modul=showgalascans&xgala=".$v_gala."&xplanet=".$v_plan."\"".($help?" onmouseover=\"return overlib('".$output."');\" onmouseout=\"return nd();\"":"").">".GetScans2($SQL_DBConn, $v_gala, $v_plan)."</a>";
 	$refa ='<a href="./main.php?modul=showgalascans&xgala='.$v_gala.'&xplanet='.$v_plan.'" ';
 	$output = $refa.InfoText($output).">".GetScans2($SQL_DBConn, $v_gala, $v_plan)."</a>";
 	return $output;
 }
 function Get_Scan4($SQL_DBConn,$v_gala,$v_plan, $help, $punkte,$flnr) {
 	$output = OnMouseFlotte($v_gala, $v_plan,$punkte,$flnr);
-	//   $output="<a href=\"./main.php?modul=showgalascans&xgala=".$v_gala."&xplanet=".$v_plan."\"".($help?" onmouseover=\"return overlib('".$output."');\" onmouseout=\"return nd();\"":"").">".GetScans2($SQL_DBConn, $v_gala, $v_plan)."</a>";
 	$refa ='<a href="./main.php?modul=showgalascans&xgala='.$v_gala.'&xplanet='.$v_plan.'" ';
 	$output = $refa.InfoText($output).">".GetScans2($SQL_DBConn, $v_gala, $v_plan)."</a>";
 	return $output;
