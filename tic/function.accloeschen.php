@@ -17,7 +17,7 @@
                 else {
                     if (!($Benutzer['rang'] == $Rang_GC && $tmp_galaxie != $Benutzer['galaxie']))
                         $SQL_Result = tic_mysql_query('DELETE FROM `gn4accounts` WHERE id='.$_GET['id'].'', $SQL_DBConn) or $error_code = 7;
-                        if ($error_code == 0) LogAction("Account gelöscht: ID=".$_GET['id'].";");
+                        if ($error_code == 0) LogAction("Account gel&ouml;scht: ID=".$_GET['id'].";");
                     else
                         $error_code = 5;
                 }

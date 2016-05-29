@@ -15,7 +15,7 @@
    echo '<TD bgcolor="#6490BB"><b>Ziel-Planet: </TD>';
    echo '<TD bgcolor="#6490BB"><b>Angriffsdatum:</TD>';
    echo '<TD bgcolor="#6490BB"><b>AngriffsUhrzeit:</TD>';
-   echo '<TD bgcolor="#6490BB"><b>Einplanen für:</TD>';
+   echo '<TD bgcolor="#6490BB"><b>Einplanen f&uuml;r:</TD>';
    echo '<TD bgcolor="#6490BB"><b>Freigabe:</TD></TR>';
 
    echo '<TR><TD bgcolor="#0000FF">';
@@ -87,7 +87,7 @@
        echo '<option value="1" '.$freigabesel.'>Sofort freigeben</option>';
        echo '</select>';
    } else {
-     echo '-nicht möglich-';
+     echo '-nicht m&ouml;glich-';
      echo '<INPUT TYPE="hidden" NAME="freigabe"  VALUE="0">';
    }
    echo '</TD></TR>';
@@ -99,6 +99,6 @@
 
    echo '</TR></Table>';
 
-   echo '<br><font size="-1">(Wenn keine Planet erfaßt wird, dann werden alle <b>gescannten Planeten der Galaxie</b> mit hinzugefügt!)</font><br>';
+   echo '<br><font size="-1">(Wenn kein Planet erfasst wird, dann werden alle <b>gescannten Planeten der Galaxie</b> mit hinzugef&uuml;gt!)</font><br>';
 ?>
 

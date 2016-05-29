@@ -1,14 +1,11 @@
 <center>
   <table border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td><font size="+2"><center>ATT-Planer Übersicht</font></td>
-  </tr>
-  <tr>
-    <td bgcolor="#6490BB" class="menu" width="350"><font face="Verdana" size="-1"><center><a href="./main.php?modul=atteinplanen">Neues Att-Ziel erfassen</a></font></td>
+    <td><font size="+2"><center>ATT-Planer &Uuml;ersicht</font></td>
   </tr>
   <tr><TD></TD></TR>
   <tr>
-    <td bgcolor="#6490BB" class="menu" width="350"><font face="Verdana" size="-1"><center><a href="./main.php?modul=attplanerlist">Attplaner II - Liste aktuallisieren</a></font></td>
+    <td bgcolor="#6490BB" class="menu" width="350"><font face="Verdana" size="-1"><center><a href="./main.php?modul=attplanerlist">Liste aktuallisieren</a></font></td>
   </tr>
 </table>
 <?php
@@ -334,9 +331,6 @@ for ( $i2=0; $i2<$SQLx_Num; $i2++ )  {
      }
     }
 echo '	</table><br>
-	<font size=1><b>(<u>Achtung:</u> Bei der Flottenanzeige (Ampel) wird ab sofort auch die Flottennr. berücksichtigt!)</b></font>
-  <br>
-	<font size=1><b>(<u>Info:</u> Bitte nur sinnvolle Text im Informationsfeld eintragen)</b></font>
-	<br>';
+	<font size=1><b>(<u>Achtung:</u> Bei der Flottenanzeige (Ampel) wird ab sofort auch die Flottennr. ber&uuml;cksichtigt!)</b></font>';
 
 ?>
