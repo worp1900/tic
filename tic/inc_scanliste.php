@@ -10,6 +10,16 @@ $hours = 36;
 
 	$where = ' (0 ';
 
+	if($_GET['koords']) {
+		$koords = explode(';', $_GET['koords']);
+		foreach($koords as $v) {
+			if(strlen($v) > 0) {
+				$k = explode(':', $v);
+				$where .= ' OR (spieler_galaxie = "'.mysql_real_escape_string($k[0]).'" AND spieler_planet = "'.mysql_real_escape_string($k[1]).'")';
+			}
+		}
+	}
+
 	if($_GET['meta']) {
 		$metas = explode(';', $_GET['meta']);
 
@@ -138,11 +148,193 @@ $hours = 36;
 		<td align="center"><input type="button" onclick="javascript:document.getElementById('galaxie').value=''" value="del"/></td>
 	</tr>
 	<tr class="fieldnormaldark">
-		<td colspan="4" align="right"><input type="submit" value="Liste erstellen"/></td>
+		<td colspan="3" align="right">
+			<input type="checkbox" checked="checked" name="s"/> Sektoren
+			<input type="checkbox" checked="checked" name="g"/> Gesch&uuml;tze
+			<input type="checkbox" checked="checked" name="e"/> Einheiten
+			<input type="checkbox" <?php echo isset($_GET['m']) ? 'checked="checked"' : '' ?> name="m"/> Milit&auml;r
+			<input type="checkbox" <?php echo isset($_GET['n']) ? 'checked="checked"' : '' ?> name="n"/> News
+			<input type="checkbox" checked="checked" name="b"/> Scanblocks
+			<input type="checkbox" <?php echo isset($_GET['u']) ? 'checked="checked"' : '' ?>name="u"/> Urlaub  
+			<input type="submit" name="export" value="Export"/>&nbsp;</td>
+		<td align="right">&nbsp;<input type="submit" value="Scanliste"/>&nbsp;</td>
 	</tr>
 </table>
 </form>
 <br/>
+<?php
+
+$where = '0';
+foreach($to_be_scanned as $v) {
+	$v = explode(':', $v);
+	$where .= ' OR (s.spieler_galaxie = '.$v[0].' AND s.spieler_planet = '.$v[1].')';
+}
+
+if(isset($_GET['export'])) {
+	if($Benutzer['rang'] >= $Rang_GC) {
+		$sql = "SELECT
+				s.meta,
+				s.allianz_name ally,
+				s.spieler_galaxie g,
+				s.spieler_planet p,
+				s.spieler_name name,
+				s.spieler_urlaub urlaub
+			FROM gn_spieler2 s
+			WHERE (".$where.") AND s.spieler_urlaub IN (0, " . (isset($_GET['u']) ? 1 : 0) . ") ORDER BY s.meta, ally, g, p";
+		//aprint($sql);
+		$res = tic_mysql_query($sql, __FILE__, __LINE__);
+		$num = mysql_num_rows($res);
+
+		echo '<textarea style="width: 700px; height: 500px">';
+		
+		for($i = 0; $i < $num; $i++) {
+			$scans = 0;
+			list($meta, $ally, $gal, $pla, $name, $urlaub) = mysql_fetch_row($res);
+			
+			if($urlaub) {
+				echo "UMODE!\n\n";
+			}
+			
+			
+			if(isset($_GET['b'])) {
+				//blocks
+				$sql = "SELECT t, svs, typ FROM gn4scanblock WHERE g = '" . $gal . "' AND p = '" . $pla . "' AND suspicious IS NULL ORDER BY svs DESC, t DESC LIMIT 3";
+				//aprint($sql);
+				$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
+				$num2 = mysql_num_rows($res2);
+				for($j = 0; $j < $num2; $j++) {
+					list($t, $svs, $typ) = mysql_fetch_row($res2);
+					echo "SCANBLOCK ";
+					switch($typ) {
+						case 0: echo 'Sektor   '; break;
+						case 1: echo 'Einheiten'; break;
+						case 2: echo 'Militär  '; break;
+						case 3: echo 'Geschütze'; break;
+						case 4: echo 'News     '; break;
+						default: echo 'unbekannt'; break;
+					}
+					echo " mit " . ZahlZuText($svs) . " SVS am " . date('d.m.Y H:i', $t) . "\n";
+				}
+				if($num2 > 0)
+					echo "\n";
+			}
+
+			//scans
+			$sql = "SELECT * FROM gn4scans WHERE rg='" . $gal . "' AND rp='" . $pla . "' ORDER BY rg, rp, `type`";
+			$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
+			for($j = 0; $j < mysql_num_rows($res2); $j++) {
+				list($id, $ticid, $zeit, $type, $g, $p, $rg, $rp, $gen, $pts, $s, $d, $me, $ke, $a,
+					$sf0j, $sf0b, $sf0f, $sf0z, $sf0kr, $sf0sa, $sf0t, $sf0ko, $sf0ka, $sf0su, 
+					$sf1j, $sf1b, $sf1f, $sf1z, $sf1kr, $sf1sa, $sf1t, $sf1ko, $sf1ka, $sf1su, $status1, $ziel1,
+					$sf2j, $sf2b, $sf2f, $sf2z, $sf2kr, $sf2sa, $sf2t, $sf2ko, $sf2ka, $sf2su, $status2, $ziel2,
+					$sfj, $sfb, $sff, $sfz, $sfkr, $sfsa, $sft, $sfko, $sfka, $sfsu, $glo, $glr, $gmr, $gsr, $ga, $gr) = mysql_fetch_row($res2);
+				switch($type) {
+					case 0:
+						if(!isset($_GET['s']))
+							continue;
+						$align = 9;
+						echo "SEKTOR " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
+						echo "Pkt: " . nformat(round($pts, 0), $align) . "\n";
+						echo "S:     " . nformat($s, $align) .       ";  D:   " . nformat($d, $align) . "\n";
+						echo "ME:    " . nformat($me, $align) .      ";  KE:  " . nformat($ke, $align) . "\n";
+						echo "E-Sum: " . nformat($me+$ke, $align) .  ";  5T:  " . nformat(round(($me+$ke)*pow(.9, 5), 0), $align) . "\n";
+						echo "\n";
+						$scans++;
+						break;
+					case 1:
+						if(!isset($_GET['e']))
+							continue;
+						$align = 7;
+						echo "EINHEITEN " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
+						echo "Ja: " . nformat($sfj, $align) .  ";  Bo: " . nformat($sfb, $align) . "\n";
+						echo "Fr: " . nformat($sff, $align) .  ";  Ze: " . nformat($sfz, $align) . "\n";
+						echo "Kr: " . nformat($sfkr, $align) . ";  Sc: " . nformat($sfsa, $align) . "\n";
+						echo "Tr: " . nformat($sft, $align) .  ";  Ca: " . nformat($sfka, $align) . "\n";
+						echo "Cl: " . nformat($sfsu, $align) . "\n";
+						echo "\n";
+						$scans++;
+						break;
+					case 2:
+						if(!isset($_GET['m']))
+							continue;
+						$align = 7;
+						echo "MILITÄR " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
+						echo "      Orbit  Flotte1  Flotte2\n";
+						echo "Ja: " . nformat($sf0j, $align)  . "  " . nformat($sf1j, $align)   . "  " . nformat($sf2j, $align)  . "\n";
+						echo "Bo: " . nformat($sf0b, $align)  . "  " . nformat($sf1b, $align)   . "  " . nformat($sf2b, $align)  . "\n";
+						echo "Fr: " . nformat($sf0f, $align)  . "  " . nformat($sf1f, $align)   . "  " . nformat($sf2f, $align)  . "\n";
+						echo "Ze: " . nformat($sf0z, $align)  . "  " . nformat($sf1z, $align)   . "  " . nformat($sf2z, $align)  . "\n";
+						echo "Kr: " . nformat($sf0kr, $align) . "  " . nformat($sf1kr, $align)  . "  " . nformat($sf2kr, $align)  . "\n";
+						echo "Sc: " . nformat($sf0sa, $align) . "  " . nformat($sf1sa, $align)  . "  " . nformat($sf2sa, $align)  . "\n";
+						echo "Tr: " . nformat($sf0t, $align)  . "  " . nformat($sf1t, $align)   . "  " . nformat($sf2t, $align)  . "\n";
+						echo "Cl: " . nformat($sf0ka, $align) . "  " . nformat($sf1ka, $align)  . "  " . nformat($sf2ka, $align)  . "\n";
+						echo "Ca: " . nformat($sf0su, $align) . "  " . nformat($sf1su, $align)  . "  " . nformat($sf2su, $align)  . "\n";
+						echo "\n";
+						$scans++;
+						break;
+					case 3:
+						if(!isset($_GET['g']))
+							continue;
+						if(isset($_GET['s']) && ($ga + $glo + $glr + $gmr + $gsr) == 0)
+							continue;
+						$align = 7;
+						$clepkill = floor($glo * 1.28 + $ga * .32);
+						echo "GESCHÜTZE " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
+						echo "AJ: " . nformat($ga, $align) .  ";  LO:       " . nformat($glo, $align) . "\n";
+						echo "LR: " . nformat($glr, $align) . ";  MR:       " . nformat($gmr, $align) . "\n";
+						echo "SR: " . nformat($gsr, $align) . ";  Clepkill: " . nformat($clepkill, $align) . "\n";
+						echo "\n";
+						$scans++;
+						break;
+				}
+			}//foreach players scans
+			mysql_free_result($res2);
+
+			if(isset($_GET['n'])) {
+				$sql = "SELECT id, t, genauigkeit, erfasser_svs FROM gn4scans_news WHERE ziel_g = '".$rg."' AND ziel_p = '".$rp."' ORDER BY t DESC LIMIT 1";
+				$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
+				if(mysql_num_rows($res2) == 1) {
+					list($id, $t, $gen, $svs) = mysql_fetch_row($res2);
+					mysql_free_result($res2);
+					
+					echo "NACHRICHTEN " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . date('H:i d.m.Y', $t) . ")\n";
+					
+					$sql = "SELECT t, typ, inhalt, inaccurate FROM gn4scans_news_entries WHERE typ NOT LIKE '%bericht%' AND typ NOT LIKE '%beschuss%' AND (typ LIKE '%Verteidigung%' OR typ LIKE '%Angriff%' OR typ LIKE '%ckzug%') AND news_id = '".$id."' ORDER BY id";
+					$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
+					$num2 = mysql_num_rows($res2);
+					
+					if($num2 > 0) {
+						for($j = 0; $j < $num2; $j++) {
+							list($t, $typ, $inhalt, $inaccurate) = mysql_fetch_row($res2);
+							$age = round((time() - $t)/60, 0);
+							if($j > 0) echo "--\n";
+							echo nformat($age, 6) . 'min ' . ($inaccurate ? ' (fehlerhaft) ' : '') . $typ . ":\n";
+							echo              '          ' . str_replace("\n", " ", $inhalt) . "\n";
+						}
+						echo "\nENDE\n\n";
+					} else {
+						echo "ENDE\n\n";
+					}
+					
+					$scans++;
+				}
+				
+				mysql_free_result($res2);
+			}
+			
+			if($scans == 0) {
+				echo 'Keine Scaninformation zu ' . $gal . ':' . $pla . ' ' . $name . "\n\n";
+			}
+			echo "===\n\n";
+		}
+		
+		echo '</textarea>';
+	} else {
+		echo 'Dieses Feature steht Dir leider nicht zur Verf&uuml;gung.';
+	}
+} else {
+?>
+
 <table width="100%">
 	<tr class="datatablehead">
 		<td align="center">&nbsp;Meta&nbsp;</td>
@@ -152,19 +344,32 @@ $hours = 36;
 		<td align="center">&nbsp;Spieler&nbsp;</td>
 		<td align="center" colspan="2">&nbsp;Blocks&nbsp;</td>
 		<td align="center" colspan="2">&nbsp;Sektor&nbsp;</td>
-		<td align="center" colspan="2">&nbsp;Gesch&uuml;tze&nbsp;</td>
+		<td align="center" colspan="3">&nbsp;Gesch&uuml;tze&nbsp;</td>
 		<td align="center" colspan="2">&nbsp;Einheiten&nbsp;</td>
 		<td align="center" colspan="2">&nbsp;Milit&auml;r&nbsp;</td>
 		<td align="center" colspan="2">&nbsp;Nachrichten&nbsp;</td>
-		<td align="center">&nbsp;Scandb&nbsp;</td>
+	</tr>
+	<tr class="datatablehead">
+		<td>&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+		<td align="center">&nbsp;SVS&nbsp;</td>
+		<td align="center">&nbsp;Typ&nbsp;</td>
+		<td align="center">&nbsp;Alter&nbsp;</td>
+		<td align="center">&nbsp;&nbsp;</td>
+		<td align="center">&nbsp;Alter&nbsp;</td>
+		<td align="center">&nbsp;Deff <i title="Laut neuestem Sektor-/Gesch&uuml;tzscan.">(?)</i>&nbsp;</td>
+		<td align="center">&nbsp;Link&nbsp;</td>
+		<td align="center">&nbsp;Alter&nbsp;</td>
+		<td align="center">&nbsp;Link&nbsp;</td>
+		<td align="center">&nbsp;Alter&nbsp;</td>
+		<td align="center">&nbsp;Link&nbsp;</td>
+		<td align="center">&nbsp;Alter&nbsp;</td>
+		<td align="center">&nbsp;Link&nbsp;</td>
 	</tr>
 <?php
-
-	$where = '0';
-	foreach($to_be_scanned as $v) {
-		$v = explode(':', $v);
-		$where .= ' OR (s.spieler_galaxie = '.$v[0].' AND s.spieler_planet = '.$v[1].')';
-	}
 	$sql = "SELECT
 			s.meta,
 			s.allianz_name ally,
@@ -176,6 +381,8 @@ $hours = 36;
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans1.zeit, '%H:%i %d.%m.%Y')))/60, 0) t1,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans2.zeit, '%H:%i %d.%m.%Y')))/60, 0) t2,
 			round((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(STR_TO_DATE(scans3.zeit, '%H:%i %d.%m.%Y')))/60, 0) t3,
+			scans0.d AS DEFF,
+			scans3.ga + scans3.glo + scans3.glr + scans3.gmr + scans3.gsr as DEFF2,
 			round((UNIX_TIMESTAMP(NOW()) - scans4.t)/60, 0) t4,
 			blocks.typ,
 			blocks.svs
@@ -211,7 +418,19 @@ $hours = 36;
 		$age_m = mysql_result($res, $i, 't2');
 		$age_g = mysql_result($res, $i, 't3');
 		$age_n = mysql_result($res, $i, 't4');
-
+		
+		$DEFF =  mysql_result($res, $i, 'DEFF');
+		$DEFF2 =  mysql_result($res, $i, 'DEFF2');
+		$deffstr = '-';
+		if($age_g && $age_s) {
+			$deffstr = ($age_g < $age_s) ? ZahlZuText($DEFF2) : ZahlZuText($DEFF);
+		} else if($age_g) {
+			$deffstr = ZahlZuText($DEFF2);
+		} else if($age_s) {
+			$deffstr = ZahlZuText($DEFF);
+		}
+		
+		
 		$block_svs = mysql_result($res, $i, 'svs');
 		$block_typ = mysql_result($res, $i, 'typ');
 
@@ -240,14 +459,15 @@ $hours = 36;
 			echo '<tr id="row'.$i.'" class="fieldnormal'.($color ? 'light' : 'dark').'">';
 		echo '	<td>&nbsp;' . $meta . '&nbsp;</td>';
 		echo '	<td>&nbsp;' . $ally . '&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . $g . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;<a href="main.php?modul=showgalascans&displaytype=1&xgala='.$g.'">&raquo; ' . $g . '</a>&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . $p . '&nbsp;</td>';
-		echo '	<td>&nbsp;' . $name . '&nbsp;</td>';
-		echo '	<td align="right">&nbsp;' . ZahlZuText($block_svs) . '&nbsp;</td>';
+		echo '	<td>&nbsp;<a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=0">&raquo; ' . $name . '</a>&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . ($block_svs > 0 ? ZahlZuText($block_svs) : '-') . '&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . $block_typ . '&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ($age_s ? ZahlZuText($age_s) : '-') . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=sektor" target="_blank"><b>Scan S</b></a>&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ($age_g ? ZahlZuText($age_g) : '-') . '&nbsp;</td>';
+		echo '	<td align="right">&nbsp;' . $deffstr . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=gesch" target="_blank"><b>Scan G</b></a>&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ($age_e ? ZahlZuText($age_e) : '-') . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=einheit" target="_blank"><b>Scan E</b></a>&nbsp;</td>';
@@ -255,11 +475,13 @@ $hours = 36;
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=mili" target="_blank"><b>Scan M</b></a>&nbsp;</td>';
 		echo '	<td align="right">&nbsp;' . ($age_n ? ZahlZuText($age_n) : '-') . '&nbsp;</td>';
 		echo '	<td align="center">&nbsp;<a href="http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news&news_kampf=1&news_scan=1&news_spenden=1&news_galaxy=1&news_allianz=1&news_tausch=1" target="_blank"><b>Scan N</b></a>&nbsp;</td>';
-		echo '	<td align="center"><a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=0">Details</a></td>';
 		echo '</tr>';
 
 		$color = !$color;
 	}
 ?>
 </table>
+<?php
+}
+?>
 </center>

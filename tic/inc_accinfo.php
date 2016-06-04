@@ -25,11 +25,9 @@
 		</td>
 		<td rowspan="2" align=left" valign="middle" style="width: 150px">
 			<form action="main.php" method="post">
-				<input type="hidden" name="modul2" value="scan" />
-				<input type="hidden" name="action" value="addscan" />
-				<b>Scanimport:</b><br/>
-				<textarea type="text" name="txtScan" style="width: 200px; height: 40px"></textarea><br/>
-				<a href="main.php?modul=<?=(isset($_GET['modul']) ? $_GET['modul'] : '');?>&mode=<?=$_GET['mode'];?>&action=updatefleett" onclick="return confirm('Dies aktualisiert den Zeitstempel des letzten Taktikscreen Imports f&uuml;r Galaxie <?=$Benutzer['galaxie'];?>.\n\nBist Du Dir sicher, dass sich nichts ge&auml;ndert hat?')">&raquo; Flottenbewegungen gleich</a> <input type="submit" value="go!"/>
+				<input type="hidden" name="action" value="addscan2" />
+				<b>Scanimport:</b> <input type="submit" value="go!"/><br/>
+				<textarea type="text" name="txtScan" style="width: 120px; height: 40px"></textarea>
 			</form>
 		</td>
 		<td align="right" valign="top" style="white-space:nowrap;">

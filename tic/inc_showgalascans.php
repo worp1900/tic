@@ -1,15 +1,3 @@
-<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.10/dist/clipboard.min.js"></script>
-<script>
-	var clipboard = new Clipboard('.btn');
-	clipboard.on('success', function(e) {
-		e.clearSelection();
-	});
-
-	clipboard.on('error', function(e) {
-		console.error('Action:', e.action);
-		console.error('Trigger:', e.trigger);
-	});
-</script>
 <?php
 	if(!isset($xgala)) {
 		if(isset($_GET['xgala']))
@@ -39,7 +27,7 @@
 			if ( !isset( $xgala ))
 				$error_occured = 3;
 			else
-				$sql  = 'select * from `gn4scans` where rg='.intval($xgala).' order by rp, type';
+				$sql  = 'select *, UNIX_TIMESTAMP(STR_TO_DATE(zeit, "%H:%i %d.%m.%Y")) as t from `gn4scans` where rg='.intval($xgala).' order by rp, type';
 			break;
 		case 2: // einzelner planet = 0 / gala= 1 / query = 2
 			if ( !isset( $_GET['qvar']) )
@@ -55,7 +43,7 @@
 				else
 					$sortdir='DESC';
 				$sql = "
-					SELECT gn4scans.* FROM `gn4scans`
+					SELECT gn4scans.*, UNIX_TIMESTAMP(STR_TO_DATE(gn4scans.zeit, '%H:%i %d.%m.%Y')) as t FROM `gn4scans`
 					".((isset($_GET['qlimit']) && $_GET['qlimit'] > 0)?"LEFT JOIN gn4accounts ON (gn4scans.rg = gn4accounts.galaxie AND gn4scans.rp = gn4accounts.planet)":"")."
 					WHERE ".$tmparr[0]." ".$_GET['qoperator']." '".$_GET['qval']."' AND type=".$tmparr[1]."
 					".((isset($_GET['qlimit']) && $_GET['qlimit'] > 0)?"AND gn4accounts.name ".($_GET['qlimit'] == 1?"IS":"IS NOT")." NULL":"")."
@@ -69,7 +57,7 @@
 			else if ( !isset( $xplanet ))
 				$error_occured = 2;
 			else
-				$sql='select * from `gn4scans` where rg='.intval($xgala).' and rp='.intval($xplanet).' order by type';
+				$sql='select *, UNIX_TIMESTAMP(STR_TO_DATE(zeit, "%H:%i %d.%m.%Y")) as t from `gn4scans` where rg='.intval($xgala).' and rp='.intval($xplanet).' order by type';
 			break;
 	}
 	if ( $error_occured > 0){
@@ -109,11 +97,11 @@
 		</td>
 		</tr>
 	</table>
-	
+
 	<br />
 <?php
 if($xgala) {
-	echo '<table width="100%">
+	echo '<form method="post" action="main.php?modul=showgalascans&action=newstosimu"><input type="hidden" name="rg" value="'.$xgala.'"/><input type="hidden" name="rp" value="'.$xplanet.'"/><table width="100%">
 		<tr class="datatablehead" style="text-align: center;">
 			<td>&nbsp;Meta&nbsp;</td>
 			<td>&nbsp;Allianz&nbsp;</td>
@@ -142,17 +130,17 @@ if($xgala) {
 			$color = !$color;
 			echo'	<tr class="fieldnormal' . ($color ? 'light' : 'dark') . '" ' . ($row[5] == 1 ? 'style="background-color: darkgray" title="Urlaub"' : '') . '>';
 			if($k == 0) {
-				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[8].'&nbsp;';
+				echo '<td class="fieldnormallight" valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[8].'&nbsp;';
 				if($row[8]) echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&meta='.urlencode($row[8]).'%3B">&raquo; Scanliste</a></i>&nbsp;';
 				echo '</td>';
-				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[7].'&nbsp;';
+				echo '<td class="fieldnormallight" valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[7].'&nbsp;';
 				if($row[7]) echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&allianz='.urlencode($row[7]).'%3B">&raquo; Scanliste</a></i>&nbsp;';
 				echo '</td>';
-				echo '<td valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[1].'&nbsp;';
+				echo '<td class="fieldnormallight" valign="top" align="center" rowspan="'.$num2.'">&nbsp;'.$row[1].'&nbsp;';
 				echo '<br>&nbsp;<i><a href="main.php?modul=scanliste&galaxie='.$row[1].'%3B">&raquo; Scanliste</a></i>&nbsp;';
 				echo '</td>';
-			} 
-			echo '		<td align="right">&nbsp;'.$row[2].'&nbsp;</td>
+			}
+			echo '		<td align="right">&nbsp;<a href="main.php?modul=showgalascans&xgala='.$row[1].'&xplanet='.$row[2].'">&raquo; '.$row[2].'</a>&nbsp;</td>
 					<td align="left">&nbsp;'.$row[0].'&nbsp;</td>
 					<td align="right">&nbsp;'.ZahlZuText($row[3]).'&nbsp;</td>
 					<td align="right">&nbsp;'.($row[11] ? ZahlZuText($row[6]) : '-').'&nbsp;</td>
@@ -187,7 +175,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 ?>
 		<table width="100%">
 			<tr>
-				<td colspan="15" class="datatablehead">NEWS: <?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="javascript:history.back();">zur&uuml;ck</a></td>
+				<td colspan="15" class="datatablehead">Nachrichten - <?php echo $rg.':'.$rp.' - '.$rname.' ('.gnuser($rg, $rp).')'; ?> - <a href="javascript:history.back();">zur&uuml;ck</a></td>
 			</tr>
 <?php
 		$copystr = '';
@@ -204,22 +192,24 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				$copystr .= '*News* (' . $svs . 'SVS, ' . $gen . '%, ' . date('H:i d.m.Y', $t) . ') - *' . trim($rname) . ' ' . $rg . ':' . $rp . '* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid=' . $id;
 				$copystr .= '```';
 			}
-?>
-			<tr>
-				<td class="fieldnormaldark"><b>Newsscan: </b></td>
-				<td class="fieldnormaldark"><b><?=date('Y-m-d H:i', $t);?></b></td>
-				<td class="fieldnormaldark"><b><?=$gen;?>%</b></td>
-				<td class="fieldnormaldark"><b><?=ZahlZuText($svs);?> SVS</b> - <a  title="Bezahle <?=ZahlZuText(round(8000 * $scanbezahlungfaktor, 0));?> Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=<?=$g;?>&transfer2=<?=$p;?>&summe=<?=round(8000 * $scanbezahlungfaktor, 0);?>&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; <?=$g.':'.$p;?></a></td>
-			</tr>
-<?php
+
+			$output = '';
+			$output .= '<tr class="datatablehead">
+				<td><b>Newsscan: </b></td>
+				<td><b>' . date('Y-m-d H:i', $t) . '</b></td>
+				<td><b>' . $gen . '%</b></td>
+				<td><b>' . ZahlZuText($svs) . ' SVS</b> - <a  title="Bezahle ' . ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)) . ' Kristall"href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1=' . $g . '&transfer2=' . $p . '&summe=' . round(8000 * $scanbezahlungfaktor, 0) . '&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ ' . $g . ':' . $p . '</a></td>
+				<td>&nbsp;Sim&nbsp;</td>
+			</tr>';
+
 			$highlight = array('Verteidigung', 'Angriff', 'Rückzug', 'Artilleriebeschuss', 'Artilleriesysteme');
 
-			$sql = "select t, typ, inhalt from gn4scans_news_entries where news_id = " . $id . " order by id asc";
+			$sql = "SELECT id, t, typ, inhalt FROM gn4scans_news_entries WHERE news_id = " . $id . " ORDER BY id ASC";
 			$res_news_entries = tic_mysql_query($sql);
 			$num_news_entries = mysql_num_rows($res_news_entries);
 
 			$color = true;
-			
+
 			if($num_news_entries == 0) {
 				if($id < 155) {
 					echo '<tr><td colspan="4">Sorry, aufgrund eines technischen Fehlers sind diese Eintr&auml;ge permanent nicht verf&uuml;bar.</td></tr>';
@@ -227,11 +217,28 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				echo '<tr><td colspan="4">Sorry, keine Eintr&auml;ge gefunden.</td></tr>';
 				}
 			}
+
+			$fleets = array();
+			$fleets_rf = array();
 			for($j = 0; $k < $num_news_entries; $k++) {
+				$id = mysql_result($res_news_entries, $k, 'id' );
 				$t = mysql_result($res_news_entries, $k, 't' );
 				$typ = mysql_result($res_news_entries, $k, 'typ' );
 				$inhalt = mysql_result($res_news_entries, $k, 'inhalt' );
+				$age = ceil((time()-$t)/60);
 
+				//GET SIMULATION RELEVANT FLEET INFORMATION
+				$please_add_selection = false;
+				$please_add_selection_checked = false;
+				$thresh = 450*60;
+				if(!in_array_contains(array('Verteidigungsbericht', 'Angriffsbericht'), $typ) && in_array_contains(array('Verteidigung', 'Angriff', 'Rückzug'), $typ)) {
+					$please_add_selection = true;
+					if(time() - $t < $thresh) {
+						$please_add_selection_checked = true;
+					}
+				}
+
+				//CONVERT REPORT
 				if(in_array_contains(array('Angriffsbericht', 'Verteidigungsbericht', 'Artilleriebeschuss', 'Artilleriesysteme'), $typ)) {
 					//convert content
 					$inhalt = str_replace("\r", "\n", $inhalt);
@@ -259,39 +266,48 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					//aprint($inhalt);
 				}
 
+				//HIGHLIGHT FLEETS
 				if(in_array_contains($highlight, $typ)) {
-					echo $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
+					$output .= $color ? '<tr bgcolor="#ededdd">' : '<tr bgcolor="#dcdccc">';
 				} else {
-					echo $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';
+					$output .= $color ? '<tr class="fieldnormallight">' : '<tr class="fieldnormaldark">';
 				}
 
-				if(in_array_contains($highlight, $typ) && time() - $t < 10*60*60) {
+				//CREATE COPY-STRING
+				if(in_array_contains($highlight, $typ) && time() - $t < (2*450+5*15)*60) {
 					if(!in_array_contains(array('Artilleriebeschuss', 'Verteidigungsbericht', 'Angriffsbericht'), $typ))
 						$copystr .= "\n" . ZahlZuText(round((time()-$t)/60, 0)) . 'min   ' . $typ . ': ' . $inhalt;
 					else
 						$copystr .= "\n" . ZahlZuText(round((time()-$t)/60, 0)) . 'min   ' . $typ . ': *snip*';
 				}
 
+				//MAKE CONTENT PRETTIERT
 				//@^(\d+):(\d+).+?Flotte (\d).+wird in (\d+:\d+|\d+ Minuten|\d+ Ticks)@mg
 				$inhalt = preg_replace('@^(?:Kommandant! )?(\\d+):(\\d+).([\\w-\.äöü]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
 				$inhalt = preg_replace('@^(?:Kommandant! )?([\\w-\.äöü]+).(\\d+):(\\d+)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
 				$inhalt = preg_replace('@([\\w-\.äöü]+).\((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
-								
-				?>
-					<td valign="top"><?php
-					if($t > 0) {
-						echo date('Y-m-d H:i', $t);
-						echo ' - ';
-						echo ZahlZuText(round((time()-$t)/60, 0));
-						echo 'min';
-					} else {
-						echo '<i>?</i>';
-					}
-					?></td>
-					<td valign="top" align="left"><?=$typ;?></td>
-					<td valign="top" align="left" colspan="2"><pre style="font-size: 8pt;"><?=$inhalt;?></pre></td>
-				</tr>
-				<?
+				$inhalt = preg_replace('@(Als Grund gab)|(Euch wurden)|(Dem Transfer)@', "\n$1$2$3", $inhalt, -1);
+				$inhalt = preg_replace('@[\\t ]+@', ' ', $inhalt, -1);
+
+				//ACTUAL HTML OUTPUT
+				$output .= '<td valign="top">';
+				if($t > 0) {
+					$output .= date('Y-m-d H:i', $t);
+					$output .= ' - ';
+					$output .= ZahlZuText($age);
+					$output .= 'min';
+				} else {
+					$output .= '<i>?</i>';
+				}
+
+				$output .= '</td>
+						<td valign="top" align="left">' . $typ . '</td>
+						<td valign="top" align="left" colspan="2"><pre style="font-size: 8pt;">' . $inhalt . '</pre></td>';
+				if($please_add_selection) {
+					$output .= '<td>&nbsp;<input type="checkbox" ' . ($please_add_selection_checked ? ' checked="checked"' : '') . ' name="news['.$id.']" />&nbsp;</td>';
+				}
+				$output .= '</tr>';
+
 				$color = !$color;
 			}
 
@@ -299,17 +315,21 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		}
 
 		$copystr .= "```";
-?>
-			<tr class="datatablehead">
+
+		echo '<tr>
+				<td class="fieldnormaldark" style="font-weight: bold;">&nbsp;Copy for:&nbsp;</td>
+				<td class="fieldnormallight">&nbsp;' . createCopyLink('Slack',  $copystr) . '&nbsp;</td>
+				<td colspan="3" class="fieldnormallight" align="right">&nbsp;<input type="submit" value="&raquo; Zur Simulation" />&nbsp;</td>
+			</tr>';
+
+		$output .= '<tr class="datatablehead">
 				<td colspan="4">&nbsp;</td>
 			</tr>
-			<tr>
-				<td colspan="1" bgcolor="dbdbbb">&nbsp;Copy for:&nbsp;</td>
-				<td colspan="1" bgcolor="#fdfddd" class="fielnormallight">&nbsp;<?php echo createCopyLink('Slack', $copystr);?>&nbsp;</td>
-			</tr>
-		</table>
-<?php
-	}
+			</table>';
+
+		echo $output;
+	}//num news > 0
+	echo '</form>';
 	mysql_free_result($res_news);
 
 } else {
@@ -348,7 +368,6 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		}
 
 		echo '<font color="#800000" size="-1"><b>Sorry - Keine Scans vorhanden. Vielleicht im <a href="main.php?auto&modul=scanarchiv&xgala='.$_GET['xgala'].'&xplanet='.$_GET['xplanet'].'">&raquo; Archiv</a>.</b></font>';
-		return;
 	} else {
 		// all
 		$svs_s = '-';
@@ -392,6 +411,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$d	= mysql_result($SQL_Result, $i, 'd' );
 					$a	= mysql_result($SQL_Result, $i, 'a' );
 					$svs_s  = mysql_result($SQL_Result, $i, 'erfasser_svs');
+					$st = mysql_result($SQL_Result, $i, 't');
 					break;
 				case 1: // unit
 					$ein_p = mysql_result($SQL_Result, $i, 'p' );
@@ -408,6 +428,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$ka	= mysql_result($SQL_Result, $i, 'sfka' );
 					$ca	= mysql_result($SQL_Result, $i, 'sfsu' );
 					$svs_e  = mysql_result($SQL_Result, $i, 'erfasser_svs');
+					$ut = mysql_result($SQL_Result, $i, 't');
 					break;
 				case 2: // mili-scan
 					$mil_p = mysql_result($SQL_Result, $i, 'p' );
@@ -446,6 +467,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$ziel2 =  mysql_result($SQL_Result, $i, 'ziel2');
 					$status1 = mysql_result($SQL_Result, $i, 'status1');
 					$status2 = mysql_result($SQL_Result, $i, 'status2');
+					$mt = mysql_result($SQL_Result, $i, 't');
 					break;
 				case 3: // geschtz
 					$ges_p = mysql_result($SQL_Result, $i, 'p' );
@@ -458,6 +480,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 					$sr	= mysql_result($SQL_Result, $i, 'gsr' );
 					$aj	= mysql_result($SQL_Result, $i, 'ga' );
 					$svs_g  = mysql_result($SQL_Result, $i, 'erfasser_svs');
+					$gt = mysql_result($SQL_Result, $i, 't');
 					break;
 				default:
 					echo '????huh?!??? - Ohooooh';
@@ -470,8 +493,8 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	echo '	<a name="plani'.$rp.'"></a>';
 ?>
 	<table width="100%">
-		<tr>
-			<td colspan="15" class="datatablehead"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">Punkteverlauf</a> - <a href="main.php?modul=kampf&preticks=1&flotten=1&ticks=5&g[0]=<?=$rg;?>&p[0]=<?=$rp;?>&typ[0]=d&g[1]=<?=$Benutzer['galaxie'];?>&p[1]=<?=$Benutzer['planet'];?>&f[1]=0&typ[1]=a&referenz=eintragen&compute=Berechnen">Angriff simulieren</a> - <a href="main.php?auto&modul=scanarchiv&xgala=<?php echo $rg; ?>&xplanet=<?php echo $rp; ?>">Archiv</a></td>
+		<tr class="datatablehead">
+			<td colspan="15" align="center"><?php echo $rg.':'.$rp.' - '.$rname.' ('.getscannames($rscans).')'; ?> - <a href="https://gntic.de/x/player.php?name=<?=$rname;?>" target="_blank">&raquo; Punkteverlauf</a> - <a href="main.php?modul=kampf&preticks=1&flotten=1&ticks=5&g[0]=<?=$rg;?>&p[0]=<?=$rp;?>&typ[0]=d&g[1]=<?=$Benutzer['galaxie'];?>&p[1]=<?=$Benutzer['planet'];?>&f[1]=0&typ[1]=a&referenz=eintragen&compute=Berechnen">&raquo; Simulieren</a> - <a href="main.php?auto&modul=scanarchiv&xgala=<?php echo $rg; ?>&xplanet=<?php echo $rp; ?>">&raquo;  Archiv</a></td>
 		</tr>
 		<tr>
 			<td class="fieldnormaldark"><b>Punkte</b></td>
@@ -484,7 +507,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">$</td>
 			<td class="fieldnormaldark" title="F&uuml;r einen erfolgreichen Scan werden SV/SB ben&ouml;tigt:&#013;* Sektor 1-1.5&#013;* Einheiten/Gesch&uuml;tze 1.5-2.0&#013;* Milit&auml;r/News 2.0-2.5"><b>Scanblocks</b><i>(?)</i></td>
 			<td class="fieldnormaldark"><b>News</b></td>
 		</tr>
@@ -502,7 +525,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 	$sektor = $sektor.	'00,01Datum: 07,01'.$szeit;
 
 	$sektor_slack = '*Sektor* ('.$svs_s.'SVS, ' . $sgen . '%, ' . $szeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
-	$sektor_slack .= '```Punkte:  ' . xformat($pts) . "\n".'Exen:    M ' . xformat($me) . ', K ' . xformat($ke) . '; Sum ' . xformat($me + $ke) . "\n".'Schiffe: ' . xformat($s) . "\n".'Deff:    ' . xformat($d) . '```';
+	$sektor_slack .= '```Punkte:  ' . nformat($pts) . "\n".'Exen:    M ' . nformat($me) . ', K ' . nformat($ke) . '; Sum ' . nformat($me + $ke) . "\n".'Schiffe: ' . nformat($s) . "\n".'Deff:    ' . nformat($d) . '```';
 ?>
 			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Sektor', $sektor);?></td>
 			<td bgcolor="#fdfddd" colspan="2"><?php echo createCopyLink('Sektor', $sektor_slack);?></td>
@@ -532,23 +555,23 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 		switch($type) {
 			case 0:
 				echo 'S';
-				echo ' <a title="Bezahle '.ZahlZuText(round(2000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(2000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(2000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(2000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 1:
 				echo 'E';
-				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 2:
 				echo 'M';
-				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 3:
 				echo 'G';
-				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(4000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(4000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$sbg.':'.$sbp.'</a>';
 				break;
 			case 4:
 				echo 'N';
-				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$sbg.':'.$sbp.'</a>';
+				echo ' <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$sbg.'&transfer2='.$sbp.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$sbg.':'.$sbp.'</a>';
 				break;
 			default:
 			break;
@@ -573,7 +596,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			$newsid = mysql_result($res_news, $j, 'id');
 			$n_g = mysql_result($res_news, $j, 'erfasser_g');
 			$n_p = mysql_result($res_news, $j, 'erfasser_p');
-			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid='.$newsid.'">' . date('Y-m-d H:i', $t) . '</a> <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$n_g.'&transfer2='.$n_p.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">&#x1f4b0; '.$n_g.':'.$n_p.'</a><br/>';
+			echo '<a href="main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . '&displaytype=news&newsid='.$newsid.'">' . date('Y-m-d H:i', $t) . '</a> <a title="Bezahle '.ZahlZuText(round(8000 * $scanbezahlungfaktor, 0)).' Kristall" href="http://www.galaxy-network.net/game/rohstoffe.php?transfer1='.$n_g.'&transfer2='.$n_p.'&summe='.round(8000 * $scanbezahlungfaktor, 0).'&transfer_typ=Kristall&spenden_grund=Scanbezahlung" target="_blank">$ '.$n_g.':'.$n_p.'</a><br/>';
 		}
 	}
 	mysql_free_result($res_news);
@@ -603,7 +626,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">$</td>
 		</tr>
 		<tr>
 			<td class="fieldnormallight"><?php echo $lo; ?></td>
@@ -623,7 +646,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 
 	if($mzeit === '-') {
 		$mili_slack = '*Einheiten* (' . $svs_e . 'SVS, ' . $ugen . '%, ' . $uzeit . ') - *'.$rname.' '.$rg.':'.$rp.'* - https://gntic.de/tic/main.php?modul=showgalascans&xgala=' . $rg . '&xplanet=' . $rp . "\n";
-		$mili_slack .= '```Jäger    ' . nformat($ja, 7) . '\t  Bomber:     ' . nformat($bo, 7) . "\n".'Fregs:   ' . nformat($fr, 7) . '\t  Zerries:    ' . nformat($ze, 7) . "\n".'Kreuzer: ' . nformat($kr, 7) . '\t  Schlachter: ' . nformat($sl, 7) . "\n".'Träger:  '   .nformat( $tr, 7) . '\t  Cleps:      ' . nformat($ka, 7) . "\n".'Cancs:   ' . nformat($ca, 7) . '```';
+		$mili_slack .= '```Jäger    ' . nformat($ja, 7) . '	  Bomber:     ' . nformat($bo, 7) . "\n".'Fregs:   ' . nformat($fr, 7) . '	  Zerries:    ' . nformat($ze, 7) . "\n".'Kreuzer: ' . nformat($kr, 7) . '	  Schlachter: ' . nformat($sl, 7) . "\n".'Träger:  '   .nformat( $tr, 7) . '	  Cleps:      ' . nformat($ka, 7) . "\n".'Cancs:   ' . nformat($ca, 7) . '```';
 	}
 
 ?>
@@ -647,7 +670,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>
-			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">&#x1f4b0;</td>
+			<td class="fieldnormaldark" title="Ein angemessener Aufschlag von <?=round(($scanbezahlungfaktor-1)*100, 0);?>% ist das Brot des Scanners.">$</td>
 		</tr>
 		<tr bgcolor="#ddddfd">
 			<td><b><?php echo $ja; ?></b></td>
@@ -701,11 +724,31 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td><?php echo $ka2; ?></td>
 			<td><?php echo $ca2; ?></td>
 		</tr>
+<?php
+	if(!empty($ziel1)) {
+		$ziel1_res = tic_mysql_query("SELECT spieler_galaxie, spieler_planet FROM gn_spieler2 WHERE spieler_name = '" . trim($ziel1) . "'", __FILE__, __LINE__);
+		if(mysql_num_rows($ziel1_res) == 1) {
+			$g = mysql_result($ziel1_res, 0, 'spieler_galaxie');
+			$p = mysql_result($ziel1_res, 0, 'spieler_planet');
+			$ziel1 = '<a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'">&raquo; '.$g.':'.$p.' ' . $ziel1 . '</a>';
+		}
+		mysql_free_result($ziel1_res);
+	}
+	if(!empty($ziel2)) {
+		$ziel2_res = tic_mysql_query("SELECT spieler_galaxie, spieler_planet FROM gn_spieler2 WHERE spieler_name = '" . trim($ziel2) . "'", __FILE__, __LINE__);
+		if(mysql_num_rows($ziel2_res) == 1) {
+			$g = mysql_result($ziel2_res, 0, 'spieler_galaxie');
+			$p = mysql_result($ziel2_res, 0, 'spieler_planet');
+			$ziel2 = '<a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'">&raquo; '.$g.':'.$p.' ' . $ziel2 . '</a>';
+		}
+		mysql_free_result($ziel2_res);
+	}
+?>
 		<tr class="fieldnormallight">
 			<td class="fieldnormaldark" colspan="2"><b>Flotte 1:</b></td>
-			<td colspan="2"><?php 
+			<td colspan="2"><?php
 				switch($status1) {
-					case '0': echo 'Im'; break;
+					case '0': echo 'Im Orbit'; break;
 					case '1': echo 'Angriff'; break;
 					case '2': echo 'Verteidigung'; break;
 					case '3': echo 'R&uuml;ckflug'; break;
@@ -714,9 +757,9 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			?></td>
 			<td colspan="2"><?=$ziel1;?></td>
 			<td class="fieldnormaldark" colspan="2"><b>Flotte 2:</b></td>
-			<td colspan="2"><?php 
+			<td colspan="2"><?php
 				switch($status2) {
-					case '0': echo 'Im'; break;
+					case '0': echo 'Im Orbit'; break;
 					case '1': echo 'Angriff'; break;
 					case '2': echo 'Verteidigung'; break;
 					case '3': echo 'R&uuml;ckflug'; break;
@@ -724,6 +767,16 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 				}
 			?></td>
 			<td colspan="2"><?=$ziel2;?></td>
+		</tr>
+		<tr class="datatablehead">
+			<td colspan="15" align="right">
+				&nbsp;Slack-Scanrequest:&nbsp;&nbsp; 
+				<a href="<?=makeRequestScanLink($rg, $rp, 0, 'modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype='.$_GET['displaytype'].'#plani' . $rp);?>">&raquo; Sek</a> | 
+				<a href="<?=makeRequestScanLink($rg, $rp, 3, 'modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype='.$_GET['displaytype'].'#plani' . $rp);?>">&raquo; Gesch</a> | 
+				<a href="<?=makeRequestScanLink($rg, $rp, 1, 'modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype='.$_GET['displaytype'].'#plani' . $rp);?>">&raquo; Einh</a> | 
+				<a href="<?=makeRequestScanLink($rg, $rp, 2, 'modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype='.$_GET['displaytype'].'#plani' . $rp);?>">&raquo; Mili</a> | 
+				<a href="<?=makeRequestScanLink($rg, $rp, 4, 'modul=showgalascans&xgala='.$rg.'&xplanet='.$rp.'&displaytype='.$_GET['displaytype'].'#plani' . $rp);?>">&raquo; News</a>&nbsp;
+			</td>
 		</tr>
 	</table>
 <?php
@@ -746,5 +799,119 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			} // end of if (rp != rpnext)
 		} // end of for
 	} // end of else
+
+
+	if($xgala && $xplanet) {
+		//single entry
+		?>
+				<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+				<script type="text/javascript">
+					google.charts.load('current', {'packages':['line', 'corechart']});
+					google.charts.setOnLoadCallback(drawChart);
+
+				function drawChart() {
+
+					var data = new google.visualization.DataTable();
+					data.addColumn('datetime', 'Datum');
+					data.addColumn('number', 'Punkte');
+					data.addColumn('number', "Extraktoren\n(ggf. ungenau)");
+					<?php /* data.addColumn('number', 'Scans'); */ ?>
+
+					data.addRows([
+			<?php
+			//$name = (isset($_POST['name'])) ? $_POST['name'] : ( (isset($_GET['name'])) ? $_GET['name'] : '');
+			$sqlX = "SELECT spieler_name, spieler_punkte, spieler_asteroiden, unix_timestamp(t) AS unix_t FROM gn_spieler WHERE UNIX_TIMESTAMP(t) > UNIX_TIMESTAMP(NOW())-60*60*24*7 AND spieler_galaxie = '" . $xgala . "' AND spieler_planet = '" . $xplanet . "' ORDER BY t ASC";
+			//aprint($sqlX);
+			$resX = tic_mysql_query($sqlX, __FILE__, __LINE__);
+			$numX = mysql_num_rows($resX);
+
+			$resY = array();
+			for($m = 0; $m < $numX; $m++) {
+				$resY[$m] = array(
+					'spieler_asteroiden' => mysql_result($resX, $m, 'spieler_asteroiden'),
+					'spieler_punkte' => mysql_result($resX, $m, 'spieler_punkte'),
+					'unix_t' => mysql_result($resX, $m, 'unix_t')
+					);
+			}
+			//aprint(resY);
+			$exen = 0;
+			for($m = 0; $m < $numX; $m++) {
+				$resY[$m]['extractors'] = 0;
+				if($m > 0) {
+					$prev = $resY[$m-1];
+					$extractors = 0;
+					$tickdiff = floor(($resY[$m]['unix_t'] - $prev['unix_t']) / 60 / 15);
+
+					if($tickdiff > 0) {
+						$extractors = round((($resY[$m]['spieler_punkte'] - $prev['spieler_punkte']) * 10 - 20000) / 50 / $tickdiff, 0);
+						if($extractors > 0 && $extractors <= 20 * $resY[$m]['spieler_asteroiden']) {
+							$resY[$m]['extractors'] = $extractors;
+							$exen = $extractors;
+						}
+					}
+				}
+
+				//if($res[$i]['extractors'] >= 0) {
+					$time = getDate($resY[$m]['unix_t']);
+					//echo '			[new Date(' . $time['year'] . ', ' . $time['mon'] . ',	' . $time['mday'] . ',	' . $time['hours'] . ',	' . $time['minutes'] . ',	0, 0), ' . $res[$m]['spieler_punkte'] . ',	' . $res[$m]['extractors'] . ' ],' . "\n";
+					echo '			[new Date(' . ($resY[$m]['unix_t'] * 1000) . '), ' . $resY[$m]['spieler_punkte'] . ',	' . $exen . '],' . "\n";
+				//}
+			}
+
+			/*
+			//aprint(array($st, $gt, $ut, $mt));
+			if($st > 0) {
+				echo '			[new Date('.($st*1000).'), null, null, 0],'."\n";
+				echo '			[new Date('.($st*1000).'), null, null, 1],'."\n";
+				echo '			[new Date('.($st*1000).'), null, null, null],'."\n";
+			}
+			if($gt > 0) {
+				echo '			[new Date('.($gt*1000).'), null, null, 0],'."\n";
+				echo '			[new Date('.($gt*1000).'), null, null, 1],'."\n";
+				echo '			[new Date('.($gt*1000).'), null, null, null],'."\n";
+			}
+			if($ut > 0) {
+				echo '			[new Date('.($ut*1000).'), null, null, 0],'."\n";
+				echo '			[new Date('.($ut*1000).'), null, null, 1],'."\n";
+				echo '			[new Date('.($ut*1000).'), null, null, null],'."\n";
+			}
+			if($mt > 0) {
+				echo '			[new Date('.($mt*1000).'), null, null, 0]'."\n";
+				echo '			[new Date('.($mt*1000).'), null, null, 1]'."\n";
+			}
+			* */
+
+			?>
+					]);
+
+					var options = {
+						chart: {
+							title: 'Punkteverlauf: <?=mysql_result($resX, 0, 'spieler_name')?>'
+						},
+						width: "90%",
+						height: 350,
+						series: {
+							0: { axis: 'pkt' },
+							1: { axis: 'num' }
+						},
+						axes: {
+							// Adds titles to each axis.
+							y: {
+								pkt: {label: 'Punkte'},
+								num: {label: '#Exen'}
+							},
+						},
+					};
+
+					var chart = new google.charts.Line(document.getElementById('chart'));
+					chart.draw(data, options);
+				}
+
+				</script>
+				<br/>
+				<center><div id="chart" style="width: 90%; height: 350px"></div></center>
+		<?php
+	}
+
 }//if displaytype news
 ?>

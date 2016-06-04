@@ -23,7 +23,7 @@ function mysqlEscapeMatchResult(&$res) {
 		}
 }
 
-function getScanType($str) {
+function getScanType($typ) {
 	if($typ == 'Sektorscan')
 		return 0;
 	if($typ == 'Einheitenscan')
@@ -62,7 +62,7 @@ function getTimeInTicks($data, $row) {
 if($data) {
 	$importlog = array();
 	$sql = array();
-	
+
 	$split = array(
 		'Sektorscan Ergebnis',
 		'Militärcan Ergebnis',
@@ -74,27 +74,27 @@ if($data) {
 		'Galaxiemitglieder',
 		'Flottenbewegungen',
 	);
-	
+
 	$pattern = '/(' . join('|', $split) . ')/';
 	if(strpos($data, 'Newsscan Ergebnis') === false) {
 		$data = explode('###', preg_replace($pattern, '###${1}', trim($data)));
 	} else {
 		$data = array(trim($data));
 	}
-	
+
 	if($DEBUG) 	aprint(array(
 			'pattern' => $pattern,
 			'result' => $data
 		), 'split');
-	
+
 	foreach($data as $v) {
 		$v = trim($v);
 		$v = str_replace("\r", "", $v);
 		if(strlen($v) > 0) {
 			$matches = array();
-			
+
 			if(strpos($v, 'Newsscan Ergebnis') !== false) {
-				$p = "/^Newsscan von .+?vom.+?(?P<d2>\\d+).+?(?P<m2>\\d+).+?(?P<y2>\\d+).+?(?P<h2>\\d+).+?(?P<i2>\\d+)|^Newsscan Ergebnis.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\wäöü\\.-]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)|^\\[(?P<d>\\d+).(?P<m>\\d+).(?P<y>\\d+).(?P<h>\\d+).(?P<i>\\d+).(?P<s>\\d+)\\].(?P<typ>.+)\\n(?P<inhalt>[\\s\\S]+?)\\n\\n(?=\\[|#|[^\\w])|^#.+?(?P<fehler>Daten zu fehlerhaft)|^[^N#\\[\\n].+?\\n(?P<inhalt2>[\\s\\S]+?)\\s(?=ENDE|#|\\[)/m"; 
+				$p = "/^Newsscan von .+?vom.+?(?P<d2>\\d+).+?(?P<m2>\\d+).+?(?P<y2>\\d+).+?(?P<h2>\\d+).+?(?P<i2>\\d+)|^Newsscan Ergebnis.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\wäöü\\.-]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)|^\\[(?P<d>\\d+).(?P<m>\\d+).(?P<y>\\d+).(?P<h>\\d+).(?P<i>\\d+).(?P<s>\\d+)\\].(?P<typ>.+)\\n(?P<inhalt>[\\s\\S]+?)\\n\\n(?=\\[|#|[^\\w])|^#.+?(?P<fehler>Daten zu fehlerhaft)|^[^N#\\[\\n].+?\\n(?P<inhalt2>[\\s\\S]+?)\\s(?=ENDE|#|\\[)/m";
 
 				preg_match_all($p, $v, $matches);
 				if($DEBUG) aprint($matches);
@@ -110,7 +110,7 @@ if($data) {
 						$i = join('', $matches['i2']);
 						$t = "UNIX_TIMESTAMP('" . $y . "-" . $m . "-" . $d . " " . $h . ":" . $i . ":00')";
 					}
-					
+
 					$sql[] = getsqlIncreaseScanCount($Benutzer['galaxie'], $Benutzer['planet']);
 					$sql[] = "INSERT INTO gn4scans_news (
 									t, genauigkeit, ziel_g, ziel_p, erfasser_g, erfasser_p, erfasser_name, erfasser_svs
@@ -123,12 +123,12 @@ if($data) {
 									" . $Benutzer['planet'] . ",
 									'" . $Benutzer['name'] . "',
 									" . $Benutzer['svs'] . "
-									
+
 								)";
 					$sql[] = 'SET @newsid = LAST_INSERT_ID();';
-					
+
 					$importlog[] = 'NEWS t=' . $t . ' gen=' . join('', $matches['gen']) . '% gal=' . join('', $matches['gal']) . ' pla=' . join('', $matches['pla']);
-					
+
 					//entries
 					for($i = 0; $i < count($matches[0]); $i++) {
 						if(strlen($matches['d'][$i]) > 0 || $matches['fehler'][$i] || $matches['inhalt2'][$i]) {
@@ -158,14 +158,14 @@ if($data) {
 						//'parsed' => $matches,
 					), 'Nachrichtenscan');
 			} else if(strpos($v, 'Sektorscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<pkt>(?:\\d+.)+\\d+)\\n.+?(?P<s>\\d+)\\n.+?(?P<d>\\d+)\\n.+?(?P<me>\\d+)\\n.+?(?P<ke>\\d+)\\n.+?(?P<a>\\d+)/"; 
+				$p = "/.+?(?P<gen>\\d+)%.+\\n.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<pkt>(?:\\d+.)+\\d+)\\n.+?(?P<s>\\d+)\\n.+?(?P<d>\\d+)\\n.+?(?P<me>\\d+)\\n.+?(?P<ke>\\d+)\\n.+?(?P<a>\\d+)/";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
 					$t = date('H:i d.m.Y');
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'] . "' AND rp='" . $matches['pla'] . "' AND `type`=0";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								pts, s, d, me, ke, a
 							) VALUES (
 								'" . $t . "',
@@ -192,7 +192,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Militärscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+\\n.+?(?:\\s(?P<s0j>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1j>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2j>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0b>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1b>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2b>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0f>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1f>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2f>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0z>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1z>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2z>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0k>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1k>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2k>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0s>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1s>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2s>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0t>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1t>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2t>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0cl>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1cl>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2cl>(?:\\d+\\.)*\\d+)\\s?)?\\n.+?(?:\\s(?P<s0ca>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s1ca>(?:\\d+\\.)*\\d+)\\s?)(?:\\s(?P<s2ca>(?:\\d+\\.)*\\d+)\\s?)?\\nPosition(?:[\\w ]+):\\s+[\\w \\(\\)]+(?:\\s)(?P<ziel1>[\\w \\(\\)]+)(?:\\s)?(?P<ziel2>[\\w \\(\\)]+)?/m"; 
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+\\n.+?(?:\\s(?P<s0j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2j>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2b>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2f>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2z>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2k>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2s>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2t>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2cl>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2ca>(?:\\d+\\.)*\\d+)\\s*?)?\\nPosition(?:[\\w ]+):\\s+[\\w \\(\\)]+(?:\\s)(?P<ziel1>[\\w\\.-äöü\\(\\) ]+)(?:\\s*)?(?P<ziel2>[\\w\\.-äöü\\(\\) ]+)?/m";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -201,11 +201,11 @@ if($data) {
 					$ziel2 = '';
 					$status2 = 0;
 					$t = date('H:i d.m.Y');
-					
+
 					$sql[] = getsqlIncreaseScanCount($Benutzer['galaxie'], $Benutzer['planet']);
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'] . "' AND rp='" . $matches['pla'] . "' AND `type`=2";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su,
 								sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, ziel1, status1,
 								sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su, ziel2, status2
@@ -217,7 +217,7 @@ if($data) {
 								'" . $matches['gal'] . "',
 								'" . $matches['pla'] . "',
 								'" . $matches['gen'] . "',
-								
+
 								'" . str_replace('.', '', $matches['s0j']) . "',
 								'" . str_replace('.', '', $matches['s0b']) . "',
 								'" . str_replace('.', '', $matches['s0f']) . "',
@@ -254,7 +254,7 @@ if($data) {
 							)";
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'] . "' AND rp='" . $matches['pla'] . "' AND `type`=1";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu
 							) VALUES (
 								'" . $t . "',
@@ -264,7 +264,7 @@ if($data) {
 								'" . $matches['gal'] . "',
 								'" . $matches['pla'] . "',
 								'" . $matches['gen'] . "',
-								
+
 								'" . (str_replace('.', '', $matches['s0j']) + str_replace('.', '', $matches['s1j']) + str_replace('.', '', $matches['s2j'])). "',
 								'" . (str_replace('.', '', $matches['s0b']) + str_replace('.', '', $matches['s1b']) + str_replace('.', '', $matches['s2b'])) . "',
 								'" . (str_replace('.', '', $matches['s0f']) + str_replace('.', '', $matches['s1f']) + str_replace('.', '', $matches['s2f'])) . "',
@@ -284,7 +284,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Geschützscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<glo>(?:\\d+\\.)*\\d+)\\n.+?(?P<glr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gmr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gsr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gaj>(?:\\d+\\.)*\\d+)/m"; 
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<glo>(?:\\d+\\.)*\\d+)\\n.+?(?P<glr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gmr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gsr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gaj>(?:\\d+\\.)*\\d+)/m";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -293,11 +293,11 @@ if($data) {
 					$ziel2 = '';
 					$status2 = 0;
 					$t = date('H:i d.m.Y');
-					
+
 					$sql[] = getsqlIncreaseScanCount($Benutzer['galaxie'], $Benutzer['planet']);
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'] . "' AND rp='" . $matches['pla'] . "' AND `type`=3";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, type, g, p, rg, rp, gen, 
+								zeit, type, g, p, rg, rp, gen,
 								glo, glr, gmr, gsr, ga
 							) VALUES (
 								'" . $t . "',
@@ -307,7 +307,7 @@ if($data) {
 								'" . $matches['gal'] . "',
 								'" . $matches['pla'] . "',
 								'" . $matches['gen'] . "',
-								
+
 								'" . str_replace('.', '', $matches['glo']) . "',
 								'" . str_replace('.', '', $matches['glr']) . "',
 								'" . str_replace('.', '', $matches['gmr']) . "',
@@ -323,7 +323,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Einheitenscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<sfja>\\d+)\\n.+?(?P<sfbo>\\d+)\\n.+?(?P<sffr>\\d+)\\n.+?(?P<sfze>\\d+)\\n.+?(?P<sfkr>\\d+)\\n.+?(?P<sfsc>\\d+)\\n.+?(?P<sftr>\\d+)\\n.+?(?P<sfcl>\\d+)\\n.+?(?P<sfca>\\d+)/"; 
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<sfja>\\d+)\\n.+?(?P<sfbo>\\d+)\\n.+?(?P<sffr>\\d+)\\n.+?(?P<sfze>\\d+)\\n.+?(?P<sfkr>\\d+)\\n.+?(?P<sfsc>\\d+)\\n.+?(?P<sftr>\\d+)\\n.+?(?P<sfcl>\\d+)\\n.+?(?P<sfca>\\d+)/";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -335,7 +335,7 @@ if($data) {
 					$sql[] = getsqlIncreaseScanCount($Benutzer['galaxie'], $Benutzer['planet']);
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'] . "' AND rp='" . $matches['pla'] . "' AND `type`=1";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu
 							) VALUES (
 								'" . $t . "',
@@ -345,7 +345,7 @@ if($data) {
 								'" . $matches['gal'] . "',
 								'" . $matches['pla'] . "',
 								'" . $matches['gen'] . "',
-								
+
 								'" . str_replace('.', '', $matches['sfja']) . "',
 								'" . str_replace('.', '', $matches['sfbo']) . "',
 								'" . str_replace('.', '', $matches['sffr']) . "',
@@ -365,19 +365,19 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Scan Block') !== false) {
-				$p = "/Scan Block vom (?P<d>\\d+).+?(?P<m>\\d+).+?(?P<y>\\d+).+?(?P<h>\\d+).+?(?P<i>\\d+).*\\n^(?P<gal>\\d+):(?P<pla>\\d+).+hat einen (?P<typ>.+) versucht!/m"; 
+				$p = "/Scan Block vom (?P<d>\\d+).+?(?P<m>\\d+).+?(?P<y>\\d+).+?(?P<h>\\d+).+?(?P<i>\\d+).*\\n^(?P<gal>\\d+):(?P<pla>\\d+).+hat einen (?P<typ>.+) versucht!/m";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
 					$scantyp = getScanType($matches['typ']);
 					$t = "UNIX_TIMESTAMP('" . $matches['y'] . "-" . $matches['m'] . "-" . $matches['d'] . " " . $matches['h'] . ":" . $matches['i'] . ":00')";
-					$sql[] = "INSERT  INTO gn4scanblock (g, p, t, sg, sp, sname, typ, suspicious) 
+					$sql[] = "INSERT  INTO gn4scanblock (g, p, t, sg, sp, sname, typ, suspicious)
 							SELECT '".$Benutzer['galaxie']."', '".$Benutzer['planet']."', ".$t.", '".$matches['gal']."', '".$matches['pla']."', '".$Benutzer['name']."', '".$typ."', 1
 							FROM DUAL
 							WHERE NOT EXISTS (
 								SELECT * FROM gn4scanblock WHERE g = '".$Benutzer['galaxie']."' AND p = '".$Benutzer['planet']."' AND sg = '".$matches['gal']."' AND sp = '".$matches['pla']."' AND t = ".$t." AND typ = '".$typ."'
 							) LIMIT 1";
-					$importlog[] = 'SCANBLOCK t=' . $t . ' suspicous=1 typ=' . $matches['typ'] . ' scanner_gal=' . $matches['gal'] . ' scanner_pla=' . $matches['pla'];
+					$importlog[] = 'SCANBLOCK t=' . $t . ' suspicous=1 typ=' . $matches['typ'] . '('.$scantyp.') scanner_gal=' . $matches['gal'] . ' scanner_pla=' . $matches['pla'];
 					if($DEBUG) aprint(array(
 							'pattern' => htmlentities($p),
 							'parsed' => $matches,
@@ -386,14 +386,14 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Flottenzusammensetzung') !== false) {
-				$p = "/^[\\wäöü]+:.+?(?P<s0>\\d+).+?(?P<s1><?\\d+).+?(?P<s2>\\d+)|Flottenzusammensetzung.+?(?P<gal>\\d+):(?P<pla>\\d+)|^.+?\".+?\":.+?(?P<d>\\d+)/m"; 
+				$p = "/^[\\wäöü]+:.+?(?P<s0>\\d+).+?(?P<s1><?\\d+).+?(?P<s2>\\d+)?|Flottenzusammensetzung.+?(?P<gal>\\d+):(?P<pla>\\d+)|^.+?\".+?\":.+?(?P<d>\\d+)/m";
 				preg_match_all($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches)> 0 && (count($matches[0]) == 10 || count($matches[0]) == 15)) {
 					$t = date('H:i d.m.Y');
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'][0] . "' AND rp='" . $matches['pla'][0] . "' AND `type`=2";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								sf0j, sf0b, sf0f, sf0z, sf0kr, sf0sa, sf0t, sf0ka, sf0su,
 								sf1j, sf1b, sf1f, sf1z, sf1kr, sf1sa, sf1t, sf1ka, sf1su, ziel1, status1,
 								sf2j, sf2b, sf2f, sf2z, sf2kr, sf2sa, sf2t, sf2ka, sf2su, ziel2, status2
@@ -405,7 +405,7 @@ if($data) {
 								'" . $matches['gal'][0]  . "',
 								'" . $matches['pla'][0] . "',
 								99,
-								
+
 								'" . str_replace('.', '', $matches['s0'][1]) . "',
 								'" . str_replace('.', '', $matches['s0'][2]) . "',
 								'" . str_replace('.', '', $matches['s0'][3]) . "',
@@ -442,7 +442,7 @@ if($data) {
 							)";
 					$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'][0] . "' AND rp='" . $matches['pla'][0] . "' AND `type`=1";
 					$sql[] = "INSERT INTO gn4scans (
-								zeit, `type`, g, p, rg, rp, gen, 
+								zeit, `type`, g, p, rg, rp, gen,
 								sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka, sfsu
 							) VALUES (
 								'" . $t . "',
@@ -452,7 +452,7 @@ if($data) {
 								'" . $matches['gal'][0] . "',
 								'" . $matches['pla'][0] . "',
 								99,
-								
+
 								'" . (str_replace('.', '', $matches['s0'][1]) + str_replace('.', '', $matches['s1'][1]) + str_replace('.', '', $matches['s2'][1])). "',
 								'" . (str_replace('.', '', $matches['s0'][2]) + str_replace('.', '', $matches['s1'][2]) + str_replace('.', '', $matches['s2'][2])) . "',
 								'" . (str_replace('.', '', $matches['s0'][3]) + str_replace('.', '', $matches['s1'][3]) + str_replace('.', '', $matches['s2'][3])) . "',
@@ -467,7 +467,7 @@ if($data) {
 					if(count($matches[0]) == 15) {
 						$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'][0] . "' AND rp='" . $matches['pla'][0] . "' AND `type`=3";
 						$sql[] = "INSERT INTO gn4scans (
-									zeit, type, g, p, rg, rp, gen, 
+									zeit, type, g, p, rg, rp, gen,
 									glo, glr, gmr, gsr, ga
 								) VALUES (
 									'" . date('H:i d.m.Y') . "',
@@ -477,13 +477,13 @@ if($data) {
 									'" . $matches['gal'][0] . "',
 									'" . $matches['pla'][0] . "',
 									99,
-									
+
 									'" . str_replace('.', '', $matches['d'][10]) . "',
 									'" . str_replace('.', '', $matches['d'][11]) . "',
 									'" . str_replace('.', '', $matches['d'][12]) . "',
 									'" . str_replace('.', '', $matches['d'][13]) . "',
 									'" . str_replace('.', '', $matches['d'][14]) . "'
-								)";	
+								)";
 						$importlog[] = 'GESCH t=' . $t . ' gen=99% gal=' . $matches['gal'][0] . ' pla=' . $matches['pla'][0];
 					}
 					if($DEBUG)
@@ -493,7 +493,7 @@ if($data) {
 						), 'Flottenzusammensetzung');
 				}
 			} else if(strpos($v, 'Galaxiemitglieder') !== false) {
-				$p = "/^(?P<gal>\\d+):(?P<pla>\\d+).(?P<name>[\\w\\.-äöü]+).+?(?P<pkt>(?:\\d+\\.)*\\d+).+?(?P<s>\\d+).+?(?P<d>\\d+).+?(?P<me>\\d+).\\/.(?P<ke>\\d+).+?(?P<a>\\d+)/m"; 
+				$p = "/^(?P<gal>\\d+):(?P<pla>\\d+).(?P<name>[\\w\\.-äöü]+).+?(?P<pkt>(?:\\d+\\.)*\\d+).+?(?P<s>\\d+).+?(?P<d>\\d+).+?(?P<me>\\d+).\\/.(?P<ke>\\d+).+?(?P<a>\\d+)/m";
 				preg_match_all($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -502,7 +502,7 @@ if($data) {
 					for($i = 0; $i < $num; $i++) {
 						$sql[] = "DELETE FROM gn4scans WHERE rg='" . $matches['gal'][$i] . "' AND rp='" . $matches['pla'][$i] . "' AND `type`=0";
 						$sql[] = "INSERT INTO gn4scans (
-									zeit, type, g, p, rg, rp, gen, 
+									zeit, type, g, p, rg, rp, gen,
 									pts, s, d, me, ke, a
 								) VALUES (
 									'" . $t . "',
@@ -521,7 +521,7 @@ if($data) {
 								)";
 						$importlog[] = 'SEKTOR t=' . $t . ' gen=99% gal=' . $matches['gal'][$i] . ' pla=' . $matches['pla'][$i];
 					}
-					if($DEBUG) 
+					if($DEBUG)
 						aprint(array(
 							'pattern' => htmlentities($p),
 							'parsed' => $matches,
@@ -532,17 +532,23 @@ if($data) {
 			} else if(strpos($v, 'Flottenbewegungen') !== false) {
 				$doNotRelocate = true;
 				include('function.updatefleett.php');
-				
-				$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[^\\n]*)/m"; 
+				//alt, kann nicht mit mehreren deffern um.
+				//$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[^\\n]*)/m"; ;
+
+				//.*?(?P<gal>\d+):(?P<pla>\d+).+?(?P<name>[\w\.-äöü]+)(?: \*)?\t(?P<greift_an>[^\t]*)\t(?P<greift_an_t>[^\t]*)\t(?P<verteidigt>[^\t]*)\t(?P<verteidigt_t>[^\t]*)\t(?P<angegriffen_von>[^\t]*)\t(?P<angegriffen_von_t>[^\t]*)\t(?P<verteidigt_von>[^\t]*)\t(?P<verteidigt_von_t>[\s\S]*?^(?=\d+:\d+.+\w))?
+				$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[\\s\\S]*?^(?=\\d+:\\d+.+\\w))?/m";
 				preg_match_all($p, $v, $matches);
+
+				//aprint($matches);
+
 				mysqlEscapeMatchResult($matches);
-				
+
 				$pattern_fleets = "/^Rückflug\\s+\\((?P<rfgal>\\d+).(?P<rfpla>\\d+).+?(?<rfname>[\\w\\.-äöü]+)\\)|^(?P<gal>\\d+).(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)/m";
 				$pattern_times ="/^(?P<minuten>\\d+).Min|^(?P<stunden>\\d+).Std|^(?P<xstunden>\\d+):(?P<xminuten>\\d+):(?P<xsekunden>\\d+)|^(?P<ystunden>\\d+):(?P<yminuten>\\d+)|^(?P<ticks>\\d+)/m";
 				$fleets = array();
 
 				$tickNow = floor(time() / 15 / 60) * 15 * 60;
-				
+
 				//for each player
 				for($i = 0; $i < count($matches['gal']); $i++) {
 					//modus
@@ -554,7 +560,7 @@ if($data) {
 					$deffer = 0;
 					$modus = -1;
 					$timeInTicks = -1;
-					
+
 					$types = array('greift_an', 'angegriffen_von', 'verteidigt', 'verteidigt_von');
 					foreach($types as $t) {
 						if(isset($matches[$t][$i])) {
@@ -569,7 +575,7 @@ if($data) {
 									$othergal = array($tmp1['gal'][$j], $tmp1['pla'][$j]);
 									$modus = (strpos($t, 'verteidigt') !== false) ? 2 : 1;
 								}
-								
+
 								//definition where the fleet has its origin
 								$atter = array($thisgal[0], $thisgal[1]);
 								$deffer = array($othergal[0], $othergal[1]);
@@ -592,19 +598,19 @@ if($data) {
 									$indexNow = count($fleets)-1;
 									$indexBefore = $indexNow-1;
 									if(
-										$fleets[$indexNow]['atter'][0] == $fleets[$indexBefore]['atter'][0] 
+										$fleets[$indexNow]['atter'][0] == $fleets[$indexBefore]['atter'][0]
 										&& $fleets[$indexNow]['atter'][1] == $fleets[$indexBefore]['atter'][1]
 										&& (
-											$fleets[$indexNow]['modus'] == $fleets[$indexBefore]['modus'] 
+											$fleets[$indexNow]['modus'] == $fleets[$indexBefore]['modus']
 											|| $fleets[$indexNow]['modus']+2 == $fleets[$indexBefore]['modus']
 											|| $fleets[$indexNow]['modus'] == $fleets[$indexBefore]['modus']+2
 										)
 									) {
 										$fleets[$indexBefore]['flottennr'] = 1;
 										$fleets[$indexNow]['flottennr'] = 2;
-										aprint(array($fleets[$indexBefore], $fleets[$indexNow]));
+										//aprint(array($fleets[$indexBefore], $fleets[$indexNow]));
 									}
-								} 
+								}
 							} //for fleets of this flight type
 						}//is array
 					}//type
@@ -617,9 +623,9 @@ if($data) {
 				if($DEBUG) aprint($sql2);
 				$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 				$num = mysql_num_rows($res);
-				
+
 				$fleetupdate_sql = [];
-				
+
 				//foreach fleet in database
 				for($i = 0; $i < $num; $i++) {
 					$fag = mysql_result($res, $i, 'angreifer_galaxie');
@@ -630,8 +636,8 @@ if($data) {
 					$fid = mysql_result($res, $i, 'id');
 					$feta = mysql_result($res, $i, 'eta');
 					$fnr = mysql_result($res, $i, 'flottennr');
-					
-					
+
+
 					if($DEBUG) aprint(array(
 							'atter' => array($fag, $fap),
 							'deffer' => array($fvg, $fvp),
@@ -639,8 +645,8 @@ if($data) {
 							'eta' => $feta,
 							'flottennr' => $fnr
 						), 'fleet id='.$fid);
-					
-					
+
+
 					$valid = false;
 					//check if we have a corresponding one
 					$found = false;
@@ -653,11 +659,11 @@ if($data) {
 								if($DEBUG) aprint(array($k => $v), 'keep fleet fid=' . $fid);
 							} else if($fleets[$k]['modus'] == 3 && $fm == 1 ||  $fleets[$k]['modus'] == 4 && $fm == 2) {
 								$found = true;
-								$sql[] = "UPDATE gn4flottenbewegungen SET modus = '" . $fleets[$k]['modus'] . "', flugzeit=0, eta='" . $fleets[$k]['eta'] . "' WHERE id = '" . $fid . "'";
+						$sql[] = "UPDATE gn4flottenbewegungen SET modus = '" . $fleets[$k]['modus'] . "', flugzeit=0, eta='" . $fleets[$k]['eta'] . "', ankunft=0, flugzeit_ende=0, erfasser='".$Benutzer['name']."', erfasst_am='".date('H:i \U\h\r \a\m d.m.Y')."', ruckflug_ende='".($tickNow + $fleets[$k]['eta'] * 15 * 60) ."' WHERE id = '" . $fid . "'";
 								$importlog[] = 'FLEET UPDATE RETURN atter_gal=' . $fleets[$k]['atter'][0] . ' atter_pla=' . $fleets[$k]['atter'][1] . ' deffer_gal=' . $fleets[$k]['deffer'][0] . ' deffer_pla=' . $fleets[$k]['deffer'][1] . ' eta=' . $fleets[$k]['eta'];
 								if($DEBUG) aprint(array($k => $v), 'switch mode to RF fid=' . $fid);
 							}
-							
+
 							if($found) {
 								//aprint(array($fleets[$k], $fnr));
 								if($fleets[$k]['flottennr'] && $fnr == 0) {
@@ -672,7 +678,7 @@ if($data) {
 							}
 						}
 					}//foreach fleet in import
-					
+
 					if(!$valid) {
 					$sql[] = 'DELETE FROM gn4flottenbewegungen WHERE id =' . $fid;
 						$importlog[] = 'FLEET DELETE id=' . $fid;
@@ -687,8 +693,8 @@ if($data) {
 					$flugzeit = 5;
 					$flugdauer = 450 / 15;
 					if($v['modus'] == 2 || $v['modus'] == 4) {
-						$res = tic_mysql_query("SELECT 
-												ac1.allianz = ac2.allianz as same_ally, 
+						$res = tic_mysql_query("SELECT
+												ac1.allianz = ac2.allianz as same_ally,
 												al1.ticid = al2.ticid as same_meta
 											FROM
 												gn4accounts ac1
@@ -698,18 +704,18 @@ if($data) {
 												gn4allianzen al1 ON al1.id = ac1.allianz
 											LEFT JOIN
 												gn4allianzen al2 ON al2.id = ac2.allianz
-											WHERE 
+											WHERE
 												ac1.galaxie = '" . $v['deffer'][0] . "'
 											GROUP BY ac1.ticid, ac2.ticid, ac1.allianz, ac2.allianz
 											LIMIT 1", __FILE__, __LINE__);
-						
+
 						$same_ally = 0;
 						$same_meta = 0;
 						if(mysql_num_rows($res) > 0) {
 							$same_ally = mysql_result($res, 0, 'same_ally');
 							$same_meta = mysql_result($res, 0, 'same_meta');
 						}
-						
+
 						//extern
 						$flugzeit = 165 / 15;
 						$flugdauer = 405 / 15;
@@ -724,35 +730,35 @@ if($data) {
 							}
 						}
 					}//modus == 2 || modus == 4
-					
+
 					//calc timestamps
 					$ankunft = $v['ankunft'];
 					$flugzeit_ende = $v['ankunft'] + $flugzeit * 15 * 60;
 					$rueckflug_ende = $flugzeit_ende + $flugdauer * 15 * 60;
-					
+
 					if($v['modus'] == 3 || $v['modus'] == 4) {
 						$ankunft = 0;
 						$flugzeit_ende = 0;
 						$rueckflug_ende = $v['ankunft'];
 					}
-					
+
 					//query
 					$sql[] = 'INSERT INTO gn4flottenbewegungen (
-											ticid, 
-											modus, 
-											angreifer_galaxie, 
-											angreifer_planet, 
-											verteidiger_galaxie, 
-											verteidiger_planet, 
-											save, 
-											eta, 
-											flugzeit, 
-											flottennr, 
-											ankunft, 
-											flugzeit_ende, 
-											ruckflug_ende, 
-											erfasser, 
-											erfasst_am,  
+											ticid,
+											modus,
+											angreifer_galaxie,
+											angreifer_planet,
+											verteidiger_galaxie,
+											verteidiger_planet,
+											save,
+											eta,
+											flugzeit,
+											flottennr,
+											ankunft,
+											flugzeit_ende,
+											ruckflug_ende,
+											erfasser,
+											erfasst_am,
 											reported_to_slack
 										) VALUES (
 											(SELECT a.ticid FROM gn4accounts ac INNER JOIN gn4allianzen a ON a.id = ac.allianz WHERE ac.galaxie = "' . $gal . '" LIMIT 1),
@@ -775,7 +781,7 @@ if($data) {
 					$importlog[] = 'FLEET ADD atter_gal=' . $fleets[$k]['atter'][0] . ' atter_pla=' . $fleets[$k]['atter'][1] . ' deffer_gal=' . $fleets[$k]['deffer'][0] . ' deffer_pla=' . $fleets[$k]['deffer'][1] . ' eta=' . $fleets[$k]['eta'] . ' fleetnr=' . $fleets[$k]['flottennr'] . ' mode=' . $v['modus'];
 					if($DEBUG) aprint(array($k => $v), 'add fleet');
 				}//foreach fleets
-				
+
 				$importlog[] = 'TAKTIK importiert';
 			}//flottenbewegungen
 		}//import item strlen > 0

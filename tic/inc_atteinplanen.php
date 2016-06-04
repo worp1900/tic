@@ -1,7 +1,7 @@
 <center>
   <table border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td><font size="+2">Neuer ATT Einplanen</font></td>
+    <td><font size="+2">Neuen ATT einplanen</font></td>
   </tr>
 </table>
 <?php

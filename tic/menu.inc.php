@@ -38,14 +38,17 @@
 	</tr>
 	<tr><td>
 		<table cellspacing="1" style="width:100%;background:#000000;">
-			<tr>
+			<!--<tr>
 				<td class="menu"><a href="./main.php?modul=scans"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" /><i>Scan-Erfassen</i></a></td>
-			</tr>
+			</tr>-->
 			<tr>
 				<td class="menu" title="beta, bitte testen!"><a href="./main.php?modul=scans2"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scan-Erfassen 2.0</a></td>
 			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=showgalascans&amp;displaytype=0&amp;xgala=<?=$Benutzer['galaxie']?>&amp;xplanet=<?=$Benutzer['planet']?>"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scan-Datenbank</a></td>
+			</tr>
+			<tr>
+				<td class="menu"><a href="./main.php?modul=scanrequest"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scan-Anfragen</a></td>
 			</tr>
 			<!--
 			<tr>
@@ -57,6 +60,9 @@
 			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=profil"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Mein Profil</a></td>
+			</tr>
+			<tr>
+				<td class="menu"><a href="./main.php?modul=massinc"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Att-Planung 2.0</a></td>
 			</tr>
 			<tr>
 

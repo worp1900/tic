@@ -32,6 +32,7 @@
 		} else {
 			$_SESSION['is_auth'] = 0;
 			$_SESSION['userid'] = -1;
+			header('Location: .');
 			die("Ihre Anmeldedaten waren nicht korrekt!<br/><a href='./' target='_self'>Zum Login</a>");
 		}
 	}
@@ -213,6 +214,18 @@
 		<script type="text/javascript" src="./overlib/overlib.js"><!-- overLIB (c) Erik Bosrup --></script>
 	</head>
 	<body>
+<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.10/dist/clipboard.min.js"></script>
+<script>
+	var clipboard = new Clipboard('.btn');
+	clipboard.on('success', function(e) {
+		e.clearSelection();
+	});
+
+	clipboard.on('error', function(e) {
+		console.error('Action:', e.action);
+		console.error('Trigger:', e.trigger);
+	});
+</script>	
 		<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 		<div style="position:absolute; z-index:10;width:100%">
 		<!-- <div align="center" style="width:100%"><img src="bilder/skin/banner.jpg" alt="" align="middle" /></div> --> <!-- Banner -->

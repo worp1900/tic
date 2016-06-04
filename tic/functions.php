@@ -1,8 +1,176 @@
 <?PHP
 
-function addShortUrl($url) {
+//addScanRequest(1, 3, 41, 3, 0);
+
+function addScanRequest($g, $p, $req_g, $req_p, $scantyp) {
+	$sql1 = "SET 	@ziel_g = '" . mysql_real_escape_string($g) . "', 
+					@ziel_p = '" . mysql_real_escape_string($p) . "', 
+					@req_g = '" . mysql_real_escape_string($req_g) . "', 
+					@req_p = '" . mysql_real_escape_string($req_p) . "', 
+					@scantyp = '" . mysql_real_escape_string($scantyp) . "',
+					@t = " . time() . ";";
+	
+	//does an entry already exist
+	$sql2 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g, ziel_p, t, scantyp)
+			SELECT * FROM (SELECT @req_g, @req_p, @ziel_g, @ziel_p, @t, @scantyp) tmp
+			WHERE NOT EXISTS(
+				SELECT * FROM gn4scanrequests 
+				WHERE ziel_g = @ziel_g 
+					AND ziel_p = @ziel_p 
+					AND requester_g = @req_g
+					AND requester_p = @req_p
+					AND scantyp = @scantyp 
+			)";
+	//aprint(join("\n\n", array($sql1, $sql2)));
+	tic_mysql_query($sql1, __FILE__, __LINE__);
+	tic_mysql_query($sql2, __FILE__, __LINE__);
+}
+
+function makeRequestScanLink($g, $p, $typ, $url_add) {
+	return "main.php?action=slackmsg&msgtyp=requestscan&g=" . $g . "&p=" . $p . "&st=" . $typ . "&" . $url_add;
+}
+
+function scanTypeName($type, $short = false, $htmlentities = true) {
+	if($short) {
+		switch($type) {
+			case 0: return 'S';
+			case 1: return 'E';
+			case 2: return 'M';
+			case 3: return 'G';
+			case 4: return 'N';
+			default: return '<i>u</i>';
+		}
+	}
+	switch($type) {
+		case 0: return 'Sektor';
+		case 1: return 'Einheiten';
+		case 2: return $htmlentities ? htmlentities('Militär') : 'Militär';
+		case 3: return $htmlentities ? htmlentities('Geschütze') : 'Geschütze';
+		case 4: return 'Nachrichten';
+		default: return '<i>unbekannt</i>';
+	}
+}
+
+//slack
+function createSlackAttachment($title, $text, $fieldTitles = null, $fieldValues = null, $short = null, $color = null) {
+	$d = '{';
+	if(!is_null($color)) {
+		$d .= '"color":"'.$color.'",';
+	}
+	$d .= '"title":"'.str_replace("\"", "\\\"", $title).'"';
+	$d .= ',"text":"'.str_replace("\"", "\\\"", $text).'"';
+	if(!is_null($short) && $short) {
+		$d .= ',"short": true';
+	}
+	$d .= ',"mrkdwn_in": ["text", "title"]';
+	if(is_array($fieldTitles)) {
+		$d .= ',"fields":[';
+		for($i = 0; $i < min(count($fieldTitles), count($fieldValues)); $i++) {
+			$d .= '{"title":"'.str_replace("\"", "\\\"", $fieldTitles[$i]).'"';
+			$d .= '"value":"'.str_replace("\"", "\\\"", $fieldValues[$i]).'"}';
+		}
+		$d .= ']';
+	}
+	$d .= '}';
+	
+	return $d;
+}
+
+function createSlackMsg($text, $g, $p , $attachments = null) {
 	global $SQL_DBConn;
 	
+	$user = null;
+	if(!is_null($g) || !is_null($p)) {
+		$sql1 = 'SET @g = "'.$g.'", @p = "'.$p.'";';
+		$sql2 = 'SELECT slack_nickname FROM gn4accounts WHERE galaxie = @g AND planet = @p';
+		//aprint(join("\n\n", array($sql1, $sql2)));
+		tic_mysql_query($sql1, __FILE__, __LINE__);
+		$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+		
+		if(mysql_num_rows($res) == 1) {
+			$user = mysql_result($res, 0, 'slack_nickname');
+		} else {
+			return null;
+		}
+	}
+	
+	$d = '{';
+	$d .= '"text":"'.str_replace("\"", "\\\"", $text).'"';
+	if(!is_null($user)) {
+		$d .= ',"channel":"@'.$user.'"';
+	}
+	if(is_array($attachments)) {
+		$d .= ',"attachments":[';
+		for($i = 0; $i < count($attachments); $i++) {
+			if($i > 0) $d .= ',';
+			$d .= $attachments[$i];
+		}
+		$d .= ']';
+	}
+	$d .= '}';
+
+	return $d;
+}
+
+function sendToSlack($postdata) {
+	global $slack_send_token_url;
+	
+	$url = $slack_send_token_url;
+	$post_data = $postdata;
+
+	$c = curl_init();
+	curl_setopt($c, CURLOPT_URL, $url);
+	curl_setopt($c, CURLOPT_POST, 1);
+	curl_setopt($c, CURLOPT_POSTFIELDS, $post_data);
+	curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+
+	return curl_exec($c);
+}
+
+//mgmt
+function postOrGet($name) {
+	if(isset($_POST[$name]) && !empty($_POST[$name]))
+		return $_POST[$name];
+	if(isset($_GET[$name]))
+		return $_GET[$name];
+	return null;
+}
+
+function makeNewsPrettier($inhalt) {
+	//@^(\d+):(\d+).+?Flotte (\d).+wird in (\d+:\d+|\d+ Minuten|\d+ Ticks)@mg
+	$inhalt = preg_replace('@^(?:Kommandant! )?(\\d+):(\\d+).([\\w-\.äöü]+)@', '<a href="main.php?modul=showgalascans&xgala=${1}&xplanet=${2}"><b>&raquo; ${1}:${2} ${3}</b></a>', $inhalt, -1);
+	$inhalt = preg_replace('@^(?:Kommandant! )?([\\w-\.äöü]+).(\\d+):(\\d+)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+	$inhalt = preg_replace('@([\\w-\.äöü]+).\((\\d+):(\\d+)\)@', '<a href="main.php?modul=showgalascans&xgala=${2}&xplanet=${3}"><b>&raquo; ${2}:${3} ${1}</b></a>', $inhalt, -1);
+	$inhalt = preg_replace('@(Als Grund gab)|(Euch wurden)|(Dem Transfer)@', "\n$1$2$3", $inhalt, -1);
+	$inhalt = preg_replace('@[\\t ]+@', ' ', $inhalt, -1);
+	return $inhalt;
+}
+
+//convert matching output to same tick based time
+function getTimeInTicksSimple($data) {
+	if(strlen($data['ticks']) > 0) {
+		//ticks
+		return $data['ticks'];
+	} elseif(strlen($data['minuten']) > 0) {
+		//Min
+		return ceil($data['minuten'] / 15.0 + 0.001);
+	} elseif(strlen($data['xstunden']) > 0) {
+		//HH:MM:SS
+		return ceil(($data['xstunden'] * 60 * 60 + $data['xminuten'] * 60 + $data['xsekunden']) / 60.0 / 15.0 + 0.001);
+	} elseif(strlen($data['ystunden']) > 0) {
+		//HH:MM
+		return ceil(($data['ystunden'] * 60 + $data['yminuten']) / 15.0 + 0.001);
+	} elseif(strlen($data['ystunden']) > 0) {
+		//HH Std
+		return ceil(($data['stunden'] * 60) / 15.0 + 0.001);
+	}
+	return -1;
+}
+
+
+function addShortUrl($url) {
+	global $SQL_DBConn, $pfadzumtick;
+
 	//does thid link exist?
 	$sql = 'SELECT uuid FROM gn4shorturls WHERE url LIKE "'.mysql_real_escape_string($url).'"';
 	$res = tic_mysql_query($sql);
@@ -12,7 +180,7 @@ function addShortUrl($url) {
 		tic_mysql_query('UPDATE gn4shorturls SET t = UNIX_TIMESTAMP(NOW()) WHERE uuid = "'.$id.'"');
 		return $pfadzumtick . 'main.php?modul=short&id='.$id;
 	}
-	
+
 	//nope, create new.
 	$id = uniqid(null, true);
 	$sql = 'INSERT INTO gn4shorturls (uuid, url, t) VALUES ("'.$id.'", "'.$url.'", UNIX_TIMESTAMP(NOW()))';
@@ -21,7 +189,7 @@ function addShortUrl($url) {
 }
 
 function createCopyLink($linktext, $copycontent, $linkattributes = null) {
-	$id = 'x'. substr(md5(rand()), 0, 31);
+	$id = 'x'. substr(md5(rand()), 0, 16);
 	$r = '';
 	$r .= '<textarea id="' . $id . '" style="width: 1px; height: 1px; border: none;">' . $copycontent . '</textarea>';
 	$r .= '<a href="#" ' . $linkattributes . ' class="btn" data-clipboard-target="#' . $id . '">' . $linktext . '</a>';
@@ -44,14 +212,13 @@ function in_array_contains($haystack, $needle) {
 	return false;
 }
 
-function xformat($number) {
-	if(is_numeric($number))
-		return number_format($number);
-	return $number;
+function xformat($var) {
+	return $var;
 }
-
-function nformat($number, $totalLen) {
-	$out = $number = xformat($number);
+function nformat($number, $totalLen = 0) {
+	if(!is_numeric($number))
+		return '';
+	$out = $number = ZahlZuText($number);
 	$lenNum = strlen($out);
 
 	for($lenNum; $lenNum < $totalLen; $lenNum++) {
@@ -75,7 +242,7 @@ function getscannames( $scantype ) {
 	return $res;
 }
 
-	
+
 function print_r_tree($data)
 {
     // capture the output of print_r
@@ -94,15 +261,16 @@ function print_r_tree($data)
 function aprint($val, $txt = null) {
 	echo '<code style="text-align: left; font-size: 8pt;"><pre>';
 	if($txt != null) echo '<b>' . $txt . ':</b> ';
-	print_r_tree($val);
+	//print_r_tree($val);
+	print_r($val);
 	echo '</pre></code><br><hr>';
 }
 
 function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
-	$sql = 'SELECT 
-			angreifer_galaxie g, 
-			angreifer_planet p, 
-			flugzeit, 
+	$sql = 'SELECT
+			angreifer_galaxie g,
+			angreifer_planet p,
+			flugzeit,
 			flottennr,
 			floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
 			IF(modus = 1, "a", "d") typ
@@ -113,10 +281,11 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 	$num = mysql_num_rows($res);
 
 	$link = '';
-	
+
+	/*
 	//home fleet
-	$sql = 'SELECT 
-			angreifer_galaxie g, 
+	$sql = 'SELECT
+			angreifer_galaxie g,
 			angreifer_planet p,
 			flugzeit,
 			flottennr,
@@ -133,7 +302,7 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 			1 => 0,
 			2 => 0
 		);
-		
+
 		for($i = 0; $i < $num2; $i++) {
 			$f = mysql_result($res2, $i, "flottennr");
 			$ankunft = mysql_result($res2, $i, "tick") + 1;
@@ -146,14 +315,17 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		}
 		for($i = 0; $i < count($home_fleets); $i++) {
 			$f = ($i == 0) ? 3 : $i;
-				
+
 			$link .= '&g['.($i).']='.$rg.'&p['.($i).']='.$rp.'&typ['.($i).']=d&f['.($i).']='.$f.'&ankunft['.($i).']='.$home_fleets[$i];
 			$offset++;
 		}
 	} else {
 		$link .= '&g[0]='.$rg.'&rp[0]='.$rp;
 	}
-	
+	*/
+	$link .= '&g[0]='.$rg.'&p[0]='.$rp;
+	$offset = 1;
+
 	//deffer & atter
 	$ticks = 0;
 	for($i = 0; $i < $num; $i++) {
@@ -164,7 +336,7 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$ankunft = mysql_result($res, $i, "tick") + 1;
 		$dauer = mysql_result($res, $i, "flugzeit");
 		$link .= '&g['.($i+$offset).']='.$g.'&p['.($i+$offset).']='.$p.'&typ['.($i+$offset).']='.$typ.'&f['.($i+$offset).']='.$f.'&ankunft['.($i+$offset).']='.$ankunft.'&aufenthalt['.($i+$offset).']='.$dauer;
-		
+
 		$ticks = ($typ == 'a' && ($ankunft + $dauer > $ticks)) ? $ankunft + $dauer -1 : $ticks;
 	}
 
@@ -242,7 +414,7 @@ function GetUserInfos($id) {
 	if ($SQL_Num == 0) {
 	  return '???';
 	}
-	
+
 	$tmp_result = mysql_result($SQL_Result, 0, 'galaxie').':'.mysql_result($SQL_Result, 0, 'planet').' '.mysql_result($SQL_Result, 0, 'name');
 	return $tmp_result;
 }
@@ -255,7 +427,7 @@ function GetUserPts($id) {
 	if ($SQL_Num == 0) {
 		return 0;
 	}
-	
+
 	return mysql_result($SQL_Result, 0, 'pts');
 }
 
@@ -263,7 +435,7 @@ function AttPlanerRights($Allianz, $Meta, $Super, $Rechte, $UserMeta, $UserAllia
 	if ($Super == 1 && $Rechte == 3) {
 		return  true;
 	}
-	
+
 	if ($Meta = $UserMeta && $Rechte >= 2) {
 		return  true;
 
@@ -285,6 +457,8 @@ function LogAction($text, $type = LOG_SYSTEM)
 
 function ZahlZuText($zahl, $decimals = 0)
 {
+	if(is_null($zahl))
+		return '-';
 	return number_format($zahl, $decimals, ',', '.');
 }
 
@@ -424,7 +598,7 @@ function printselect($nr) {
 
 function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 	global $ATTOVERALL, $SF, $DF, $PIC, $EF;
-	
+
 	$SQL = "SELECT * FROM gn4scans WHERE rg=".$galaxie." and rp=".$planet." order by type ASC, id DESC;";
 	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
 	$SQL_Num = mysql_num_rows($SQL_Result);
@@ -598,7 +772,7 @@ function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 
 	//latest news (if available)
 	$res = tic_mysql_query("select n.genauigkeit gen, n.t newsfrom, e.t, e.typ, e.inhalt
-							from gn4scans_news n 
+							from gn4scans_news n
 							left join gn4scans_news_entries e on e.news_id = n.id
 							where n.ziel_g = '".$galaxie."' and n.ziel_p = '".$planet."' and n.t = (select max(t) from gn4scans_news where n.ziel_g = 48 and n.ziel_p = 1)
 							order by t desc");
@@ -616,13 +790,13 @@ function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 			}
 		}
 	}
-	
+
 	if ($output != '') {
 		$output .= '<br>';
 	} else {
 		$output .= 'No Scans!';
 	}
-	
+
 	return $output;
 }
 
@@ -690,14 +864,14 @@ function AttAnzahl($Ally,$Meta,$type) {
 	} else {
 		$SQL = "SELECT count(lfd) as Anzahl FROM gn4attplanung WHERE (freigabe = 1) and (forall = 1 or formeta = ".$Meta." or forallianz = ".$Ally.") and attstatus >2;";
 	}
-	
+
 	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
 	$SQL_Num = mysql_num_rows($SQL_Result);
-	
+
 	if ($SQL_Num != 0) {
 		return  mysql_result($SQL_Result, 0, "Anzahl");
 	}
-	
+
 	return  0;
 }
 
