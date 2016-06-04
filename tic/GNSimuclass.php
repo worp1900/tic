@@ -303,7 +303,9 @@ class GNSimu_Multi
 						'todel' => $todel
 					), 'combatRoundValues');*/
 
-					//maybe remove other ships as a consequrnce of this deletions.
+					//maybe remove other ships as a consequrnce of these deletions.
+					/*
+					//incorrect this way. the ships remain as long as there is capacity.
 					if(isset($this->shipdata[$attackShipId]['prefire_consequences_for']))
 					{
 						$num = count($this->shipdata[$attackShipId]['prefire_consequences_for']);
@@ -312,6 +314,7 @@ class GNSimu_Multi
 							$todel[$consequencedShipId] += $del * $this->shipdata[$attackShipId]['prefire_consequences_factor'][$x] / $num;
 						}
 					}
+					*/
 				}
 
 			}
@@ -661,14 +664,14 @@ aprint(array(
 		$tmp = $this->calcResForShipsArray($ToDestroyAtt);
 		$totalResM += $tmp[0];
 		$totalResK += $tmp[1];
-		
+
 		if(is_array($this->AttFleets)) {
 			foreach($this->AttFleets as $v) {
 				$totalResM -= 1500 * ($v->StolenExenMthisTick + $v->StolenExenKthisTick);
 				$totalResK -= 1000 * ($v->StolenExenMthisTick + $v->StolenExenKthisTick);
 			}
 		}
-		
+
 		for($i = 0; $i < count($this->DeffFleets); $i++) {
 			if($this->DeffFleets[$i]->extern) {
 				//anzahl
@@ -687,8 +690,8 @@ aprint(array(
 					$this->DeffFleets[$i]->bergungM += round($fraction * $totalResM * 0.2, 0);
 					$this->DeffFleets[$i]->bergungK += round($fraction * $totalResK * 0.2, 0);
 
-					$this->bergungExternalDeffer[0] += $this->DeffFleets[$i]->bergungM;
-					$this->bergungExternalDeffer[1] += $this->DeffFleets[$i]->bergungK;
+					$this->bergungExternalDeffer[0] += round($fraction * $totalResM * 0.2, 0);
+					$this->bergungExternalDeffer[1] += round($fraction * $totalResK * 0.2, 0);
 /*
 aprint(array(
 	'$ToDestroyDeff' => $ToDestroyDeff,
@@ -702,6 +705,7 @@ aprint(array(
 	'$fraction' => $fraction,
 	'$this->DeffFleets[$i]->bergungM' => $this->DeffFleets[$i]->bergungM,
 	'$this->DeffFleets[$i]->bergungK' => $this->DeffFleets[$i]->bergungK,
+	'$this->bergungExternalDeffer' => $this->bergungExternalDeffer
 ), 'bergung ' . $i);
 */
 				}
@@ -716,7 +720,7 @@ aprint(array(
 aprint(array(
 	'bergungPrimeDeffer' => $this->bergungPrimeDeffer,
 	'bergungExternalDeffer' => $this->bergungExternalDeffer,
-	
+
 ));
 */
 		//traeger-kapazitaetsverlute
@@ -1118,8 +1122,8 @@ aprint(array(
 
 		//VAG
 		echo '<tr class="fieldnormaldark" style="font-style:
-		italic;"><td title="Im Verteidigungsfall dürfen bis
-		zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Metall (?)</td><td colspan="4" bgcolor="white"></td>';
+		italic;"><td title="Verlustausgleich: Im Verteidigungsfall dürfen bis
+		zu 50% der Verlustrohstoffe ersetzt werden.">VAG Metall (?)</td><td colspan="4" bgcolor="white"></td>';
 		//M
 		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
@@ -1132,7 +1136,7 @@ aprint(array(
 		echo '</tr>';
 		//K
 		echo '<tr class="fieldnormallight" style="font-style:
-		italic;"><td title="Im Verteidigungsfall dürfen bis zu 50% der Verlustrohstoffe ersetzt werden.">Verlustausgleich Kristall (?)</td><td colspan="4" bgcolor="white"></td>';
+		italic;"><td title="Verlustausgleich: Im Verteidigungsfall dürfen bis zu 50% der Verlustrohstoffe ersetzt werden.">VAG Kristall (?)</td><td colspan="4" bgcolor="white"></td>';
 		$x = 0;
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
 			$key = $this->getFleetKey($this->DeffFleets[$i]->g, $this->DeffFleets[$i]->p, $i);
