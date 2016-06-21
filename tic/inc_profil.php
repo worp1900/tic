@@ -9,15 +9,17 @@
 				<table width="100%" class="fieldnormallight">
 					<tr>
 						<td>Scantyp:</td>
-						<td colspan="3">
+						<td>
 							<select name="lstScanTyp">
 <?php
 	foreach ($ScanTyp as $ScanTypNummer => $ScanTypname) {
-		echo "								<option value=\"".$ScanTypNummer."\"".(($ScanTypNummer == $Benutzer['scantyp'])?" selected":"").">".$ScanTypname."</option>";
+		echo "			<option value=\"".$ScanTypNummer."\"".(($ScanTypNummer == $Benutzer['scantyp'])?" selected":"").">".$ScanTypname."</option>";
 	}
 ?>
 							</select>
 						</td>
+						<td>Scananfragen anzeigen:</td>
+						<td><input type="checkbox" name="scananfragen" <?php if($Benutzer['scananfragen']) echo 'checked="checked"'; ?> value="1"/></td>
 					</tr>
 					<tr>
 						<td>Scanverst&auml;rker:</td>

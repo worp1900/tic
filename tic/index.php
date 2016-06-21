@@ -1,3 +1,19 @@
+<?php
+
+@session_start();
+// Session-Registrieren
+if (isset($_SESSION['is_auth']) && $_SESSION['is_auth']==1) {
+	header("Location: ./main.php");
+	echo "<a href='main.php'>hier geht es weiter...</a>";
+
+	exit();
+}
+
+//echo "<pre><code>";
+//print_r($_SESSION);
+//echo "</code></pre>";
+
+?>
 <html>
 <head>
 <title>Tactical Information Center</title>

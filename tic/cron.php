@@ -30,10 +30,35 @@ $div_ticks = $null_ticks - $alt_ticks;
 // cron Berechnungen
 if($div_ticks > 0)
 {
+	//delete scanrequests not successful and old:
+	$days = 2;
+	$sql = "DELETE FROM gn4scanrequests
+				WHERE
+				(
+					(
+						scantyp IN (0, 1, 2, 3)
+						AND
+						NOT EXISTS(
+							SELECT * FROM gn4scans s WHERE s.rg = ziel_g AND s.rp = ziel_p AND s.type = scantyp AND UNIX_TIMESTAMP(STR_TO_DATE(s.zeit, '%H:%i %d.%m.%Y')) > t
+						)
+					)
+					OR
+					(
+						scantyp = 4
+						AND
+						NOT EXISTS(
+							SELECT * FROM gn4scans_news n WHERE n.ziel_g = ziel_g AND n.ziel_p = ziel_p AND n.t > t
+						)
+					)
+				)
+				AND
+				t < UNIX_TIMESTAMP(NOW()) - ".$days."*24*60*60";
+	tic_mysql_query($sql, __FILE__, __LINE__);
+
 	//30days
 	tic_mysql_query('DELETE FROM gn4shorturls WHERE t < UNIX_TIMESTAMP(NOW()) - 60*60*24*30');
-	
-	
+
+
     $SQL_Result = tic_mysql_query('SELECT * FROM `gn4flottenbewegungen`  ORDER BY id;', $SQL_DBConn) or die(mysql_errno()." - ".mysql_error());
     $SQL_Num = mysql_num_rows($SQL_Result);
 

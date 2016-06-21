@@ -34,6 +34,8 @@ function getScanType($typ) {
 		return 3;
 	if($typ == 'Nachrichtenscan')
 		return 4;
+	if($typ == 'Newsscan')
+		return 4;
 	return -1;
 }
 
@@ -42,18 +44,22 @@ function getTimeInTicks($data, $row) {
 	if(strlen($data['ticks'][$row]) > 0) {
 		//ticks
 		return $data['ticks'][$row];
+
 	} elseif(strlen($data['minuten'][$row]) > 0) {
 		//Min
-		return ceil($data['minuten'][$row] / 15.0 + 0.001);
+		return ceil($data['minuten'][$row] / 15.0);
+
 	} elseif(strlen($data['xstunden'][$row]) > 0) {
 		//HH:MM:SS
-		return ceil(($data['xstunden'][$row] * 60 * 60 + $data['xminuten'][$row] * 60 + $data['xsekunden'][$row]) / 60.0 / 15.0 + 0.001);
+		return ceil(($data['xstunden'][$row] * 60 * 60 + $data['xminuten'][$row] * 60 + $data['xsekunden'][$row]) / 60.0 / 15.0);
+
 	} elseif(strlen($data['ystunden'][$row]) > 0) {
 		//HH:MM
-		return ceil(($data['ystunden'][$row] * 60 + $data['yminuten'][$row]) / 15.0 + 0.001);
+		return ceil(($data['ystunden'][$row] * 60 + $data['yminuten'][$row]) / 15.0);
+
 	} elseif(strlen($data['ystunden'][$row]) > 0) {
 		//HH Std
-		return ceil(($data['stunden'][$row] * 60) / 15.0 + 0.001);
+		return ceil(($data['stunden'][$row] * 60) / 15.0);
 	}
 	return -1;
 }
@@ -94,7 +100,7 @@ if($data) {
 			$matches = array();
 
 			if(strpos($v, 'Newsscan Ergebnis') !== false) {
-				$p = "/^Newsscan von .+?vom.+?(?P<d2>\\d+).+?(?P<m2>\\d+).+?(?P<y2>\\d+).+?(?P<h2>\\d+).+?(?P<i2>\\d+)|^Newsscan Ergebnis.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\wäöü\\.-]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)|^\\[(?P<d>\\d+).(?P<m>\\d+).(?P<y>\\d+).(?P<h>\\d+).(?P<i>\\d+).(?P<s>\\d+)\\].(?P<typ>.+)\\n(?P<inhalt>[\\s\\S]+?)\\n\\n(?=\\[|#|[^\\w])|^#.+?(?P<fehler>Daten zu fehlerhaft)|^[^N#\\[\\n].+?\\n(?P<inhalt2>[\\s\\S]+?)\\s(?=ENDE|#|\\[)/m";
+				$p = "/^Newsscan von .+?vom.+?(?P<d2>\\d+).+?(?P<m2>\\d+).+?(?P<y2>\\d+).+?(?P<h2>\\d+).+?(?P<i2>\\d+)|^Newsscan Ergebnis.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\wäöü\\.\\-]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)|^\\[(?P<d>\\d+).(?P<m>\\d+).(?P<y>\\d+).(?P<h>\\d+).(?P<i>\\d+).(?P<s>\\d+)\\].(?P<typ>.+)\\n(?P<inhalt>[\\s\\S]+?)\\n\\n(?=\\[|#|[^\\w])|^#.+?(?P<fehler>Daten zu fehlerhaft)|^[^N#\\[\\n].+?\\n(?P<inhalt2>[\\s\\S]+?)\\s(?=ENDE|#|\\[)/m";
 
 				preg_match_all($p, $v, $matches);
 				if($DEBUG) aprint($matches);
@@ -158,7 +164,7 @@ if($data) {
 						//'parsed' => $matches,
 					), 'Nachrichtenscan');
 			} else if(strpos($v, 'Sektorscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<pkt>(?:\\d+.)+\\d+)\\n.+?(?P<s>\\d+)\\n.+?(?P<d>\\d+)\\n.+?(?P<me>\\d+)\\n.+?(?P<ke>\\d+)\\n.+?(?P<a>\\d+)/";
+				$p = "/.+?(?P<gen>\\d+)%.+\\n.+?(?P<name>[\\w\\.\\-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<pkt>(?:\\d+.)+\\d+)\\n.+?(?P<s>\\d+)\\n.+?(?P<d>\\d+)\\n.+?(?P<me>\\d+)\\n.+?(?P<ke>\\d+)\\n.+?(?P<a>\\d+)/";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -192,7 +198,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Militärscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+\\n.+?(?:\\s(?P<s0j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2j>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2b>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2f>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2z>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2k>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2s>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2t>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2cl>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2ca>(?:\\d+\\.)*\\d+)\\s*?)?\\nPosition(?:[\\w ]+):\\s+[\\w \\(\\)]+(?:\\s)(?P<ziel1>[\\w\\.-äöü\\(\\) ]+)(?:\\s*)?(?P<ziel2>[\\w\\.-äöü\\(\\) ]+)?/m";
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w.+?(?P<name>[\\w\\.\\-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+\\n.+?(?:\\s(?P<s0j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1j>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2j>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1b>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2b>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1f>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2f>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1z>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2z>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1k>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2k>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1s>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2s>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1t>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2t>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1cl>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2cl>(?:\\d+\\.)*\\d+)\\s*?)?\\n.+?(?:\\s(?P<s0ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s1ca>(?:\\d+\\.)*\\d+)\\s*?)(?:\\s(?P<s2ca>(?:\\d+\\.)*\\d+)\\s*?)?\\nPosition(?:[\\w ]+):\\s+[\\w \\(\\)]+(?:\\s)(?P<ziel1>[\\w\\.\\-äöü\\(\\) ]+)(?:\\s*)?(?P<ziel2>[\\w\\.\\-äöü\\(\\) ]+)?/m";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -284,7 +290,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Geschützscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<glo>(?:\\d+\\.)*\\d+)\\n.+?(?P<glr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gmr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gsr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gaj>(?:\\d+\\.)*\\d+)/m";
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.\\-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<glo>(?:\\d+\\.)*\\d+)\\n.+?(?P<glr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gmr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gsr>(?:\\d+\\.)*\\d+)\\n.+?(?P<gaj>(?:\\d+\\.)*\\d+)/m";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -323,7 +329,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Einheitenscan Ergebnis') !== false) {
-				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<sfja>\\d+)\\n.+?(?P<sfbo>\\d+)\\n.+?(?P<sffr>\\d+)\\n.+?(?P<sfze>\\d+)\\n.+?(?P<sfkr>\\d+)\\n.+?(?P<sfsc>\\d+)\\n.+?(?P<sftr>\\d+)\\n.+?(?P<sfcl>\\d+)\\n.+?(?P<sfca>\\d+)/";
+				$p = "/.+?(?P<gen>\\d+)%.+\\n\\w+.+?(?P<name>[\\w\\.\\-äöü]+)\\n.+?(?P<gal>\\d+):(?P<pla>\\d+)\\n.+?(?P<sfja>\\d+)\\n.+?(?P<sfbo>\\d+)\\n.+?(?P<sffr>\\d+)\\n.+?(?P<sfze>\\d+)\\n.+?(?P<sfkr>\\d+)\\n.+?(?P<sfsc>\\d+)\\n.+?(?P<sftr>\\d+)\\n.+?(?P<sfcl>\\d+)\\n.+?(?P<sfca>\\d+)/";
 				preg_match($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -386,7 +392,7 @@ if($data) {
 					showImportError($v, $matches, $p);
 				}
 			} else if(strpos($v, 'Flottenzusammensetzung') !== false) {
-				$p = "/^[\\wäöü]+:.+?(?P<s0>\\d+).+?(?P<s1><?\\d+).+?(?P<s2>\\d+)?|Flottenzusammensetzung.+?(?P<gal>\\d+):(?P<pla>\\d+)|^.+?\".+?\":.+?(?P<d>\\d+)/m";
+				$p = "/^[\\w\\.\\-äöü]+:.+?(?P<s0>\\d+).+?(?P<s1><?\\d+).+?(?P<s2>\\d+)?|Flottenzusammensetzung.+?(?P<gal>\\d+):(?P<pla>\\d+)|^.+?\".+?\":.+?(?P<d>\\d+)/m";
 				preg_match_all($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches)> 0 && (count($matches[0]) == 10 || count($matches[0]) == 15)) {
@@ -493,7 +499,7 @@ if($data) {
 						), 'Flottenzusammensetzung');
 				}
 			} else if(strpos($v, 'Galaxiemitglieder') !== false) {
-				$p = "/^(?P<gal>\\d+):(?P<pla>\\d+).(?P<name>[\\w\\.-äöü]+).+?(?P<pkt>(?:\\d+\\.)*\\d+).+?(?P<s>\\d+).+?(?P<d>\\d+).+?(?P<me>\\d+).\\/.(?P<ke>\\d+).+?(?P<a>\\d+)/m";
+				$p = "/^(?P<gal>\\d+):(?P<pla>\\d+).(?P<name>[\\w\\.\\-äöü]+).+?(?P<pkt>(?:\\d+\\.)*\\d+).+?(?P<s>\\d+).+?(?P<d>\\d+).+?(?P<me>\\d+).\\/.(?P<ke>\\d+).+?(?P<a>\\d+)/m";
 				preg_match_all($p, $v, $matches);
 				mysqlEscapeMatchResult($matches);
 				if(count($matches) > 0) {
@@ -532,18 +538,15 @@ if($data) {
 			} else if(strpos($v, 'Flottenbewegungen') !== false) {
 				$doNotRelocate = true;
 				include('function.updatefleett.php');
-				//alt, kann nicht mit mehreren deffern um.
-				//$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[^\\n]*)/m"; ;
-
-				//.*?(?P<gal>\d+):(?P<pla>\d+).+?(?P<name>[\w\.-äöü]+)(?: \*)?\t(?P<greift_an>[^\t]*)\t(?P<greift_an_t>[^\t]*)\t(?P<verteidigt>[^\t]*)\t(?P<verteidigt_t>[^\t]*)\t(?P<angegriffen_von>[^\t]*)\t(?P<angegriffen_von_t>[^\t]*)\t(?P<verteidigt_von>[^\t]*)\t(?P<verteidigt_von_t>[\s\S]*?^(?=\d+:\d+.+\w))?
-				$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[\\s\\S]*?^(?=\\d+:\\d+.+\\w))?/m";
+				//.*?(?P<gal>\d+):(?P<pla>\d+).+?(?P<name>[\w\.\-äöü]+)(?: \*)?\t(?P<greift_an>[^\t]*)\t(?P<greift_an_t>[^\t]*)\t(?P<verteidigt>[^\t]*)\t(?P<verteidigt_t>[^\t]*)\t(?P<angegriffen_von>[^\t]*)\t(?P<angegriffen_von_t>[^\t]*)\t(?P<verteidigt_von>[^\t]*)\t(?P<verteidigt_von_t>[\s\S]*?^(?=\d+:\d+.+\w))?
+				$p = "/.*?(?P<gal>\\d+):(?P<pla>\\d+).+?(?P<name>[\\w\\.\\-äöü]+)(?: \\*)?\\t(?P<greift_an>[^\\t]*)\\t(?P<greift_an_t>[^\\t]*)\\t(?P<verteidigt>[^\\t]*)\\t(?P<verteidigt_t>[^\\t]*)\\t(?P<angegriffen_von>[^\\t]*)\\t(?P<angegriffen_von_t>[^\\t]*)\\t(?P<verteidigt_von>[^\\t]*)\\t(?P<verteidigt_von_t>[\\s\\S]*?^(?=\\d+:\\d+.+\\w))?/m";
 				preg_match_all($p, $v, $matches);
 
 				//aprint($matches);
 
 				mysqlEscapeMatchResult($matches);
 
-				$pattern_fleets = "/^Rückflug\\s+\\((?P<rfgal>\\d+).(?P<rfpla>\\d+).+?(?<rfname>[\\w\\.-äöü]+)\\)|^(?P<gal>\\d+).(?P<pla>\\d+).+?(?P<name>[\\w\\.-äöü]+)/m";
+				$pattern_fleets = "/^Rückflug\\s+\\((?P<rfgal>\\d+).(?P<rfpla>\\d+).+?(?<rfname>[\\w\\.\\-äöü]+)\\)|^(?P<gal>\\d+).(?P<pla>\\d+).+?(?P<name>[\\w\\.\\-äöü]+)/m";
 				$pattern_times ="/^(?P<minuten>\\d+).Min|^(?P<stunden>\\d+).Std|^(?P<xstunden>\\d+):(?P<xminuten>\\d+):(?P<xsekunden>\\d+)|^(?P<ystunden>\\d+):(?P<yminuten>\\d+)|^(?P<ticks>\\d+)/m";
 				$fleets = array();
 
@@ -662,6 +665,9 @@ if($data) {
 						$sql[] = "UPDATE gn4flottenbewegungen SET modus = '" . $fleets[$k]['modus'] . "', flugzeit=0, eta='" . $fleets[$k]['eta'] . "', ankunft=0, flugzeit_ende=0, erfasser='".$Benutzer['name']."', erfasst_am='".date('H:i \U\h\r \a\m d.m.Y')."', ruckflug_ende='".($tickNow + $fleets[$k]['eta'] * 15 * 60) ."' WHERE id = '" . $fid . "'";
 								$importlog[] = 'FLEET UPDATE RETURN atter_gal=' . $fleets[$k]['atter'][0] . ' atter_pla=' . $fleets[$k]['atter'][1] . ' deffer_gal=' . $fleets[$k]['deffer'][0] . ' deffer_pla=' . $fleets[$k]['deffer'][1] . ' eta=' . $fleets[$k]['eta'];
 								if($DEBUG) aprint(array($k => $v), 'switch mode to RF fid=' . $fid);
+
+								$logstr = 'Flotte ge&auml;ndert alt=('.$fag.':'.$fap.'-#'.$fid.'->'.$fvg.':'.$fvp.' modus='.$fm.' eta='.$feta.')';
+								LogAction($logstr, LOG_SETSAFE);
 							}
 
 							if($found) {
@@ -670,6 +676,9 @@ if($data) {
 									$sql[] = "UPDATE gn4flottenbewegungen SET flottennr = '" . $fleets[$k]['flottennr'] . "' WHERE id = '" . $fid . "'";
 									$importlog[] = 'FLEET UPDATE FLEET_NO atter_gal=' . $fleets[$k]['atter'][0] . ' atter_pla=' . $fleets[$k]['atter'][1] . ' deffer_gal=' . $fleets[$k]['deffer'][0] . ' deffer_pla=' . $fleets[$k]['deffer'][1] . ' eta=' . $fleets[$k]['eta'] . ' fleetnr=' . $fleets[$k]['flottennr'];
 									if($DEBUG) aprint(array($k => $v), 'update fleet number fid=' . $fid);
+
+									$logstr = 'Flotte ge&auml;ndert alt=('.$fag.':'.$fap.'-#'.$fid.'->'.$fvg.':'.$fvp.' modus='.$fm.' eta='.$feta.')';
+									LogAction($logstr, LOG_SETSAFE);
 								}
 								//remove from list to be processed.
 								$valid = true;
@@ -683,6 +692,8 @@ if($data) {
 					$sql[] = 'DELETE FROM gn4flottenbewegungen WHERE id =' . $fid;
 						$importlog[] = 'FLEET DELETE id=' . $fid;
 						if($DEBUG) aprint('delete fleet id=' . $fid);
+						$logstr = 'Flotte gel&ouml;scht ('.$fag.':'.$fap.'-#'.$fid.'->'.$fvg.':'.$fvp.' modus='.$fm.' eta='.$feta.')';
+						LogAction($logstr, LOG_SETSAFE);
 					}
 				}//for each fleet in db
 
@@ -767,7 +778,7 @@ if($data) {
 											"' . $v['atter'][1] . '",
 											"' . $v['deffer'][0] . '",
 											"' . $v['deffer'][1] . '",
-											0,
+											"0",
 											"' . $v['eta'] . '",
 											"' . $flugzeit . '",
 											"' . $v['flottennr'] . '",
@@ -780,6 +791,10 @@ if($data) {
 										)';
 					$importlog[] = 'FLEET ADD atter_gal=' . $fleets[$k]['atter'][0] . ' atter_pla=' . $fleets[$k]['atter'][1] . ' deffer_gal=' . $fleets[$k]['deffer'][0] . ' deffer_pla=' . $fleets[$k]['deffer'][1] . ' eta=' . $fleets[$k]['eta'] . ' fleetnr=' . $fleets[$k]['flottennr'] . ' mode=' . $v['modus'];
 					if($DEBUG) aprint(array($k => $v), 'add fleet');
+
+					$logstr = 'Flotte hinzugef&uuml;gt ('.$v['atter'][0].':'.$v['atter'][1].'-#'.$v['flottennr'].'->'.$v['deffer'][0].':'.$v['deffer'][1].' modus='.$v['modus'].' eta='.$v['eta'].')';
+					LogAction($logstr, LOG_SETSAFE);
+
 				}//foreach fleets
 
 				$importlog[] = 'TAKTIK importiert';

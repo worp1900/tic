@@ -168,7 +168,7 @@ class GNSimu_Multi
 	function finalize() {
 		//prüfen, ob flotten genug träger für den rückfkug haben
 		for($i = 1; $i < count($this->DeffFleets); $i++) {
-			if($this->DeffFleets[$i]->Endtick-1 > $this->currentTick)
+			if($this->DeffFleets[$i]->Endtick != $this->currentTick || $this->DeffFleets[$i]->arrival >= $this->currentTick)
 				continue;
 
 			$numJa = $this->DeffFleets[$i]->Ships[0];
@@ -181,19 +181,12 @@ class GNSimu_Multi
 				$lostJa = round($numJa / $num * $lost, 0);
 				$lostBo = round($numBo / $num * $lost, 0);
 				aprint(array(
-					'tick' => $this->currentTick,
-					'arrival' => $this->DeffFleets[$i]->ArrivalTick,
-					'stay' => $this->DeffFleets[$i]->TicksToStay,
-					'fleet' => array(
-						'txt' => $this->DeffFleets[$i]->txt,
-						'typ' => $this->DeffFleets[$i]->fleet,
-						'g' => $this->DeffFleets[$i]->g,
-						'p' => $this->DeffFleets[$i]->p,
-						),
+					'tick' => $this->currentTick + 1,
+					'fleet' => $this->DeffFleets[$i],
 					'num' => $lost,
 					'ja' => $lostJa,
 					'bo' => $lostBo,
-					), 'verlust durch fehlende traegerkaparitaet');
+					), 'verlust durch fehlende traegerkaparitaet bei rueckflug; die schiffe kämpfen den tick noch mit.');
 
 				$this->DeffFleets[$i]->Ships[0] -= $lostJa;
 				$this->DeffFleets[$i]->Ships[1] -= $lostBo;
@@ -203,7 +196,7 @@ class GNSimu_Multi
 		}
 
 		for($i = 0; $i < count($this->AttFleets); $i++) {
-			if($this->AttFleets[$i]->Endtick-1 > $this->currentTick)
+			if($this->AttFleets[$i]->Endtick != $this->currentTick + 1 || $this->AttFleets[$i]->arrival >= $this->currentTick)
 				continue;
 
 			$numJa = $this->AttFleets[$i]->Ships[0];
@@ -216,19 +209,15 @@ class GNSimu_Multi
 				$lostJa = round($numJa / $num * $lost, 0);
 				$lostBo = round($numBo / $num * $lost, 0);
 				aprint(array(
-					'tick' => $this->currentTick,
-					'arrival' => $this->AttFleets[$i]->ArrivalTick,
-					'end' => $this->AttFleets[$i]->Endtick,
+					'tick' => $this->currentTick + 1,
 					'fleet' => array(
-						'txt' => $this->AttFleets[$i]->txt,
-						'typ' => $this->AttFleets[$i]->fleet,
-						'g' => $this->AttFleets[$i]->g,
-						'p' => $this->AttFleets[$i]->p,
-						),
+						$this->AttFleets[$i]->ArrivalTick,
+						$this->AttFleets[$i]->Endtick,
+					),
 					'num' => $lost,
 					'ja' => $lostJa,
 					'bo' => $lostBo,
-					), 'verlust durch fehlende traegerkaparitaet bei rueckflug');
+					), 'verlust durch fehlende traegerkaparitaet bei rueckflug; die schiffe k&auml;mpfen den tick noch mit.');
 
 				$this->AttFleets[$i]->Ships[0] -= $lostJa;
 				$this->AttFleets[$i]->Ships[1] -= $lostBo;
@@ -796,7 +785,7 @@ aprint(array(
 	{
 		$fleet->OldShips = $fleet->Ships;
 		$fleet->ArrivalTick = $fleet->TicksToWait;
-		$fleet->Endtick = $fleet->TicksToStay;
+		$fleet->Endtick = $fleet->ArrivalTick + $fleet->TicksToStay;
 		$this->AttFleets[] = &$fleet;
 	}
 
@@ -804,7 +793,7 @@ aprint(array(
 	{
 		$fleet->OldShips = $fleet->Ships;
 		$fleet->ArrivalTick = $fleet->TicksToWait;
-		$fleet->Endtick = $fleet->TicksToStay;
+		$fleet->Endtick = $fleet->ArrivalTick + $fleet->TicksToStay;
 		$this->DeffFleets[] = &$fleet;
 	}
 

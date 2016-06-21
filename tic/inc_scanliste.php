@@ -479,6 +479,10 @@ if(isset($_GET['export'])) {
 
 		$color = !$color;
 	}
+	
+	if($num == 0) {
+		echo '<tr class="fieldnormallight"><td colspan="18" align="center"><i>keine Eintr&auml;ge</i></td></tr>';
+	}
 ?>
 </table>
 <?php

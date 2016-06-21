@@ -18,7 +18,7 @@ function showError($msg) {
 
 
 
-$SQL_DEBUG = true;
+$SQL_DEBUG = false;
 //general vars
 $project = postOrGet('project');
 
@@ -64,7 +64,7 @@ if(postOrGet('wave_askfleet')) {
 				AND z.atter_pla = '".mysql_real_escape_string($started_p)."'
 				AND z.fleet_id = '".mysql_real_escape_string($started_f)."'
 			GROUP BY z.project_fk";
-	//aprint($sql);
+	if($SQL_DEBUG) aprint($sql);
 	list($started) = mysql_fetch_row(tic_mysql_query($sql, __FILE__, __LINE__));
 	echo '<html><head><meta http-equiv="refresh" content="'.$refresh.'"/></head><body style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px;
 padding: 0; font-family: helvetica; font-size: 9pt; font-weight: bold; text-align: center; background-color: '.($started ? '55ff55' : '#ff5555').'">'.($started ? 'JA' : 'NEIN').'</body></html>';
@@ -77,7 +77,7 @@ if(postOrGet('start_f')) {
 	$f = postOrGet('start_f');
 	$sql1 = "SET @g = '".mysql_real_escape_string($Benutzer['galaxie'])."', @p = '".mysql_real_escape_string($Benutzer['planet'])."', @f = '".mysql_real_escape_string($f)."';";
 	$sql2 = "SELECT atter_gal, atter_pla, dest_gal, dest_pla, fleet_id, welle, relative_starttick FROM gn4massinc_zuweisung WHERE atter_gal = @g AND atter_pla = @p AND fleet_id = @f";
-	//aprint(join("\n\n", array($sql1, $sql2)));
+	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$num = mysql_num_rows($res);
@@ -116,7 +116,7 @@ if(postOrGet('start_f')) {
 							AND flottennr = @fleet_id
 							AND ankunft = '".$ankunft."'
 					) LIMIT 1";
-		//aprint(join("\n\n", array($sql1, $sql2)));
+		if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 		tic_mysql_query($sql1, __FILE__, __LINE__);
 		tic_mysql_query($sql2, __FILE__, __LINE__);
 	} else {
@@ -232,6 +232,7 @@ if($Benutzer['rang'] >= $Rang_GC) {
 				foreach($v as $p=>$v2) {
 					if(!empty(v2)) {
 						$sql = "DELETE FROM gn4massinc_ziele WHERE project_fk = '".mysql_real_escape_string($project)."' AND gal = '".mysql_real_escape_string($g)."' AND pla = '".mysql_real_escape_string($p)."'";
+						if($SQL_DEBUG) aprint($sql);
 						tic_mysql_query($sql);
 					}
 				}
@@ -327,6 +328,7 @@ if(empty($project)) {
 	echo '</tr>';
 
 	$sql = "SELECT project_id, name, freigegeben, erstellt_von, erstellt_am FROM gn4massinc_projects ORDER BY project_id";
+	if($SQL_DEBUG) aprint($sql);
 	$res = tic_mysql_query($sql, __FILE__, __LINE__);
 	$num = mysql_num_rows($res);
 
@@ -398,7 +400,7 @@ if(empty($project)) {
 					SELECT * FROM gn4massinc_atter_willing a
 					WHERE a.project_fk = w.project_fk AND a.welle = w.t AND a.atter_gal = @g AND a.atter_pla = @p
 				) ORDER BY w.t";
-	//aprint(join("\n\n", array($sql1, $sql2)));
+	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$color = true;
@@ -435,7 +437,7 @@ if(empty($project)) {
 				LEFT JOIN gn4massinc_projects p ON p.project_id = z.project_fk
 				WHERE z.atter_gal = @g AND z.atter_pla = @p
 				ORDER BY z.welle";
-	//aprint(join("\n\n", array($sql1, $sql2)));
+	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$color = false;
@@ -458,6 +460,7 @@ if(empty($project)) {
 } else {
 	//show project info
 	$sql = 'SELECT project_id, name, freigegeben, erstellt_von, erstellt_am FROM gn4massinc_projects WHERE project_id = "'.mysql_real_escape_string($project).'"';
+	if($SQL_DEBUG) aprint($sql);
 	$res = tic_mysql_query($sql, __FILE__, __LINE__);
 	$num = mysql_num_rows($res);
 
@@ -469,18 +472,19 @@ if(empty($project)) {
 
 		echo '<table>';
 		echo '<tr class="datatablehead">';
-		echo '	<td>&nbsp;<a href="main.php?modul=massinc">&laquo Projekte</a>&nbsp;</td>';
+		echo '	<td>&nbsp;<a href="main.php?modul=massinc">&laquo</a>&nbsp;</td>';
 		echo '	<td>&nbsp;Projekt: '.$name.'&nbsp;</td>';
 		echo '</tr>';
 		echo '<tr>';
 		echo '	<td class="fieldnormaldark" valign="top">';
 
 		//projects
+		/*
 		$sql = "SELECT project_id, name FROM gn4massinc_projects ORDER BY project_id";
 		$res = tic_mysql_query($sql, __FILE__, __LINE__);
 		while(list($id, $name) = mysql_fetch_row($res)) {
 			echo '&nbsp;<a href="main.php?modul=massinc&project='.$id.'">&raquo; '.$name.'</a>&nbsp;<br>';
-		}
+		}*/
 		echo '	</td>';
 
 		echo '	<td>';
@@ -547,7 +551,7 @@ if(empty($project)) {
 					WHERE w.project_fk = @project
 					GROUP BY w.t, w.kommentar
 					ORDER BY w.t ASC";
-			//aprint(join("\n\n", array($sql1, $sql2)));
+			if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 			tic_mysql_query($sql1, __FILE__, __LINE__);
 			$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 			$num = mysql_num_rows($res);
@@ -587,7 +591,7 @@ if(empty($project)) {
 									@atter_gal = '".mysql_real_escape_string($Benutzer['galaxie'])."',
 									@atter_pla = '".mysql_real_escape_string($Benutzer['planet'])."'";
 						$sql2 = "SELECT willing FROM gn4massinc_atter_willing w WHERE w.project_fk=@project AND w.welle=@welle AND w.atter_gal=@atter_gal AND w.atter_pla=@atter_pla";
-						//aprint(join("\n\n", array($sql1, $sql2)));
+						if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 						tic_mysql_query($sql1, __FILE__, __LINE__);
 						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
 						$habeZeit = null;
@@ -608,7 +612,7 @@ if(empty($project)) {
 						echo '</td>';
 
 						$sql = "SELECT count(*) > 0 FROM gn4massinc_zuweisung WHERE project_fk='".mysql_real_escape_string($project)."' AND welle='".mysql_real_escape_string($t)."' AND atter_gal='".mysql_real_escape_string($Benutzer['galaxie'])."' AND atter_pla='".mysql_real_escape_string($Benutzer['planet'])."'";
-						//aprint($sql);
+						if($SQL_DEBUG) aprint($sql);
 						$zugeteilt = mysql_result(tic_mysql_query($sql, __FILE__, __LINE__), 0, 0);
 						if($freigegeben == 2) {
 							echo '	<td>&nbsp;'.($zugeteilt ? '<b>JA</b>' : 'NEIN').'&nbsp;</td>';
@@ -662,7 +666,7 @@ if(empty($project)) {
 							WHERE w.project_fk = @project
 							GROUP BY w.t
 							ORDER BY w.t ASC";
-				//aprint(join("\n\n", array($sql1, $sql2)));
+				//if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 				tic_mysql_query($sql1, __FILE__, __LINE__);
 				$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 				while(list($t, $flotten) = mysql_fetch_row($res)) {
@@ -707,7 +711,7 @@ if(empty($project)) {
 										LIMIT 1				
 										) blocks ON blocks.g = z.dest_gal AND blocks.p = z.dest_pla
 							WHERE z.atter_gal = @g AND z.atter_pla = @p ORDER BY z.welle + z.relative_starttick*15*60";
-					//aprint(join("\n\n", array($sql1, $sql2)));
+					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					tic_mysql_query($sql1, __FILE__, __LINE__);
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 					while(list($g, $p, $name, $meta, $allianz,
@@ -732,7 +736,7 @@ if(empty($project)) {
 						echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
 						$sql1 = "SET @gal = '".mysql_real_escape_string($g)."', @pla = '".mysql_real_escape_string($p)."';";
 						$sql2 = "SELECT id, t, genauigkeit FROM gn4scans_news WHERE ziel_g = @gal AND ziel_p = @pla ORDER BY t DESC LIMIT 1";
-						//aprint(join("\n\n", array($sql1, $sql2)));
+						if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 						tic_mysql_query($sql1, __FILE__, __LINE__);
 						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
 						$num2 = mysql_num_rows($res2);
@@ -742,14 +746,14 @@ if(empty($project)) {
 							$news_id = mysql_result($res2, 0, 'id');
 							echo '<td width="155">&nbsp;'.date('Y-m-d H:i', mysql_result($res2, 0, 't')).'&nbsp;</td>';
 							echo '<td>&nbsp;'.mysql_result($res2, 0, 'genauigkeit').'%&nbsp;</td>';
-							echo '<td align="right">&nbsp;<a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=news&newsid='.$news_id.'">&raquo; mehr</a>&nbsp;</td></tr>';
+							echo '<td align="right">&nbsp;<a href="'.makeRequestScanLink($g, $p, 4, 'modul=massinc&project='.$project.'&wave='.$wave.'&tab_ziele=1').'">&raquo; request News</a> &nbsp; <a href="main.php?modul=showgalascans&xgala='.$g.'&xplanet='.$p.'&displaytype=news&newsid='.$news_id.'">&raquo; mehr</a>&nbsp;</td></tr>';
 
 							$sql3 = "SET @newsid = " . $news_id;
 							$sql4 = "SELECT t, typ, inhalt, inaccurate
 									FROM gn4scans_news_entries
 									WHERE news_id = @newsid
 									LIMIT 10";
-							//aprint(join("\n\n", array($sql3, $sql4)));
+							if($SQL_DEBUG) aprint(join("\n\n", array($sql3, $sql4)));
 							tic_mysql_query($sql3, __FILE__, __LINE__);
 							$res3 = tic_mysql_query($sql4, __FILE__, __LINE__);
 							$color = false;
@@ -881,7 +885,7 @@ if(empty($project)) {
 							LEFT JOIN gn4gnuser u ON u.gala = z.dest_gal AND u.planet = z.dest_pla
 							LEFT JOIN gn4scans s ON s.rg = @refgal AND s.rp = @refpla AND s.type = 2
 							WHERE z.project_fk = @proj AND z.welle = @welle AND z.atter_gal = @refgal AND z.atter_pla = @refpla ORDER BY z.welle + z.relative_starttick * 15 * 60';
-					//aprint(join("\n\n", array($sql1, $sql2)));
+					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 					$color = true;
 					while(list($t, $atter_g, $atter_p, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name,
@@ -986,7 +990,7 @@ if(empty($project)) {
 									AND EXISTS(
 										SELECT * FROM gn4massinc_zuweisung y WHERE y.project_fk = @proj AND y.atter_gal = @refgal AND y.atter_pla = @refpla AND y.dest_gal = z.dest_gal AND y.dest_pla = z.dest_pla)
 								 ORDER BY z.welle + z.relative_starttick * 15 * 60, z.atter_gal, z.atter_pla, z.fleet_id';
-					//aprint(join("\n\n", array($sql1, $sql2)));
+					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 					$color = true;
 					while(list($t, $atter_g, $atter_p, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name, $name2,
@@ -1169,6 +1173,7 @@ if(empty($project)) {
 					LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = z.gal AND s.spieler_planet = z.pla
 					LEFT JOIN gn4scans i ON i.rg = z.gal AND i.rp = z.pla AND i.type = 0
 					WHERE z.project_fk = '".$project."' ORDER BY s.meta, s.allianz_name, z.gal, z.pla";
+			if($SQL_DEBUG) aprint($sql);
 			$res = tic_mysql_query($sql, __FILE__, __LINE__);
 			$color = false;
 			$scanlistparams = '';
@@ -1203,7 +1208,7 @@ if(empty($project)) {
 						JOIN gn4massinc_wellen w ON w.project_fk = '".$project."'
 						LEFT JOIN gn4massinc_ziele_welle zw ON zw.ziel_gal = z.gal AND zw.ziel_pla = z.pla AND zw.welle = w.t
 						WHERE z.gal = '".$g."' AND z.pla = '".$p."'";
-				//if($SQL_DEBUG) aprint($sql);
+				if($SQL_DEBUG) aprint($sql);
 				$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
 				while(list($g, $p, $t, $id) = mysql_fetch_row($res2)) {
 					echo '<td>&nbsp;<input type="checkbox" name="ziel_welle['.$g.']['.$p.']['.$t.']" '.($id ? ' checked="checked"' : '').'/>&nbsp;</td>';

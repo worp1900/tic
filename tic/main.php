@@ -83,6 +83,7 @@
 		$Benutzer['spy'] = mysql_result($SQL_Result, 0, 'spy');
 		$Benutzer['help'] = mysql_result($SQL_Result, 0, 'help');
 		$Benutzer['tcausw'] = mysql_result($SQL_Result, 0, 'tcausw');
+		$Benutzer['scananfragen'] = mysql_result($SQL_Result, 0, 'scananfragen');
 
 // Erweiterung von Bytehoppers vom 20.07.05 für Attplaner2
 		@$Benutzer['attplaner'] = mysql_result($SQL_Result, 0, 'attplaner');

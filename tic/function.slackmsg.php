@@ -29,7 +29,7 @@ if($msgtyp === 'requestscan') {
 			$url ='http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=gesch';
 			break;
 		case 4: 
-			$url = 'http://www.galaxy-network.net/#game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news&news_kampf=1&news_scan=1&news_spenden=1&news_galaxy=1&news_allianz=1&news_tausch=1';
+			$url = 'http://www.galaxy-network.net/game/waves.php?action=Scannen&c1=' . $g . '&c2=' . $p . '&typ=news&news_kampf=1&news_scan=1&news_spenden=1&news_galaxy=1&news_allianz=1&news_tausch=1';
 			break;
 		default: 
 			$txt .= 'unknown'; 
