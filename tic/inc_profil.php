@@ -36,6 +36,13 @@
 						<td>
 							<input type="text" name="txtPunkte" maxlength="20" size="10" value="<?=ZahlZuText($Benutzer['punkte'])?>" />
 						</td>
+						<td>Offensive Flotten:</td>
+						<td>
+							<select name="txtOfffleets">
+								<option value="1" <?php echo ($Benutzer['offfleets'] == 1) ? ' selected="selected"' : ''; ?>>1</option>
+								<option value="2" <?php echo ($Benutzer['offfleets'] == 2) ? ' selected="selected"' : ''; ?>>2</option>
+							</select>
+						</td>
 					</tr>
 					<tr>
 						<td>Schiffe:</td>
