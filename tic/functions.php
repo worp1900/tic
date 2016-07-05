@@ -340,7 +340,7 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$ticks = ($typ == 'a' && ($ankunft + $dauer > $ticks)) ? $ankunft + $dauer -1 : $ticks;
 	}
 
-	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.($num + $offset - 1).$link.'#oben">'.$linkName.'</a>';;
+	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.($num + $offset - 1).$link.'#oben">'.$linkName.'</a>';
 }
 
 function GetScans($SQL_DBConn, $galaxie, $planet) {
@@ -856,23 +856,6 @@ function del_attplanlfd($lfd) {
 	$SQL = 'DELETE FROM gn4attplanung WHERE lfd ='.$lfd.';';
 	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
 	// echo 'ATT-Ziel Nr. '.$lfd.' geloescht!';
-}
-
-function AttAnzahl($Ally,$Meta,$type) {
-	if ($type == 0) {
-		$SQL = "SELECT count(lfd) as Anzahl FROM gn4attplanung WHERE (freigabe = 1) and (forall = 1 or formeta = ".$Meta." or forallianz = ".$Ally.");";
-	} else {
-		$SQL = "SELECT count(lfd) as Anzahl FROM gn4attplanung WHERE (freigabe = 1) and (forall = 1 or formeta = ".$Meta." or forallianz = ".$Ally.") and attstatus >2;";
-	}
-
-	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
-	$SQL_Num = mysql_num_rows($SQL_Result);
-
-	if ($SQL_Num != 0) {
-		return  mysql_result($SQL_Result, 0, "Anzahl");
-	}
-
-	return  0;
 }
 
 function InfoText($Text) {
