@@ -147,6 +147,19 @@ $hours = 36;
 		</td>
 		<td align="center"><input type="button" onclick="javascript:document.getElementById('galaxie').value=''" value="del"/></td>
 	</tr>
+	<tr class="datatablehead">
+		<td colspan="4">&nbsp;Spieler&nbsp;</td>
+	</tr>
+	<tr class="fieldnormallight">
+		<td>
+			<input size="6" id="gal"/>:<input size="6" id="pla"/>
+		</td>
+		<td align="center"><input type="button" value=">>" onclick="javascript:document.getElementById('spieler').value += (document.getElementById('gal').value + ':' + document.getElementById('pla').value + ';')"></td>
+		<td>
+			<textarea id="spieler" name="koords"><?=$_GET['koords']?></textarea>
+		</td>
+		<td align="center"><input type="button" onclick="javascript:document.getElementById('spieler').value=''" value="del"/></td>
+	</tr>
 	<tr class="fieldnormaldark">
 		<td colspan="3" align="right">
 			<input type="checkbox" checked="checked" name="s"/> Sektoren
@@ -158,7 +171,7 @@ $hours = 36;
 			<input type="checkbox" <?php echo isset($_GET['u']) ? 'checked="checked"' : '' ?>name="u"/> Urlaub  
 			<input type="submit" name="export" value="Export"/>&nbsp;</td>
 		<td align="right">&nbsp;<input type="submit" value="Scanliste"/>&nbsp;</td>
-	</tr>
+	</tr>	
 </table>
 </form>
 <br/>
