@@ -1,7 +1,71 @@
 <h2>Angriffsplanung 2.0</h2>
-<p style="border: 2px red solid; background-color: rgb(200, 200, 0)">Dieser Bereich befindet sich noch in Entwicklung. /dv</p>
+<!--<p style="background-color: rgb(200, 200, 0)">Dieser Bereich befindet sich noch in Entwicklung. /dv</p>-->
 <?php
-$Benutzer['rang'] = 1;
+//$Benutzer['rang'] = 0;
+
+
+function createSimuLink($project, $wave, $gal, $pla, $linkName) {
+	global $SQL_DBConn;
+	
+	$link = '';
+	//deffer
+	$link .= '&g[0]='.$gal.'&p[0]='.$pla;
+	$sql1 = "SET @project = '".$project."',
+					@welle = '".$wave."',
+					@gal = '".mysql_real_escape_string($koords_g)."',
+					@pla = '".mysql_real_escape_string($koords_p)."'";
+	$sql2 = "SELECT 
+			s0.me, s0.ke,
+			s3.ga, s3.glo, s3.glr, s3.gmr, s3.gsr,
+			s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu
+		FROM gn4massinc_ziele_welle zw
+		LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = zw.ziel_pla AND s0.type = 0
+		LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = zw.ziel_pla AND s1.type = 1
+		LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = zw.ziel_pla AND s3.type = 3";
+	if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "victum info");
+	tic_mysql_query($sql1, __FILE__, __LINE__);
+	list($me, $ke,
+		$gaj, $glo, $glr, $gmr, $gsr, 
+		$fja, $fbo, $ffr, $fze, $fkr, $fsc, $ftr, $fcl, $fca) = mysql_fetch_row(tic_mysql_query($sql2, __FILE__, __LINE__));
+	$link .= '&d[0][0]=' . $fja . '&d[0][1]=' . $fbo . '&d[0][2]=' . $ffr . '&d[0][3]=' . $fze . '&d[0][4]=' . $fkr . '&d[0][5]=' . $fsc . '&d[0][6]=' . $ftr . '&d[0][7]=' . $fcl . '&d[0][8]=' . $fca;
+	$link .= '&d[0][9]=' . $gaj . '&d[0][10]=' . $glo . '&d[0][11]=' . $glr . '&d[0][12]=' . $gmr . '&d[0][13]=' . $gsr;
+	$link .= '&d[0][14]=' . $me . '&d[0][15]=' . $ke;
+	
+	//atter
+	$sql1 = "SET @project = '".$project."',
+				@welle = '".$wave."',
+				@gal = '".$gal."',
+				@pla = '".$pla."'";
+	$sql2 = "SELECT z.atter_gal, z.atter_pla, z.fleet_id, z.relative_starttick,
+				f.ja, f.bo, f.fr, f.ze, f.kr, f.sc, f.tr, f.cl, f.ca,
+				i.me, i.ke
+			FROM gn4massinc_zuweisung z
+			JOIN gn4massinc_fleets f ON f.project_fk = z.project_fk AND f.atter_gal = z.atter_gal AND f.atter_pla = z.atter_pla AND z.fleet_id = f.fleet
+			LEFT JOIN gn4scans i ON i.rg = z.atter_gal AND i.rp = z.atter_pla AND i.type = 0
+			WHERE z.project_fk = @project AND z.welle = @welle AND z.dest_gal = @gal AND z.dest_pla = @pla
+			ORDER BY z.atter_gal, z.atter_pla, z.relative_starttick, z.fleet_id";
+	if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+	tic_mysql_query($sql1, __FILE__, __LINE__);
+	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+	$num = mysql_num_rows($res);
+	
+
+	$offset = 1;
+	//atter link
+	$max_starttick = 0;
+	while(list($g, $p, $fleetid, $relative_starttick, $fja, $fbo, $bfr, $fzr, $fkr, $fsc, $ftr, $fcl, $fca, $me, $ke) = mysql_fetch_row($res)) {
+		$link .= '&g['.($i+$offset).']='.$g.'&p['.($i+$offset).']='.$p.'&typ['.($i+$offset).']=a&f['.($i+$offset).']='.$fleetid.'&ankunft['.($i+$offset).']='.$relative_starttick.'&aufenthalt['.($i+$offset).']=5';
+		$link .= '&d['.($i+$offset).'][0]=' . $fja . '&d['.($i+$offset).'][1]=' . $fbo . '&d['.($i+$offset).'][2]=' . $ffr . '&d['.($i+$offset).'][3]=' . $fze . '&d['.($i+$offset).'][4]=' . $fkr . '&d['.($i+$offset).'][5]=' . $fsc . '&d['.($i+$offset).'][6]=' . $ftr . '&d['.($i+$offset).'][7]=' . $fcl . '&d['.($i+$offset).'][8]=' . $fca;
+		$link .= '&d['.($i+$offset).'][14]=' . $me . '&d['.($i+$offset).'][15]=' . $ke;
+		$i++;
+		$max_starttick = ($relative_starttick > $max_starttick) ? $relative_starttick : $max_starttick;
+	}
+
+	return '<a href="main.php?modul=kampf&compute=Berechnen&preticks=1&ticks='.($max_starttick + 5).'&num_flotten='.($num + $offset - 1).$link.'#overview" target="_blank">'.$linkName.'</a>';
+}
+
+
+//$Benutzer['rang'] = 1;
 
 $refresh = 20;
 
@@ -125,6 +189,40 @@ if(postOrGet('start_f')) {
 }
 
 //MGMT
+
+if(postOrGet('edit_welle_user_willing_g') && postOrGet('edit_welle_user_willing_p') && postOrGet('edit_welle_user_willing_id')) {
+	$id = postOrGet('edit_welle_user_willing_id');
+	$state = postOrGet('edit_welle_user_willing');
+	$g = postOrGet('edit_welle_user_willing_g');
+	$p = postOrGet('edit_welle_user_willing_p');
+
+	$freigabestatus = mysql_result(tic_mysql_query("SELECT freigegeben FROM gn4massinc_projects WHERE project_id = '".mysql_real_escape_string($project)."'", __FILE__, __LINE__), 0, 0);
+
+	if($Benutzer['rang'] >= $Rang_GC || $g == $Benutzer['galaxie'] && $p == $Benutzer['planet'] && $freigabestatus == 1) {
+		$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+					@welle = '".mysql_real_escape_string($id)."',
+					@atter_gal = '".mysql_real_escape_string($g)."',
+					@atter_pla = '".mysql_real_escape_string($p)."',
+					@atter_fleets = '".mysql_real_escape_string($Benutzer['offfleets'])."'";
+		if(!$state) {
+			$sql2 = "INSERT INTO gn4massinc_atter_willing (project_fk, welle, atter_gal, atter_pla, willing)
+					VALUES(@project, @welle, @atter_gal, @atter_pla, 0)
+					ON DUPLICATE KEY UPDATE willing = 0";
+		} else {
+			$sql2 = "INSERT INTO gn4massinc_atter_willing (project_fk, welle, atter_gal, atter_pla, willing)
+					VALUES(@project, @welle, @atter_gal, @atter_pla, 1)
+					ON DUPLICATE KEY UPDATE willing = 1";
+		}
+		$sql3 = "INSERT INTO gn4massinc_atter (project_fk, gal, pla, off_fleets) VALUES (@project, @atter_gal, @atter_pla, @atter_fleets)
+			 ON DUPLICATE KEY UPDATE off_fleets=@atter_fleets;";
+		
+		if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2, $sql2)));
+		tic_mysql_query($sql1, __FILE__, __LINE__);
+		tic_mysql_query($sql2, __FILE__, __LINE__);
+		tic_mysql_query($sql3, __FILE__, __LINE__);
+	}
+}
+
 if($Benutzer['rang'] >= $Rang_GC) {
 	$proj_edit = postOrGet('proj_edit');
 	$proj_edit_ack = postOrGet('proj_edit_ack');
@@ -160,7 +258,7 @@ if($Benutzer['rang'] >= $Rang_GC) {
 		$tab_ziele = postOrGet('tab_ziele');
 
 		if(!empty($wave_del)) {
-			$sql = "DELETE FROM gn4massinc_wellen WHERE project_fk = '" . mysql_real_escape_string($project) . "' AND t = '".mysql_real_escape_string($wave_del)."'";
+			$sql = "DELETE FROM gn4massinc_wellen WHERE project_fk = '" . mysql_real_escape_string($project) . "' AND id = '".mysql_real_escape_string($wave_del)."'";
 			if($SQL_DEBUG) aprint($sql);
 			tic_mysql_query($sql, __FILE__, __LINE__);
 		}
@@ -171,40 +269,11 @@ if($Benutzer['rang'] >= $Rang_GC) {
 		}
 		if(!empty($wave_edit) && $wave_edit_ack) {
 			$wave_edit_t = postOrGet('wave_edit_t');
-			$wave_edit_old_t = postOrGet('wave_edit_old_t');
 			$wave_edit_kommentar = postOrGet('wave_edit_kommentar');
-			$sql = "UPDATE gn4massinc_wellen SET t = UNIX_TIMESTAMP(STR_TO_DATE('".mysql_real_escape_string($wave_edit_t)."', '%Y-%m-%d %H:%i')), kommentar = '".$wave_edit_kommentar."' WHERE project_fk = '".mysql_real_escape_string($project)."' AND t = '".$wave_edit_old_t."'";
+			$sql = "UPDATE gn4massinc_wellen SET t = UNIX_TIMESTAMP(STR_TO_DATE('".mysql_real_escape_string($wave_edit_t)."', '%Y-%m-%d %H:%i')), kommentar = '".$wave_edit_kommentar."' WHERE project_fk = '".mysql_real_escape_string($project)."' AND id = '".$wave_edit."'";
 			if($SQL_DEBUG) aprint($sql);
 			tic_mysql_query($sql, __FILE__, __LINE__);
 			$wave_edit = null;
-		}
-
-		if(postOrGet('edit_welle_user_willing_g') && postOrGet('edit_welle_user_willing_p')) {
-			$t = postOrGet('edit_welle_user_willing_t');
-			$state = postOrGet('edit_welle_user_willing');
-			$g = postOrGet('edit_welle_user_willing_g');
-			$p = postOrGet('edit_welle_user_willing_p');
-
-			$freigabestatus = mysql_result(tic_mysql_query("SELECT freigegeben FROM gn4massinc_projects WHERE project_id = '".mysql_real_escape_string($project)."'", __FILE__, __LINE__), 0, 0);
-
-			if($Benutzer['rang'] >= $Rang_GC || $g == $Benutzer['galaxie'] && $p == $Benutzer['planet'] && $freigabestatus == 1) {
-				$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
-							@welle = '".mysql_real_escape_string($t)."',
-							@atter_gal = '".mysql_real_escape_string($g)."',
-							@atter_pla = '".mysql_real_escape_string($p)."'";
-				if(!$state) {
-					$sql2 = "INSERT INTO gn4massinc_atter_willing (project_fk, welle, atter_gal, atter_pla, willing)
-							VALUES(@project, @welle, @atter_gal, @atter_pla, 0)
-							ON DUPLICATE KEY UPDATE willing = 0";
-				} else {
-					$sql2 = "INSERT INTO gn4massinc_atter_willing (project_fk, welle, atter_gal, atter_pla, willing)
-							VALUES(@project, @welle, @atter_gal, @atter_pla, 1)
-							ON DUPLICATE KEY UPDATE willing = 1";
-				}
-				if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
-				tic_mysql_query($sql1, __FILE__, __LINE__);
-				tic_mysql_query($sql2, __FILE__, __LINE__);
-			}
 		}
 
 		if(postOrGet('ziel_welle_update')) {
@@ -333,9 +402,11 @@ if(empty($project)) {
 	$num = mysql_num_rows($res);
 
 	$color = false;
+	$i = 0;
 	while(list($project_id, $name, $freigegeben, $erstellt_von, $erstellt_am) = mysql_fetch_row($res)) {
 		$color = !$color;
 		if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC) {
+			$i++;
 			if($proj_edit == $project_id && $Benutzer['rang'] >= $Rang_GC) {
 				echo '<form method="post" action="main.php?modul=massinc"><input type="hidden" name="proj_edit" value="'.$proj_edit.'"/>';
 				echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
@@ -359,63 +430,76 @@ if(empty($project)) {
 				echo '	<td>&nbsp;'.$erstellt_am.'&nbsp;</td>';
 				echo '	<td>&nbsp;';
 				switch($freigegeben) {
-					case 0: echo 'nicht freigegeben'; break;
-					case 1: echo 'Flotten-Checkin'; break;
-					case 2: echo 'freigegeben'; break;
+					case 0: echo '<span title="Nicht sichtbar f&uuml;r regul&auml;re Mitglieder">nicht freigegeben</span>'; break;
+					case 1: echo '<span title="F&uuml;r alle sichtbar, Spieler tragen ein, ob Sie mitmachen m&ouml;chten">Flotten-Checkin</span>'; break;
+					case 2: echo '<span title="Planung abgeschlossen">freigegeben</span>'; break;
 				}
 				echo '&nbsp;</td>';
 				if($Benutzer['rang'] >= $Rang_GC) {
 					echo '	<td>&nbsp;<a href="main.php?modul=massinc&proj_edit='.$project_id.'">&raquo; editieren</a>&nbsp;<br/>';
-					echo '	&nbsp;<a href="main.php?modul=massinc&proj_del='.$project_id.'">&raquo; l&ouml;schen</a>&nbsp;</td>';
+					echo '	&nbsp;<a href="main.php?modul=massinc&proj_del='.$project_id.'" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; l&ouml;schen</a>&nbsp;</td>';
 				}
 				echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project_id.'">&raquo; ausw&auml;hlen</a>&nbsp;</td>';
 				echo '</tr>';
 			}
 		}
-
 	}
 	if($Benutzer['rang'] >= $Rang_GC) {
 		echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
 			echo '<td colspan="7" align="right"><a href="main.php?modul=massinc&proj_neu=1">&raquo; neu erstellen</a></td>';
 		echo '</tr>';
 	}
+
+	if($i == 0) {
+		echo '<tr class="fieldnormallight"><td colspan="7" align="center">Keine Eintr&auml;ge vorhanden.</td></tr>';
+	}
+
 	echo '</table>';
 
 
 	//show waves without confirmation
 	echo '<br/><table class="datatable" align="center" width="100%">';
 	echo '<tr class="datatablehead">';
-	echo '	<td colspan="3">M&ouml;chtest Du mitmachen?</td>';
-	echo '</tr">';
+	echo '	<td colspan="4">M&ouml;chtest Du mitmachen?</td>';
+	echo '</tr>';
 	echo '<tr class="fieldnormaldark" style="font-weight: bold">';
 	echo '	<td>&nbsp;Projekt&nbsp;</td>';
 	echo '	<td>&nbsp;Welle&nbsp;</td>';
+	echo '	<td>&nbsp;Entscheidung&nbsp;</td>';
 	echo '	<td>&nbsp;&nbsp;</td>';
 	echo '</tr>';
 	$sql1 = "SET @g = '".mysql_real_escape_string($Benutzer['galaxie'])."', @p = '".mysql_real_escape_string($Benutzer['planet'])."'";
-	$sql2 = "SELECT w.project_fk, p.name, w.t
+	$sql2 = "SELECT w.project_fk, p.name, w.t, a.willing
 				FROM gn4massinc_wellen w
 				LEFT JOIN gn4massinc_projects p ON p.project_id = w.project_fk
-				WHERE NOT EXISTS(
-					SELECT * FROM gn4massinc_atter_willing a
-					WHERE a.project_fk = w.project_fk AND a.welle = w.t AND a.atter_gal = @g AND a.atter_pla = @p
-				) ORDER BY w.t";
+				LEFT JOIN gn4massinc_atter_willing a ON a.project_fk = w.project_fk AND a.welle = w.id AND a.atter_gal = @g AND a.atter_pla = @p
+				WHERE (SELECT freigegeben FROM gn4massinc_projects WHERE project_id = w.project_fk) > 0
+				ORDER BY w.t";
 	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$color = true;
 	$i = 0;
-	while(list($project_id, $project_name, $welle) = mysql_fetch_row($res)) {
+	while(list($project_id, $project_name, $welle, $willing) = mysql_fetch_row($res)) {
 		$i++;
 		$color = !$color;
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
 		echo '	<td>&nbsp;'.$project_name.'&nbsp;</td>';
 		echo '	<td>&nbsp;'.date('Y-m-d H:i', $welle).'&nbsp;</td>';
+		echo '	<td'.(is_null($willing) ? ' bgcolor="#ffffaa"' : '').'>&nbsp;';
+		if(is_null($willing)) {
+			echo 'bitte eintragen';
+		} else if($willing) {
+			echo 'JA';
+		} else {
+			echo 'Nein';
+		}
+		echo '&nbsp;</td>';
 		echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project_id.'">&raquo; hier w&auml;hlen</a>&nbsp;</td>';
 		echo '</tr>';
 	}
 	if($i == 0) {
-		echo '<tr class="fieldnormallight"><td colspan="3">&nbsp;Es liegen keine weiteren Entscheidungen an.&nbsp;</td></tr>';
+		echo '<tr class="fieldnormallight"><td colspan="4">&nbsp;Es liegen keine weiteren Entscheidungen an.&nbsp;</td></tr>';
 	}
 	echo '</table>';
 
@@ -423,7 +507,7 @@ if(empty($project)) {
 	//show waves without confirmation
 	echo '<br/><table class="datatable" align="center" width="100%">';
 	echo '<tr class="datatablehead">';
-	echo '	<td colspan="4">Deine Aktionen</td>';
+	echo '	<td colspan="4">Deine zugeteilten Aktionen</td>';
 	echo '</tr">';
 	echo '<tr class="fieldnormaldark" style="font-weight: bold">';
 	echo '	<td>&nbsp;Projekt&nbsp;</td>';
@@ -432,28 +516,29 @@ if(empty($project)) {
 	echo '	<td>&nbsp;&nbsp;</td>';
 	echo '</tr>';
 	$sql1 = "SET @g = '".mysql_real_escape_string($Benutzer['galaxie'])."', @p = '".mysql_real_escape_string($Benutzer['planet'])."'";
-	$sql2 = "SELECT DISTINCT z.project_fk, p.name, z.welle
+	$sql2 = "SELECT DISTINCT z.project_fk, p.name, z.welle, w.t
 				FROM gn4massinc_zuweisung z
 				LEFT JOIN gn4massinc_projects p ON p.project_id = z.project_fk
+				LEFT JOIN gn4massinc_wellen w ON w.project_fk = z.project_fk AND w.id = z.welle
 				WHERE z.atter_gal = @g AND z.atter_pla = @p
 				ORDER BY z.welle";
-	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
+	if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$color = false;
 	$i = 0;
-	while(list($project_id, $project_name, $welle) = mysql_fetch_row($res)) {
+	while(list($project_id, $project_name, $welle, $t) = mysql_fetch_row($res)) {
 		$i++;
 		$color = !$color;
 		echo '<tr bgcolor="#'.($color ? 'ffffaa' : 'dddd99').'">';
 		echo '	<td>&nbsp;'.$project_name.'&nbsp;</td>';
-		echo '	<td>&nbsp;'.date('Y-m-d H:i', $welle).'&nbsp;</td>';
-		echo '	<td>&nbsp;'.ZahlZuText(($welle - time()) / 60).'&nbsp;</td>';
+		echo '	<td>&nbsp;'.date('Y-m-d H:i', $t).'&nbsp;</td>';
+		echo '	<td>&nbsp;'.ZahlZuText(($t - time()) / 60).'&nbsp;</td>';
 		echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project_id.'&wave='.$welle.'">&raquo; zum Cockpit</a>&nbsp;</td>';
 		echo '</tr>';
 	}
 	if($i == 0) {
-		echo '<tr class="fieldnormallight"><td colspan="3">&nbsp;Es liegen keine weiteren Entscheidungen an.&nbsp;</td></tr>';
+		echo '<tr class="fieldnormallight"><td colspan="4">&nbsp;Es liegen keine weiteren Entscheidungen an.&nbsp;</td></tr>';
 	}
 	echo '</table>';
 
@@ -519,35 +604,36 @@ if(empty($project)) {
 
 			$sql1 = 'SET @project = "'.$project.'"';
 			$sql2 = "SELECT
+						w.id,
 						w.t,
 						w.kommentar,
 						COUNT(z.project_fk) num_flotten_zugewiesen,
 						(SELECT COUNT(DISTINCT(CONCAT_WS(':', atter_gal, atter_pla)))
 							FROM gn4massinc_zuweisung x
-							WHERE x.project_fk = @project AND x.welle = w.t
+							WHERE x.project_fk = @project AND x.welle = w.id
 							) num_spieler_zugewiesen,
-						(SELECT SUM(s.off_fleets)
+						(SELECT COALESCE(SUM(s.off_fleets), 0)
 							FROM gn4massinc_atter_willing a
 							LEFT JOIN gn4massinc_atter s
 							ON s.gal = a.atter_gal AND s.pla = a.atter_pla
-							WHERE a.project_fk = @project AND a.welle = w.t AND a.willing = 1) zeit_fleets,
+							WHERE a.willing = 1 AND a.project_fk = @project AND a.welle = w.id AND a.willing = 1) zeit_fleets,
 						(SELECT COUNT(a.project_fk)
                          	FROM gn4massinc_atter_willing a
 							LEFT JOIN gn4massinc_atter s
 							ON s.gal = a.atter_gal AND s.pla = a.atter_pla
-							WHERE a.project_fk = @project AND a.welle = w.t AND a.willing = 1) zeit_spieler,
+							WHERE a.willing = 1 AND a.project_fk = @project AND a.welle = w.id AND a.willing = 1) zeit_spieler,
 						(SELECT COUNT(DISTINCT(CONCAT_WS(';', a.atter_gal, a.atter_pla)))
 							FROM gn4massinc_atter_willing a
-							WHERE a.project_fk = @project) distinct_spieler,
+							WHERE a.willing = 1 AND a.project_fk = @project) distinct_spieler,
 						(SELECT sum(x.off_fleets)
 							FROM (
 								SELECT DISTINCT(CONCAT_WS(':', w.atter_gal, w.atter_pla)), a.off_fleets
 								FROM gn4massinc_atter_willing w
 								LEFT JOIN gn4massinc_atter a ON w.atter_gal = a.gal AND w.atter_pla = a.pla
-								WHERE w.project_fk = @project
+								WHERE w.willing = 1 AND w.project_fk = @project
 							) x) distinct_fleets
 					FROM gn4massinc_wellen w
-					LEFT JOIN gn4massinc_zuweisung z ON z.project_fk = w.project_fk AND z.welle = w.t
+					LEFT JOIN gn4massinc_zuweisung z ON z.project_fk = w.project_fk AND z.welle = w.id
 					WHERE w.project_fk = @project
 					GROUP BY w.t, w.kommentar
 					ORDER BY w.t ASC";
@@ -560,18 +646,18 @@ if(empty($project)) {
 			$i = 0;
 			$distinct_spieler = 0;
 			$distinct_fleets = 0;
-			while(list($t, $kommentar, $fleets_zugewiesen, $spieler_zugewiesen, $zeit_fleets, $zeit_spieler, $d_spieler, $d_fleets) = mysql_fetch_row($res)) {
+			while(list($id, $t, $kommentar, $fleets_zugewiesen, $spieler_zugewiesen, $zeit_fleets, $zeit_spieler, $d_spieler, $d_fleets) = mysql_fetch_row($res)) {
 				$distinct_spieler = $d_spieler;
 				$distinct_fleets = $d_fleets;
 				$i++;
 				$color = !$color;
 				if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC) {
-					if($wave_edit == $t && $Benutzer['rang'] >= $Rang_GC) {
+					if($wave_edit == $id && $Benutzer['rang'] >= $Rang_GC) {
 						echo '<form method="post" action="main.php?modul=massinc&project='.$project.'">';
-						echo '<input type="hidden" name="wave_edit_old_t" value="'.$t.'"/><input type="hidden" name="wave_edit" value="'.$wave_edit.'"/>';
+						echo '<input type="hidden" name="wave_edit" value="'.$id.'"/>';
 						echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
 						echo '	<td valign="top">&nbsp;'.$i.'&nbsp;</td>';
-						echo '	<td valign="top">&nbsp;<input type="text" name="wave_edit_t" value="'.date('Y-m-d H:i', $t).'"/>&nbsp;</td>';
+						echo '	<td valign="top">&nbsp;<input type="text" name="wave_edit_t" value="'.date('Y-m-d H:i', $t).'"/> <span title="Beachte: Datum/Zeit nach Freigabe &auml;ndern wird im Allgemeinen &Auml;rger geben.">(!)</span>&nbsp;</td>';
 						echo '	<td valign="top" colspan="4">&nbsp;<textarea name="wave_edit_kommentar">'.$kommentar.'</textarea>&nbsp;</td>';
 						echo '	<td valign="top" colspan="3">&nbsp;<input type="submit" name="wave_edit_ack" value="absenden"/>&nbsp;</td>';
 						echo '</tr>';
@@ -582,36 +668,41 @@ if(empty($project)) {
 						echo '	<td>&nbsp;'.date('Y-m-d H:i', $t).'&nbsp;</td>';
 						echo '	<td>&nbsp;'.$kommentar.'&nbsp;</td>';
 						if($Benutzer['rang'] >= $Rang_GC) {
-							echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_edit='.$t.'">&raquo; editieren</a>&nbsp;<br/>';
-							echo '	&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_del='.$t.'">&raquo; l&ouml;schen</a>&nbsp;</td>';
+							echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_edit='.$id.'">&raquo; editieren</a>&nbsp;<br/>';
+							echo '	&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_del='.$id.'" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; l&ouml;schen</a>&nbsp;</td>';
 						}
 
 						$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
-									@welle = '".mysql_real_escape_string($t)."',
+									@welle = '".mysql_real_escape_string($id)."',
 									@atter_gal = '".mysql_real_escape_string($Benutzer['galaxie'])."',
 									@atter_pla = '".mysql_real_escape_string($Benutzer['planet'])."'";
-						$sql2 = "SELECT willing FROM gn4massinc_atter_willing w WHERE w.project_fk=@project AND w.welle=@welle AND w.atter_gal=@atter_gal AND w.atter_pla=@atter_pla";
+						$sql2 = "SELECT w.willing, (NOT zw.project_fk IS NULL) AND w.willing = 0 as error
+								FROM gn4massinc_atter_willing w 
+								LEFT JOIN gn4massinc_zuweisung zw ON zw.project_fk = w.project_fk AND zw.welle = w.welle AND zw.atter_gal = @atter_gal AND zw.atter_pla = @pla
+								WHERE w.project_fk=@project AND w.welle=@welle AND w.atter_gal=@atter_gal AND w.atter_pla=@atter_pla";
 						if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 						tic_mysql_query($sql1, __FILE__, __LINE__);
 						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
 						$habeZeit = null;
+						$error = null;
 						if(mysql_num_rows($res2) > 0) {
 							$habeZeit = mysql_result($res2, 0, 'willing');
+							$error = mysql_result($res2, 0, 'error');
 						}
 
 						if(is_null($habeZeit)) {
 							echo '	<td bgcolor="#ffffaa">&nbsp;<b>Bitte eintragen!</b><br/>';
 						} else if($habeZeit == 0) {
-							echo '	<td>&nbsp;NEIN<br/>';
+							echo '	<td'.($error ? ' bgcolor="red" title="Du wurdest bereits zugewiesen. Bitte benachrichtige den Organisator!"' : '').'>&nbsp;NEIN<br/>';
 						} else {
 							echo '	<td>&nbsp;JA<br/>';
 						}
 						if($freigegeben == 1) {
-							echo '<a href="main.php?modul=massinc&project='.$project.'&edit_welle_user_willing_t='.$t.'&edit_welle_user_willing='.($habeZeit ? 0 : 1).'&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'">&raquo; &auml;ndern</a>';
+							echo '<a href="main.php?modul=massinc&project='.$project.'&edit_welle_user_willing_id='.$id.'&edit_welle_user_willing='.($habeZeit ? 0 : 1).'&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'"'.(!$error ? ' onclick="return confirm(\'Du wurdest bereits zugewiesen; Bist Du Dir sicher? - Benachrichte ggf. den Organisator!\')"' : '').'>&raquo; &auml;ndern</a>';
 						}
 						echo '</td>';
 
-						$sql = "SELECT count(*) > 0 FROM gn4massinc_zuweisung WHERE project_fk='".mysql_real_escape_string($project)."' AND welle='".mysql_real_escape_string($t)."' AND atter_gal='".mysql_real_escape_string($Benutzer['galaxie'])."' AND atter_pla='".mysql_real_escape_string($Benutzer['planet'])."'";
+						$sql = "SELECT count(*) > 0 FROM gn4massinc_zuweisung WHERE project_fk='".mysql_real_escape_string($project)."' AND welle='".mysql_real_escape_string($id)."' AND atter_gal='".mysql_real_escape_string($Benutzer['galaxie'])."' AND atter_pla='".mysql_real_escape_string($Benutzer['planet'])."'";
 						if($SQL_DEBUG) aprint($sql);
 						$zugeteilt = mysql_result(tic_mysql_query($sql, __FILE__, __LINE__), 0, 0);
 						if($freigegeben == 2) {
@@ -625,7 +716,7 @@ if(empty($project)) {
 							echo '	<td>&nbsp;'.$spieler_zugewiesen.'&nbsp;<br/>&nbsp;('.$fleets_zugewiesen.')&nbsp;</td>';
 						}
 
-						echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$t.'">&raquo; Zuweisung</a>&nbsp;</td>';
+						echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&zuweisung=1">'.($Benutzer['rang'] >= $Rang_GC ? '&raquo; Zuweisung' : '&raquo; Cockpit').'</a>&nbsp;</td>';
 						echo '</tr>';
 					}
 				}
@@ -633,26 +724,1007 @@ if(empty($project)) {
 			}
 			if($Benutzer['rang'] >= $Rang_GC) {
 				echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
-				echo '	<td colspan="6"></td>';
-				echo '	<td colspan="2">Spieler (Flotten): '.$distinct_spieler.' ('.$distinct_fleets.')</td>';
-				echo '	<td align="right"><a href="main.php?modul=massinc&project='.$project.'&wave_neu=1">&raquo; neu erstellen</a></td>';
+				echo '	<td colspan="6">&nbsp;&nbsp;</td>';
+				echo '	<td colspan="2">&nbsp;Spieler (Flotten): '.$distinct_spieler.' ('.$distinct_fleets.')&nbsp;</td>';
+				echo '	<td align="right">&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_neu=1">&raquo; neu erstellen</a>&nbsp;</td>';
 				echo '</tr>';
+				echo '<tr class="fieldnormaldark"><td colspan="9" align="right" style="font-weight: bold;">';
+				echo '&nbsp;<a href="main.php?modul=massinc&project='.$project.'&scansbeantragen1=1" onclick="return confirm(\'Du beantragst SEG Scans von allen Zielen. Bist Du Dir wirklich sicher?\')">&raquo SEG Scans beantragen</a>&nbsp;<br/>';
+				echo '&nbsp;<a href="main.php?modul=massinc&project='.$project.'&scansbeantragen2=1" onclick="return confirm(\'Du beantragst N Scans von allen Zielen. Bist Du Dir wirklich sicher?\')">&raquo N Scans beantragen</a>&nbsp;<br/>';
+				echo '</td></tr>';
 			}
 			echo '</table>';
+		} else if (postOrGet('zuweisung') AND $Benutzer['rang'] >= $Rang_GC) {
+			$koords_g = explode(':', postOrGet('koord'))[0];
+			$koords_p = explode(':', postOrGet('koord'))[1];
+			
+			//mgmgt
+			//UPDATE
+			$edit_gal = postOrGet('edit_gal');
+			$edit_pla = postOrGet('edit_pla');
+			$edit_fleet = postOrGet('edit_fleet');
+			$edit_dest_gal = postOrGet('edit_dest_gal');
+			$edit_dest_pla = postOrGet('edit_dest_pla');
+			if(postOrGet('edit') && !empty($edit_dest_gal) && !empty($edit_dest_pla) && !empty($edit_gal) && !empty($edit_pla) && !empty($edit_fleet)) {
+				$data = postOrGet('edit_f');
+				$edit_relative_start = postOrGet('edit_relative_start');
+				$edit_kommentar = postOrGet('edit_kommentar');
+				$sql1 = "SET @project = '".$project."',
+								@welle = '".$wave."',
+								@edit_gal = '".mysql_real_escape_string($edit_gal)."',
+								@edit_pla = '".mysql_real_escape_string($edit_pla)."',
+								@edit_dest_gal = '".mysql_real_escape_string($edit_dest_gal)."',
+								@edit_dest_pla = '".mysql_real_escape_string($edit_dest_pla)."',
+								@edit_fleet = '".mysql_real_escape_string($edit_fleet)."',
+								@edit_start = '".mysql_real_escape_string($edit_relative_start)."',
+								@edit_kommentar = '".mysql_real_escape_string($edit_kommentar)."',
+								@f0 = '".mysql_real_escape_string($data[0])."',
+								@f1 = '".mysql_real_escape_string($data[1])."',
+								@f2 = '".mysql_real_escape_string($data[2])."',
+								@f3 = '".mysql_real_escape_string($data[3])."',
+								@f4 = '".mysql_real_escape_string($data[4])."',
+								@f5 = '".mysql_real_escape_string($data[5])."',
+								@f6 = '".mysql_real_escape_string($data[6])."',
+								@f7 = '".mysql_real_escape_string($data[7])."',
+								@f8 = '".mysql_real_escape_string($data[8])."'";
+				$sql2 = "UPDATE gn4massinc_fleets SET ja = @f0, bo = @f1, fr = @f2, ze = @f3, kr = @f4, sc = @f5, tr = @f6, cl = @f7, ca = @f8
+						WHERE project_fk = @project AND atter_gal = @edit_gal AND atter_pla = @edit_pla AND fleet = @edit_fleet";
+				$sql3 = "UPDATE gn4massinc_zuweisung SET kommentar = @edit_kommentar, relative_starttick = @edit_start
+						WHERE project_fk = @project AND atter_gal = @edit_gal AND atter_pla = @edit_pla AND dest_gal = @edit_dest_gal AND dest_pla = @edit_dest_pla AND fleet_id = @edit_fleet";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2, $sql3)));
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				tic_mysql_query($sql2, __FILE__, __LINE__);
+				tic_mysql_query($sql3, __FILE__, __LINE__);
+				
+				$edit_gal = NULL;
+				$edit_pla = NULL;
+				$edit_fleet = NULL;
+			}
+
+			//DELETE
+			$del_gal = postOrGet('del_gal');
+			$del_pla = postOrGet('del_pla');
+			$del_fleet = postOrGet('del_fleet');
+			if(!empty($del_gal) && !empty($del_pla) && !empty($del_fleet)) {
+				$sql1 = "SET @project = '".$project."',
+								@welle = '".$wave."',
+								@del_gal = '".mysql_real_escape_string($del_gal)."',
+								@del_pla = '".mysql_real_escape_string($del_pla)."',
+								@del_fleet = '".mysql_real_escape_string($del_fleet)."'";
+				$sql2 = "DELETE FROM gn4massinc_zuweisung WHERE project_fk = @project AND welle = @welle AND atter_gal = @del_gal AND atter_pla = @del_pla AND fleet_id = @del_fleet";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), 'delete asdsignment');
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				tic_mysql_query($sql2, __FILE__, __LINE__);
+			}
+			
+			//ADD
+			$add_gal = postOrGet('add_gal');
+			$add_pla = postOrGet('add_pla');
+			if(!empty($add_gal) && !empty($add_pla)) {
+				//determine fleetid
+				$fleetid = 0;
+				$sql1 = "SET @project = '".$project."',
+								@add_gal = '".mysql_real_escape_string($add_gal)."',
+								@add_pla = '".mysql_real_escape_string($add_pla)."'";
+				$sql2 = "SELECT fleet_id FROM gn4massinc_zuweisung WHERE project_fk = @project AND atter_gal = @add_gal AND atter_pla = @add_pla ORDER BY fleet_id";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), 'used fleets');
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				$tmp = tic_mysql_query($sql2, __FILE__, __LINE__);
+				$tmp_num = mysql_num_rows($tmp);
+				if($tmp_num == 0) {
+					$fleetid = 1;
+				} else if($tmp_num > 1) {
+					$fleetid = 0;
+				} else {
+					list($used) = mysql_fetch_row($tmp);
+					$fleetid = $used % 2 + 1;
+					//aprint($fleetid, 'fleetid');
+				}
+				
+				if($fleetid) {
+					$sql1 = "SET @project = '".$project."',
+									@welle = '".$wave."',
+									@add_gal = '".mysql_real_escape_string($add_gal)."',
+									@add_pla = '".mysql_real_escape_string($add_pla)."',
+									@add_fleet = '".$fleetid."',
+									@dest_gal = '".mysql_real_escape_string($koords_g)."',
+									@dest_pla = '".mysql_real_escape_string($koords_p)."'";
+					$sql2 = "INSERT IGNORE INTO gn4massinc_fleets (project_fk, atter_gal, atter_pla, fleet) VALUES (@project, @add_gal, @add_pla, @add_fleet)";
+					$sql3 = "INSERT INTO gn4massinc_zuweisung (project_fk, welle, atter_gal, atter_pla, fleet_id, dest_gal, dest_pla) VALUES (@project, @welle, @add_gal, @add_pla, @add_fleet, @dest_gal, @dest_pla)";
+					if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2, $sql3)), 'add assignment');
+					tic_mysql_query($sql1, __FILE__, __LINE__);
+					tic_mysql_query($sql2, __FILE__, __LINE__);
+					tic_mysql_query($sql3, __FILE__, __LINE__);
+					
+					$edit_gal = $add_gal;
+					$edit_pla = $add_pla;
+					$edit_fleet = $fleetid;
+				}
+			}
+			
+			//zuweisungen löschen
+			if(postOrGet('zuweisungenloeschen') == 1 || postOrGet('zuweisungauto') == 1) {
+				$sql1 = "SET @project = '".mysql_real_escape_string($project)."', @wave = '".mysql_real_escape_string($wave)."'";
+				$sql2 = "DELETE FROM gn4massinc_zuweisung WHERE project_fk = @project AND welle = @wave";
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				tic_mysql_query($sql2, __FILE__, __LINE__);
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+			}
+
+			//auto
+			if(postOrGet('zuweisungenauto') == 1) {
+				showError('AUTO nicht implementiert.');
+			}
+			
+			//display
+			$sql = "SELECT project_fk, id, t,  kommentar FROM gn4massinc_wellen WHERE id = '".mysql_real_escape_string($wave)."'";
+			list($project, $wave, $t, $kommentar) = mysql_fetch_row(tic_mysql_query($sql, __FILE__, __LINE__));
+			
+			echo '<table>';
+			echo '	<tr class="datatablehead">';
+			echo '		<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'">&laquo;</a>&nbsp;</td>';
+			echo '		<td>&nbsp;Status&nbsp;</td>';
+			echo '		<td colspan="3">&nbsp;Ziel&nbsp;</td>';
+			echo '		<td>&nbsp;Zuweisung Welle #'. $wave .' - ' . date('Y-m-d H:i', $t) . '&nbsp;</td>';
+			echo '	</tr>';
+			
+			$sql1 = "SET @welle = '".$wave."',
+						@project = '".$project."'";
+			$sql2 = "SELECT z.gal, z.pla, s.spieler_name, s.spieler_urlaub,
+						(SELECT COUNT(*) FROM gn4massinc_zuweisung x WHERE x.project_fk = @project AND x.welle = @welle AND x.dest_gal = z.gal AND x.dest_pla = z.pla) flotten_zugewiesen
+					FROM gn4massinc_ziele z 
+					JOIN gn4massinc_ziele_welle zw ON zw.welle = @welle AND zw.project_fk = @project AND ziel_gal = z.gal AND ziel_pla = z.pla
+					LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = z.gal AND s.spieler_planet = z.pla";
+			if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+			tic_mysql_query($sql1, __FILE__, __LINE__);
+			$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+			$num = mysql_num_rows($res);
+
+			//MAIN LOOP FOR PLAYERS
+			$color = false;
+			$first = true;
+			
+			if($num == 0) {
+				echo '<tr class="fieldnormallight"><td align="center" colspan="6">Es sind noch keine Ziele ausgew&auml;hlt. <a href="main.php?modul=massinc&project='.$project.'">&raquo; Hier geht es weiter</a></td></tr>';
+			}
+			
+			while(list($g, $p, $name, $urlaub, $flotten_zugewiesen) = mysql_fetch_row($res)) {
+				$color = !$color;
+				
+				echo '	<tr class="fieldnormal'.($color ? 'light' : 'dark').'"'.($g == $koords_g && $p == $koords_p ? ' style="background-color: #dddd99"' : '').'>';
+				echo '		<td>&nbsp;<a style="font-weight: bold; font-size: 15px;" href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.$g.':'.$p.'">&raquo;</a>&nbsp;</td>';
+				echo '		<td>&nbsp;';
+				if($urlaub) {
+					echo '<span style="color: red">URLAUB!</span>&nbsp;<br/>&nbsp;';
+				}
+				echo '			'. $flotten_zugewiesen .' Flotten&nbsp;</td>';
+				echo '		<td>&nbsp;'.$g.'&nbsp;</td>';
+				echo '		<td>&nbsp;'.$p.'&nbsp;</td>';
+				echo '		<td>&nbsp;'.$name.'&nbsp;</td>';
+
+				//ASSIGNMENT
+				if($first == true) {
+					$first = false;
+					
+					if(empty($koords_g) && empty($koords_p)) {
+						echo '		<td rowspan="'.($num).'" style="background-color: #dddd99" valign="top">';
+						echo '			<p style="margin: 5px"><b>Willkommen.</b> Wähle im linken Men&uuml; Dein Ziel, um Flotten dort zuweisen zu k&ouml;nnen.</p><br/>';
+						echo '<table align="center"><tr><td align="left">';
+						
+						echo '<b>Optionen:</b><br/>';
+						echo '<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&zuweisungenloeschen=1" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; Zuweisungen l&ouml;schen</a><br/>';
+						echo '<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&&zuweisungenauto=1" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; Zuweisungen l&ouml;schen und Vorschlag eintragen</a>';
+						echo '</td></tr></table><br/>';
+
+						//STATS
+						/*
+						//opfer
+						$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+									@welle = '".mysql_real_escape_string($wave)."'";
+						$sql2 = "SELECT SUM(s.spieler_punkte), COUNT(*), SUM(s3.ga), SUM(s3.glo), SUM(s3.glr), SUM(s3.gmr), SUM(s3.gsr),
+										SUM(s1.sfj), SUM(s1.sfb), SUM(s1.sff), SUM(s1.sfz), SUM(s1.sfkr), SUM(s1.sfsa), SUM(s1.sft), SUM(s1.sfka), SUM(s1.sfsu)
+									FROM gn4massinc_ziele_welle zw
+									LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = ziel_pla AND s0.type = 0
+									LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = ziel_pla AND s1.type = 1
+									LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = ziel_pla AND s3.type = 3
+									LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.ziel_gal AND s.spieler_planet = zw.ziel_pla
+									WHERE zw.project_fk = @project AND zw.welle = @welle";
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+						list($zpkt, $znum, $zgaj, $zglo, $zglr, $zgmr, $zgsr, $zfja, $zfbo, $zffr, $zfze, $zfkr, $zfsc, $zftr, $zfcl, $zfca) = mysql_fetch_row($res2);
+						//wir
+						$sql2 = "SELECT SUM(s.spieler_punkte), COUNT(*), SUM(s1.sfj), SUM(s1.sfb), SUM(s1.sff), SUM(s1.sfz), SUM(s1.sfkr), SUM(s1.sfsa), SUM(s1.sft), SUM(s1.sfka), SUM(s1.sfsu)
+									FROM gn4massinc_atter_willing aw
+									LEFT JOIN gn4scans s0 ON s0.rg = aw.atter_gal AND s0.rp = aw.atter_pla AND s0.type = 0
+									LEFT JOIN gn4scans s1 ON s1.rg = aw.atter_gal AND s1.rp = aw.atter_pla AND s1.type = 1
+									LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = aw.atter_gal AND s.spieler_planet = aw.atter_pla
+									WHERE aw.project_fk = @project AND aw.welle = @welle AND aw.willing = 1
+									ORDER BY aw.atter_gal, aw.atter_pla";
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+						list($wpkt, $wnum, $wfja, $wfbo, $wffr, $wfze, $wfkr, $wfsc, $wftr, $wfcl, $wfca) = mysql_fetch_row($res2);
+						
+						echo '	<table bgcolor="white" style="width: calc(100% - 10px); margin: 5px" align="center">';
+						echo '		<tr class="datatablehead">';
+						echo '			<td colspan="6">&nbsp;Statistiken (verf&uuml;gbar)&nbsp;</td>';
+						echo '		</tr>';
+						echo '		<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '			<td>&nbsp;&nbsp;</td>';
+						echo '			<td colspan="3">&nbsp;WIR&nbsp;</td>';
+						echo '			<td>&nbsp;vs.&nbsp;</td>';
+						echo '			<td>&nbsp;Gegner&nbsp;</td>';
+						echo '		</tr>';
+						echo '		<tr class="fieldnormallight">';
+						echo '			<td>&nbsp;Punkte&nbsp;</td>';
+						echo '			<td colspan="3">&nbsp;'.ZahlZuText($wpkt).'&nbsp;</td>';
+						echo '			<td>&nbsp;'.round($wpkt / $zpkt, 2).'&nbsp;</td>';
+						echo '			<td>&nbsp;'.ZahlZuText($zpkt).'&nbsp;</td>';
+						echo '		</tr>';
+						echo '		<tr class="fieldnormaldark">';
+						echo '			<td>&nbsp;Spieler&nbsp;</td>';
+						echo '			<td colspan="3">&nbsp;'.ZahlZuText($wnum).'&nbsp;</td>';
+						echo '			<td>&nbsp;'.round($wnum / $znum, 2).'&nbsp;</td>';
+						echo '			<td>&nbsp;'.ZahlZuText($znum).'&nbsp;</td>';
+						echo '		</tr>';
+						echo '		<tr class="fieldnormaldark" style="height: 5px">';
+						echo '			<td colspan="6"></td>';
+						echo '		</tr>';
+						echo '	</table><br/>';
+						*/
+						
+						//ZIELE
+						echo '			<table bgcolor="white" style="width: calc(100% - 10px); margin: 5px" align="center">';
+						echo '				<tr class="datatablehead">';
+						echo '					<td colspan="19">&nbsp;Total Ziele&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td colspan="5">&nbsp;Ziel&nbsp;</td>';
+						echo '					<td colspan="5">&nbsp;Deff&nbsp;</td>';
+						echo '					<td colspan="9">&nbsp;Schiffe&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td>&nbsp;Gal&nbsp;</td>';
+						echo '					<td>&nbsp;Pla&nbsp;</td>';
+						echo '					<td>&nbsp;Spieler&nbsp;</td>';
+						echo '					<td>&nbsp;Punkte&nbsp;</td>';
+						echo '					<td>&nbsp;Exen&nbsp;</td>';
+						echo '					<td>&nbsp;AJ&nbsp;</td>';
+						echo '					<td>&nbsp;LO&nbsp;</td>';
+						echo '					<td>&nbsp;LR&nbsp;</td>';
+						echo '					<td>&nbsp;MR&nbsp;</td>';
+						echo '					<td>&nbsp;SR&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						
+						$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+									@welle = '".mysql_real_escape_string($wave)."'";
+						$sql2 = "SELECT zw.ziel_gal, zw.ziel_pla, 
+										s.spieler_name, s.spieler_punkte,
+										s0.me + s0.ke, 
+										s3.ga, s3.glo, s3.glr, s3.gmr, s3.gsr,
+										s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu
+									FROM gn4massinc_ziele_welle zw
+									LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = ziel_pla AND s0.type = 0
+									LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = ziel_pla AND s1.type = 1
+									LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = ziel_pla AND s3.type = 3
+									LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.ziel_gal AND s.spieler_planet = zw.ziel_pla
+									WHERE zw.project_fk = @project AND zw.welle = @welle
+									ORDER BY zw.ziel_gal, zw.ziel_pla";
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+						
+						if(mysql_num_rows($res2) == 0) {
+							echo '<tr class="fieldnormallight"><td colspan="19" align="center">&nbsp;Keine Eintr&auml;ge.&nbsp;</td></tr>';
+						}
+						$color = false;
+						$szpkt = $szexen = $szgaj = $szglo = $szglr = $szgmr = $szgsr = $szfja = $szfbo = $szffr = $szfze = $szfkr = $szfsc = $szftr = $szfcl = $szfca = 0;
+						while(list($zg, $zp, $zs, $zpkt, $zexen, $zgaj, $zglo, $zglr, $zgmr, $zgsr, $zfja, $zfbo, $zffr, $zfze, $zfkr, $zfsc, $zftr, $zfcl, $zfca) = mysql_fetch_row($res2)) {
+							$szpkt += $zpkt;
+							$szexen += $zexen;
+							$szgaj += $zgaj;
+							$szglo += $zglo;
+							$szglr += $zglr;
+							$szgmr += $zgmr;
+							$szgsr += $zgsr;
+							$szfja += $zfja;
+							$szfbo += $zfbo;
+							$szffr += $zffr;
+							$szfze += $zfze;
+							$szfkr += $zfkr;
+							$szfsc += $zfsc;
+							$szftr += $zftr;
+							$szfcl += $zfcl;
+							$szfca += $zfca;
+							
+							$color = !$color;
+							echo '				<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
+							echo '					<td>&nbsp;'.$zg.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.$zp.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.$zs.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zpkt).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zexen).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zgaj).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zglo).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zglr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zgmr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zgsr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfja).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfbo).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zffr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfze).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfkr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfsc).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zftr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfcl).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfca).'&nbsp;</td>';
+							echo '				</tr>';
+						}
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td colspan="3">&nbsp;&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szpkt).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szexen).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szgaj).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szglo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szglr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szgmr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szgsr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfbo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szffr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfkr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfsc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szftr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfcl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfca).'&nbsp;</td>';
+						echo '				</tr>';
+						echo '			</table>';
+
+						//übersicht verfügbar
+						echo '			<br/>';
+						echo '			<table bgcolor="white" style="width: calc(100% - 10px); margin: 5px" align="center">';
+						echo '				<tr class="datatablehead">';
+						echo '					<td colspan="14">&nbsp;Total verf&uuml;gbar&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td colspan="5">&nbsp;Ziel&nbsp;</td>';
+						echo '					<td colspan="9">&nbsp;Schiffe&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td>&nbsp;Gal&nbsp;</td>';
+						echo '					<td>&nbsp;Pla&nbsp;</td>';
+						echo '					<td>&nbsp;Spieler&nbsp;</td>';
+						echo '					<td>&nbsp;Punkte&nbsp;</td>';
+						echo '					<td>&nbsp;Exen&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						
+						$sql2 = "SELECT aw.atter_gal, aw.atter_pla, 
+										s.spieler_name, s.spieler_punkte,
+										s0.me + s0.ke, 
+										s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu
+									FROM gn4massinc_atter_willing aw
+									LEFT JOIN gn4scans s0 ON s0.rg = aw.atter_gal AND s0.rp = aw.atter_pla AND s0.type = 0
+									LEFT JOIN gn4scans s1 ON s1.rg = aw.atter_gal AND s1.rp = aw.atter_pla AND s1.type = 1
+									LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = aw.atter_gal AND s.spieler_planet = aw.atter_pla
+									WHERE aw.project_fk = @project AND aw.welle = @welle AND aw.willing = 1
+									ORDER BY aw.atter_gal, aw.atter_pla";
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+						
+						if(mysql_num_rows($res2) == 0) {
+							echo '<tr class="fieldnormallight"><td colspan="14" align="center">&nbsp;Keine Eintr&auml;ge.&nbsp;</td></tr>';
+						}
+						$color = false;
+						$szpkt = $szexen = $szgaj = $szglo = $szglr = $szgmr = $szgsr = $szfja = $szfbo = $szffr = $szfze = $szfkr = $szfsc = $szftr = $szfcl = $szfca = 0;
+						while(list($zg, $zp, $zs, $zpkt, $zexen, $zfja, $zfbo, $zffr, $zfze, $zfkr, $zfsc, $zftr, $zfcl, $zfca) = mysql_fetch_row($res2)) {
+							$szpkt += $zpkt;
+							$szexen += $zexen;
+							$szfja += $zfja;
+							$szfbo += $zfbo;
+							$szffr += $zffr;
+							$szfze += $zfze;
+							$szfkr += $zfkr;
+							$szfsc += $zfsc;
+							$szftr += $zftr;
+							$szfcl += $zfcl;
+							$szfca += $zfca;
+							
+							$color = !$color;
+							echo '				<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
+							echo '					<td>&nbsp;'.$zg.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.$zp.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.$zs.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zpkt).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zexen).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfja).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfbo).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zffr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfze).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfkr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfsc).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zftr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfcl).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zfca).'&nbsp;</td>';
+							echo '				</tr>';
+						}
+						echo '				<tr class="fieldnormaldark" style="font-weight: bold">';
+						echo '					<td colspan="3">&nbsp;&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szpkt).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szexen).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfbo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szffr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfkr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfsc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szftr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfcl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($szfca).'&nbsp;</td>';
+						echo '				</tr>';
+						echo '			</table>';
+						echo '		</td>';
+					} else {
+						//player info
+						$sql1 = "SET @project = '".$project."',
+										@welle = '".$wave."',
+										@gal = '".mysql_real_escape_string($koords_g)."',
+										@pla = '".mysql_real_escape_string($koords_p)."'";
+						$sql2 = "SELECT 
+								s.spieler_name, s.spieler_punkte, s.spieler_urlaub, UNIX_TIMESTAMP(STR_TO_DATE(s0.zeit, '%H:%i %d.%m.%Y')) szeit, s0.me, s0.ke,
+								s3.id, UNIX_TIMESTAMP(STR_TO_DATE(s3.zeit, '%H:%i %d.%m.%Y')) gzeit, s3.ga, s3.glo, s3.glr, s3.gmr, s3.gsr,
+								s1.id, UNIX_TIMESTAMP(STR_TO_DATE(s1.zeit, '%H:%i %d.%m.%Y')) ezeit, s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu
+							FROM gn4massinc_ziele_welle zw
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.ziel_gal AND s.spieler_planet = zw.ziel_pla
+							LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = zw.ziel_pla AND s0.type = 0
+							LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = zw.ziel_pla AND s1.type = 1
+							LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = zw.ziel_pla AND s3.type = 3
+							WHERE zw.ziel_gal = @gal AND zw.ziel_pla = @pla AND zw.project_fk = @project AND zw.welle = @welle";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "victum info");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$player = tic_mysql_query($sql2, __FILE__, __LINE__);
+						$num2 = mysql_num_rows($player);
+						if($num2 != 1) {
+							showError('Fehler, Spielerdaten nicht gefunden.');
+						}
+						list($s_name, $pkt, $s_urlaub, $s_t, $s_me, $s_ke,
+							$g_id, $g_t, $g_aj, $g_lo, $g_lr, $g_mr, $g_sr, 
+							$f_id, $f_t, $f_ja, $f_bo, $f_fr, $f_ze, $f_kr, $f_sc, $f_tr, $f_cl, $f_ca) = mysql_fetch_row($player);
+						
+						echo '		<td rowspan="'.($num).'" style="background-color: #dddd99">';
+						echo '			<table bgcolor="white" style="margin: 5px; padding: 5px">';
+						echo '				<tr>';
+						echo '					<td colspan="16" class="datatablehead">&nbsp;Gegnerflotte ' . $s_name . '&nbsp;</td>';
+						echo '					<td colspan="2">&nbsp;&nbsp;</td>';
+						echo '					<td rowspan="16" valign="top">';
+						echo '						<table style="margin-left: 10px">';
+						echo '							<tr class="datatablehead">';
+						echo '								<td colspan="2">&nbsp;Zusammenfassung&nbsp;</td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormaldark" style="font-weight: bold;">';
+						echo '								<td>&nbsp;Punkte&nbsp;</td>';
+						echo '								<td>&nbsp;Flotten&nbsp;<br/>&nbsp;/ (Spieler)&nbsp;</td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight">';
+						echo '								<td>&nbsp;'.ZahlZuText($pkt).'&nbsp;</td>';
+						echo '								<td>&nbsp;-&nbsp;</td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormaldark">';
+						echo '								<td colspan="2" height="5"></td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight">';
+
+						//total atter points
+						$sql2 = "SELECT COALESCE(SUM(g.spieler_punkte), 0) total_pkt 
+								FROM (
+									SELECT DISTINCT atter_gal, atter_pla 
+									FROM gn4massinc_zuweisung 
+									WHERE project_fk = @project AND welle = @welle AND dest_gal = @gal AND dest_pla = @pla
+									) z
+									LEFT JOIN gn_spieler2 g ON g.spieler_galaxie = z.atter_gal AND g.spieler_planet = z.atter_pla";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "total att pkt");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						list($fleetpkt) = mysql_fetch_row(tic_mysql_query($sql2, __FILE__, __LINE__));
+
+						//atter num per ally
+						$sql2 = "SELECT COUNT(DISTINCT(CONCAT_WS(':', atter_gal, atter_pla))) num, g.allianz_name FROM gn4massinc_zuweisung z
+									LEFT JOIN gn_spieler2 g ON g.spieler_galaxie = atter_gal AND g.spieler_planet = atter_pla
+									WHERE z.project_fk = @project AND z.welle = @welle AND z.dest_gal = @gal AND z.dest_pla = @pla
+									GROUP BY g.allianz_name
+									ORDER BY num DESC";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "num per ally");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$tmp = tic_mysql_query($sql2, __FILE__, __LINE__);
+						$spieler_punkte_str = "";
+						$total_num = 0;
+						$error = false;
+						while(list($num, $ally) = mysql_fetch_row($tmp)) {
+							if($total_num > 0) {
+								$spieler_punkte_str .= ", ";
+							}
+							$spieler_punkte_str .= '<span title="'.$ally.'">' . $num . '</span>';
+							$total_num++;
+							if($num > 8)
+								$error = true;
+						}
+						
+						if($total_num == 0) {
+							$spieler_punkte_str = '-';
+						}
+						
+						echo '								<td'.($fleetpkt > 6 * $pkt ? ' bgcolor="#ffaaaa"' : '').'>&nbsp;'.ZahlZuText($fleetpkt).'&nbsp;<br/>&nbsp;/ '.ZahlZuText(6 * $pkt).'&nbsp;</td>';
+						echo '								<td'.($error ? ' bgcolor="#ffaaaa"' : '').'>&nbsp;'.$flotten_zugewiesen.'&nbsp;<br/>&nbsp;/ ('.$spieler_punkte_str.')&nbsp;</td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight">';
+						echo '								<td><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/ height="10" width="'.($pkt > 0 ? min(round($fleetpkt / (6 * $pkt) * 100, 0), 100) : '0').'%" style="background-color: darkgray"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/ height="10" width="'.($pkt > 0 ? max(100 - round($fleetpkt / (6 * $pkt) * 100, 0), 0) : '100').'%" style="background-color: lightgreen"></td>';
+						echo '								<td title="ohne Kriegszustand">&nbsp;max. 8 pro Ally&nbsp;</td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormaldark">';
+						echo '								<td colspan="2" height="5"></td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight" align="left"><td>&nbsp;Extraktoren&nbsp;</td><td align="center">&nbsp;'.(is_null($s_me) ? '-' : ZahlZuText($s_me + $s_ke) . ' (M ' . ZahlZuText($s_me) . ', K ' . ZahlZuText($s_ke) . ')').'&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormallight" align="left"><td>&nbsp;5 Tick Roid&nbsp;</td><td align="center">&nbsp;'.(is_null($s_me) ? '-' : ZahlZuText($s_me + $s_ke - ($s_me + $s_ke) * pow(0.9, 5))).'&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormaldark">';
+						echo '								<td colspan="2" height="5"></td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight" align="left"><td>&nbsp;Sektorscan&nbsp;</td><td>&nbsp;'.(is_null($s_t) ? '-' : date('Y-m-d H:i', $s_t)).'&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormallight" align="left"><td>&nbsp;Gesch&uuml;tzscan&nbsp;</td><td>&nbsp;'.(is_null($g_t) ? '-' : date('Y-m-d H:i', $g_t)).'&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormallight" align="left"><td>&nbsp;Einheitenscan&nbsp;</td><td>&nbsp;'.(is_null($f_t) ? '-' : date('Y-m-d H:i', $f_t)).'&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormaldark">';
+						echo '								<td colspan="2" height="5"></td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight" align="right"><td bgcolor="white"></td><td>&nbsp;<a href="main.php?modul=showgalascans&displaytype=0&xgala='.$koords_g.'&xplanet='.$koords_p.'">&raquo; Scans</a>&nbsp;</td></tr>';
+						echo '							<tr class="fieldnormaldark">';
+						echo '								<td bgcolor="white"></td><td height="5"></td>';
+						echo '							</tr>';
+						echo '							<tr class="fieldnormallight" align="right"><td bgcolor="white"></td><td>&nbsp;<b>'.createSimuLink($project, $wave, $koords_g, $koords_p, '&raquo; Simulation').'</b>&nbsp;</td></tr>';
+						if($s_urlaub)
+							echo '						<tr><td colspan="2">URLAUB!</td></tr>';
+						echo '						</table>';
+						echo '					</td>';
+						echo '				</tr>';
+
+						//ziel info
+						echo '				<tr style="font-weight: bold;" class="fieldnormaldark">';
+						echo '					<td>&nbsp;AJ&nbsp;</td>';
+						echo '					<td>&nbsp;LO&nbsp;</td>';
+						echo '					<td>&nbsp;LR&nbsp;</td>';
+						echo '					<td>&nbsp;MR&nbsp;</td>';
+						echo '					<td>&nbsp;SR&nbsp;</td>';
+						echo '					<td rowspan="2" colspan="2" bgcolor="white">&nbsp;&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr class="fieldnormallight">';
+						echo '					<td>&nbsp;'.ZahlZuText($g_aj).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($g_lo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($g_lr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($g_mr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($g_sr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_ja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_bo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_fr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_ze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_kr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_sc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_tr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_cl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($f_ca).'&nbsp;</td>';
+						echo '				</tr>';
+
+						echo '				</tr><tr style="font-weight: bold; background-color: white"><td colspan="7"></td><td colspan="9" bgcolor="#ffaaaa" style="font-size: 6pt">vs<td></td></tr>';
+
+						//zugewiesene flotten
+						$sql1 = "SET @project = '".$project."',
+										@welle = '".$wave."',
+										@gal = '".mysql_real_escape_string($koords_g)."',
+										@pla = '".mysql_real_escape_string($koords_p)."'";
+						$sql2 = "SELECT 
+								SUM(f.ja), SUM(f.bo), SUM(f.fr), SUM(f.ze), SUM(f.kr), SUM(f.sc), SUM(f.tr), SUM(f.cl), SUM(f.ca)
+							FROM gn4massinc_zuweisung zw
+							JOIN gn4massinc_fleets f ON f.project_fk = zw.project_fk AND f.atter_gal = zw.atter_gal AND f.atter_pla = zw.atter_pla AND f.fleet = zw.fleet_id
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.dest_gal AND s.spieler_planet = zw.dest_pla
+							WHERE zw.dest_gal = @gal AND zw.dest_pla = @pla AND zw.project_fk = @project AND zw.welle = @welle";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "zugewiesen");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						list($sum_ja, $sum_bo, $sum_fr, $sum_ze, $sum_kr, $sum_sc, $sum_tr, $sum_cl, $sum_ca) = mysql_fetch_row(tic_mysql_query($sql2, __FILE__, __LINE__));
+						echo '				<tr>';
+						echo '					<td colspan="16" class="datatablehead">&nbsp;Hier zugewiesen&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormaldark">';
+						echo '					<td rowspan="2" colspan="7" bgcolor="white">&nbsp;'.createSimuLink($project, $wave, $koords_g, $koords_p, '&raquo; zur Simulation').'&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormallight">';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_bo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_fr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_kr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_sc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_tr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_cl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ca).'&nbsp;</td>';
+						echo '				</tr><tr style="font-weight: bold;" class="fieldnormaldark"><td colspan="16" height="5"></td></tr>';
+						$sql2 = "SELECT 
+								s.spieler_name, s.spieler_punkte, zw.atter_gal, zw.atter_pla, zw.fleet_id, zw.relative_starttick, zw.kommentar,
+								f.ja, f.bo, f.fr, f.ze, f.kr, f.sc, f.tr, f.cl, f.ca
+							FROM gn4massinc_zuweisung zw
+							JOIN gn4massinc_fleets f ON f.project_fk = zw.project_fk AND f.atter_gal = zw.atter_gal AND f.atter_pla = zw.atter_pla AND f.fleet = zw.fleet_id
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.atter_gal AND s.spieler_planet = zw.atter_pla
+							WHERE zw.dest_gal = @gal AND zw.dest_pla = @pla AND zw.project_fk = @project AND zw.welle = @welle
+							ORDER BY zw.relative_starttick, zw.atter_gal, zw.atter_pla, zw.fleet_id";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "zugewiesen");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$zugewiesen = tic_mysql_query($sql2, __FILE__, __LINE__);
+						if(mysql_num_rows($zugewiesen) == 0) {
+							echo '<tr class="fieldnormallight"><td colspan="16">&nbsp;<i>keine</i></td></tr>';
+						}
+						$color2 = false;
+						while(list($zw_name, $zw_pkt, $zw_atter_gal, $zw_atter_pla, $zw_fleet_id, $zw_relative_starttick, $zw_kommentar, $zw_fja, $zw_fbo, $zw_ffr, $zw_fze, $zw_fkr, $zw_fsc, $zw_ftr, $zw_fcl, $zw_fca) = mysql_fetch_row($zugewiesen))
+						{
+							$color2 = !$color2;
+
+							if($edit_gal == $zw_atter_gal && $edit_pla == $zw_atter_pla && $edit_fleet == $zw_fleet_id) {
+								$sql1 = "SET @project = '".$project."',
+												@welle = '".$wave."',
+												@igal = '".mysql_real_escape_string($edit_gal)."',
+												@ipla = '".mysql_real_escape_string($edit_pla)."',
+												@ifleet = '".mysql_real_escape_string($edit_fleet)."'";
+								$sql2 = "SELECT	COALESCE(s1.sfj, 0) - COALESCE(f.ja, 0),
+												COALESCE(s1.sfb, 0) - COALESCE(f.bo, 0), 
+												COALESCE(s1.sff, 0) - COALESCE(f.fr, 0), 
+												COALESCE(s1.sfz, 0) - COALESCE(f.ze, 0), 
+												COALESCE(s1.sfkr, 0) - COALESCE(f.kr, 0), 
+												COALESCE(s1.sfsa, 0) - COALESCE(f.sc, 0), 
+												COALESCE(s1.sft, 0) - COALESCE(f.tr, 0), 
+												COALESCE(s1.sfka, 0) - COALESCE(f.cl, 0), 
+												COALESCE(s1.sfsu, 0) - COALESCE(f.ca, 0)
+								FROM gn4scans s1
+								LEFT JOIN gn4massinc_zuweisung zw ON zw.project_fk = @project AND zw.atter_gal = @igal AND zw.atter_pla = @ipla AND fleet_id <> @ifleet
+								LEFT JOIN gn4massinc_fleets f ON f.project_fk = zw.project_fk AND f.atter_gal = zw.atter_gal AND f.atter_pla = zw.atter_pla AND f.fleet = zw.fleet_id
+								WHERE s1.rg = @igal AND s1.rp = @ipla AND s1.type = 1";
+								if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), 'verfuegbare flotte');
+								tic_mysql_query($sql1, __FILE__, __LINE__);
+								$tmp = tic_mysql_query($sql2, __FILE__, __LINE__);
+								$fleet_ja = $fleet_bo = $fleet_fr = $fleet_ze = $fleet_kr = $fleet_sc = $fleet_tr = $fleet_cl = $fleet_ca = 0;
+								if(mysql_num_rows($tmp) > 0) {
+									list($fleet_ja, $fleet_bo, $fleet_fr, $fleet_ze, $fleet_kr, $fleet_sc, $fleet_tr, $fleet_cl, $fleet_ca) = mysql_fetch_row($tmp);
+								}
+								
+								//edit
+								echo '<form action="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.postOrGet('koord').'" method="post">';
+								echo '<input type="hidden" name="edit_gal" value="'.$zw_atter_gal.'"/>';
+								echo '<input type="hidden" name="edit_pla" value="'.$zw_atter_pla.'"/>';
+								echo '<input type="hidden" name="edit_dest_gal" value="'.$koords_g.'"/>';
+								echo '<input type="hidden" name="edit_dest_pla" value="'.$koords_p.'"/>';
+								echo '<input type="hidden" name="edit_fleet" value="'.$zw_fleet_id.'"/>';
+								echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'" style="background-color: #dddd99">';
+								echo '					<td>&nbsp;'.$zw_atter_gal.':'.$zw_atter_pla.'&nbsp;</td>';
+								echo '					<td colspan="4">&nbsp;'.$zw_name.'&nbsp;</td>';
+								echo '					<td>&nbsp;#'.$zw_fleet_id.'&nbsp;</td>';
+								echo '					<td>&nbsp;<select name="edit_relative_start">';
+								for($i = 0; $i < 6; $i++) {
+									echo '					<option value="'.$i.'"'.($zw_relative_starttick == $i ? ' selected="selected"' : '').'>+ '.($i*15).'min</option>';
+								}
+								echo '						</select>&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_ja) ? '-' : ZahlZuText($fleet_ja)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_bo) ? '-' : ZahlZuText($fleet_bo)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_fr) ? '-' : ZahlZuText($fleet_fr)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_ze) ? '-' : ZahlZuText($fleet_ze)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_kr) ? '-' : ZahlZuText($fleet_kr)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_sc) ? '-' : ZahlZuText($fleet_sc)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_tr) ? '-' : ZahlZuText($fleet_tr)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_cl) ? '-' : ZahlZuText($fleet_cl)).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.(is_null($fleet_ca) ? '-' : ZahlZuText($fleet_ca)).'&nbsp;</td>';
+								echo '					<td colspan="2">&nbsp;
+															<a href="#" onclick="document.getElementById(\'e0\').value=\''.$fleet_ja.'\';
+																document.getElementById(\'e1\').value=\''.$fleet_bo.'\';
+																document.getElementById(\'e2\').value=\''.$fleet_fr.'\';
+																document.getElementById(\'e3\').value=\''.$fleet_ze.'\';
+																document.getElementById(\'e4\').value=\''.$fleet_kr.'\';
+																document.getElementById(\'e5\').value=\''.$fleet_sc.'\';
+																document.getElementById(\'e6\').value=\''.$fleet_tr.'\';
+																document.getElementById(\'e7\').value=\''.$fleet_cl.'\';
+																document.getElementById(\'e8\').value=\''.$fleet_ca.'\';">&raquo; alles</a>&nbsp;</td>';
+								echo '				</tr>';
+								echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'" style="background-color: #dddd99">';
+								echo '					<td rowspan="2" bgcolor="white"></td>';
+								echo '					<td rowspan="2" colspan="6" style="font-style: italic">&nbsp;'.ZahlZuText($zw_pkt).' Pkt&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e0" name="edit_f[0]" value="'.$zw_fja.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e1" name="edit_f[1]" value="'.$zw_fbo.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e2" name="edit_f[2]" value="'.$zw_ffr.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e3" name="edit_f[3]" value="'.$zw_fze.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e4" name="edit_f[4]" value="'.$zw_fkr.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e5" name="edit_f[5]" value="'.$zw_fsc.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e6" name="edit_f[6]" value="'.$zw_ftr.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e7" name="edit_f[7]" value="'.$zw_fcl.'"/>&nbsp;</td>';
+								echo '					<td>&nbsp;<input type="text" size="6" id="e8" name="edit_f[8]" value="'.$zw_fca.'"/>&nbsp;</td>';
+								echo '					<td colspan="2">&nbsp;
+															<a href="#" onclick="document.getElementById(\'e0\').value=\'\';
+																document.getElementById(\'e1\').value=\'\';
+																document.getElementById(\'e2\').value=\'\';
+																document.getElementById(\'e3\').value=\'\';
+																document.getElementById(\'e4\').value=\'\';
+																document.getElementById(\'e5\').value=\'\';
+																document.getElementById(\'e6\').value=\'\';
+																document.getElementById(\'e7\').value=\'\';
+																document.getElementById(\'e8\').value=\'\';">&raquo; leeren</a>&nbsp;</td>';
+								echo '				</tr>';
+								echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'" style="background-color: #dddd99">';
+								echo '					<td colspan="9" align="left"><table border="0"><tr><td valign="top">&nbsp;Anmerkungen:&nbsp;</td><td><textarea style="font-family: courier new; font-size: 9pt" name="edit_kommentar" rows="1" cols="50">'.$zw_kommentar.'</textarea></td></tr></table></td>';
+								echo '					<td colspan="2">&nbsp;<input type="submit" name="edit" value="speichern"/>&nbsp;</td>';
+								echo '				</tr>';
+								echo '</form>';
+							} else {
+								//display
+								echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'">';
+								echo '					<td>&nbsp;'.$zw_atter_gal.':'.$zw_atter_pla.'&nbsp;</td>';
+								echo '					<td colspan="4">&nbsp;'.$zw_name.'&nbsp;</td>';
+								echo '					<td>&nbsp;#'.$zw_fleet_id.'&nbsp;</td>';
+								echo '					<td>&nbsp;+'.($zw_relative_starttick * 15).'min&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fja).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fbo).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_ffr).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fze).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fkr).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fsc).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_ftr).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fcl).'&nbsp;</td>';
+								echo '					<td>&nbsp;'.ZahlZuText($zw_fca).'&nbsp;</td>';
+								echo '					<td rowspan="2">&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.postOrGet('koord').'&edit_gal='.$zw_atter_gal.'&edit_pla='.$zw_atter_pla.'&edit_fleet='.$zw_fleet_id.'" title="&auml;ndern">&raquo; edit</a>&nbsp;</td>';
+								echo '					<td rowspan="2">&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.postOrGet('koord').'&del_gal='.$zw_atter_gal.'&del_pla='.$zw_atter_pla.'&del_fleet='.$zw_fleet_id.'" title="l&ouml;schen" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; X</a>&nbsp;</td>';
+								echo '				</tr>';
+								echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'" style="font-style: italic">';
+								echo '					<td bgcolor="white"></td><td colspan="6">&nbsp;'.ZahlZuText($zw_pkt).' Pkt&nbsp;</td>';
+								echo '					<td colspan="9" align="left" style="font-family: courier new">&nbsp;'.htmlspecialchars($zw_kommentar).'&nbsp;</td>';
+								echo '				</tr>';
+							}
+						}
+						echo '				</tr><tr style="font-weight: bold; background-color: white"><td colspan="16" height="5"></td></tr>';
+
+						//verfügbare flotten
+						$sql2 = "SELECT 
+									SUM(COALESCE(s1.sfj, 0) - COALESCE(f.ja, 0)), 
+									SUM(COALESCE(s1.sfb, 0) - COALESCE(f.bo, 0)), 
+									SUM(COALESCE(s1.sff, 0) - COALESCE(f.fr, 0)), 
+									SUM(COALESCE(s1.sfz, 0) - COALESCE(f.ze, 0)), 
+									SUM(COALESCE(s1.sfkr, 0) - COALESCE(f.kr, 0)), 
+									SUM(COALESCE(s1.sfsa, 0) - COALESCE(f.sc, 0)), 
+									SUM(COALESCE(s1.sft, 0) - COALESCE(f.tr, 0)), 
+									SUM(COALESCE(s1.sfka, 0) - COALESCE(f.cl, 0)), 
+									SUM(COALESCE(s1.sfsu, 0) - COALESCE(f.ca, 0))
+							FROM gn4massinc_atter_willing aw
+							JOIN gn4massinc_atter a ON a.project_fk = aw.project_fk AND a.gal = aw.atter_gal AND a.pla = aw.atter_pla
+							LEFT JOIN gn4massinc_fleets f 
+								ON f.project_fk = aw.project_fk AND f.atter_gal = aw.atter_gal AND f.atter_pla = aw.atter_pla
+									AND NOT EXISTS(
+										SELECT * FROM gn4massinc_zuweisung zw WHERE zw.project_fk = @project AND zw.fleet_id = f.fleet AND zw.atter_gal = aw.atter_gal AND zw.atter_pla = aw.atter_pla
+									)
+							LEFT JOIN gn4scans s1 ON s1.rg = aw.atter_gal AND s1.rp = aw.atter_pla AND s1.type = 1
+							WHERE aw.willing = 1 AND aw.project_fk = @project AND aw.welle = @welle AND 
+								a.off_fleets > (
+									SELECT COUNT(*) FROM gn4massinc_zuweisung zw WHERE zw.project_fk = @project AND zw.atter_gal = aw.atter_gal AND zw.atter_pla = aw.atter_pla
+								)";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						list($sum_ja, $sum_bo, $sum_fr, $sum_ze, $sum_kr, $sum_sc, $sum_tr, $sum_cl, $sum_ca) = mysql_fetch_row(tic_mysql_query($sql2, __FILE__, __LINE__));
+						echo '				<tr>';
+						echo '					<td colspan="16" class="datatablehead">&nbsp;Verf&uuml;gbar&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormaldark">';
+						echo '					<td rowspan="2" colspan="7" bgcolor="white">&nbsp;<!--7 Flotten&nbsp;<br/>&nbsp;4 Spieler-->&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormallight">';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_bo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_fr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_kr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_sc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_tr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_cl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ca).'&nbsp;</td>';
+						echo '				</tr><tr style="font-weight: bold;" class="fieldnormaldark"><td colspan="16" height="5"></td></tr>';
+						
+						$sql2 = "SELECT 
+									s.spieler_name, 
+									s.spieler_punkte, 
+									aw.atter_gal, 
+									aw.atter_pla, 
+									a.off_fleets - (SELECT COUNT(*) FROM gn4massinc_zuweisung zw WHERE zw.project_fk = @project AND zw.atter_gal = aw.atter_gal AND zw.atter_pla = aw.atter_pla) fleets,
+									s1.id, UNIX_TIMESTAMP(STR_TO_DATE(s1.zeit, '%H:%i %d.%m.%Y')) ezeit, 
+									COALESCE(s1.sfj, 0) - COALESCE(f.ja, 0), 
+									COALESCE(s1.sfb, 0) - COALESCE(f.bo, 0), 
+									COALESCE(s1.sff, 0) - COALESCE(f.fr, 0), 
+									COALESCE(s1.sfz, 0) - COALESCE(f.ze, 0), 
+									COALESCE(s1.sfkr, 0) - COALESCE(f.kr, 0), 
+									COALESCE(s1.sfsa, 0) - COALESCE(f.sc, 0), 
+									COALESCE(s1.sft, 0) - COALESCE(f.tr, 0), 
+									COALESCE(s1.sfka, 0) - COALESCE(f.cl, 0), 
+									COALESCE(s1.sfsu, 0) - COALESCE(f.ca, 0)
+							FROM gn4massinc_atter_willing aw
+							JOIN gn4massinc_atter a ON a.project_fk = aw.project_fk AND a.gal = aw.atter_gal AND a.pla = aw.atter_pla
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = aw.atter_gal AND s.spieler_planet = aw.atter_pla
+							LEFT JOIN gn4scans s1 ON s1.rg = aw.atter_gal AND s1.rp = aw.atter_pla AND s1.type = 1
+							LEFT JOIN gn4massinc_zuweisung xz ON xz.project_fk = aw.project_fk AND xz.atter_gal = aw.atter_gal AND xz.atter_pla = aw.atter_pla
+							LEFT JOIN gn4massinc_fleets f ON f.project_fk = aw.project_fk AND f.atter_gal = aw.atter_gal AND f.atter_pla = aw.atter_pla AND xz.fleet_id = f.fleet
+							WHERE aw.willing = 1 AND aw.project_fk = @project AND aw.welle = @welle AND
+								a.off_fleets > (SELECT COUNT(*) FROM gn4massinc_zuweisung zw WHERE zw.project_fk = @project AND zw.welle = @welle AND zw.atter_gal = aw.atter_gal AND zw.atter_pla = aw.atter_pla)
+							HAVING fleets > 0
+							ORDER BY aw.atter_gal, aw.atter_pla";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$verfuegbar = tic_mysql_query($sql2, __FILE__, __LINE__);
+						if(mysql_num_rows($verfuegbar) == 0) {
+							echo '<tr class="fieldnormallight"><td colspan="16">&nbsp;<i>keine</i></td></tr>';
+						}
+						$color2 = false;
+						while(list($zw_name, $zw_pkt, $zw_atter_gal, $zw_atter_pla, $zw_fleets, $zw_fid, $zw_ft, $zw_fja, $zw_fbo, $zw_ffr, $zw_fze, $zw_fkr, $zw_fsc, $zw_ftr, $zw_fcl, $zw_fca) = mysql_fetch_row($verfuegbar))
+						{
+							$color2 = !$color2;
+							echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'">';
+							echo '					<td colspan="6" align="left" title="'.ZahlZuText($zw_pkt).' Pkt">&nbsp;'.$zw_atter_gal.':'.$zw_atter_pla.' '.$zw_name.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.($zw_fleets - $zw_verplant).' Flotte(n)&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fja).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fbo).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_ffr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fze).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fkr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fsc).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_ftr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fcl).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fca).'&nbsp;</td>';
+							echo '					<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.postOrGet('koord').'&add_gal='.$zw_atter_gal.'&add_pla='.$zw_atter_pla.'" title="zuweisen">&raquo; +</a>&nbsp;</td>';
+							echo '				</tr>';
+						}
+						
+						echo '				</tr><tr style="font-weight: bold; background-color: white"><td colspan="16" height="5"></td></tr>';
+						
+						//woanders zugewiesen
+						$sql2 = "SELECT 
+								SUM(f.ja), SUM(f.bo), SUM(f.fr), SUM(f.ze), SUM(f.kr), SUM(f.sc), SUM(f.tr), SUM(f.cl), SUM(f.ca)
+							FROM gn4massinc_zuweisung zw
+							JOIN gn4massinc_fleets f ON f.project_fk = zw.project_fk AND f.atter_gal = zw.atter_gal AND f.atter_pla = zw.atter_pla AND f.fleet = zw.fleet_id
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.dest_gal AND s.spieler_planet = zw.dest_pla
+							WHERE CONCAT_WS(':', zw.dest_gal, zw.dest_pla) <> CONCAT_WS(':', @gal, @pla) AND zw.project_fk = @project";
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)), "zugewiesen");
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						list($sum_ja, $sum_bo, $sum_fr, $sum_ze, $sum_kr, $sum_sc, $sum_tr, $sum_cl, $sum_ca) = mysql_fetch_row(tic_mysql_query($sql2, __FILE__, __LINE__));
+						echo '				<tr>';
+						echo '					<td colspan="16" class="datatablehead">&nbsp;Woanders zugewiesen&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormaldark">';
+						echo '					<td rowspan="2" colspan="7" bgcolor="white">&nbsp;<!--7 Flotten&nbsp;<br/>&nbsp;4 Spieler-->&nbsp;</td>';
+						echo '					<td>&nbsp;Ja&nbsp;</td>';
+						echo '					<td>&nbsp;Bo&nbsp;</td>';
+						echo '					<td>&nbsp;Fr&nbsp;</td>';
+						echo '					<td>&nbsp;Ze&nbsp;</td>';
+						echo '					<td>&nbsp;Kr&nbsp;</td>';
+						echo '					<td>&nbsp;Sc&nbsp;</td>';
+						echo '					<td>&nbsp;Tr&nbsp;</td>';
+						echo '					<td>&nbsp;Cl&nbsp;</td>';
+						echo '					<td>&nbsp;Ca&nbsp;</td>';
+						echo '				</tr>';
+						echo '				<tr style="font-weight: bold;" class="fieldnormallight">';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ja).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_bo).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_fr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ze).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_kr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_sc).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_tr).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_cl).'&nbsp;</td>';
+						echo '					<td>&nbsp;'.ZahlZuText($sum_ca).'&nbsp;</td>';
+						echo '				</tr><tr style="font-weight: bold;" class="fieldnormaldark"><td colspan="16" height="5"></td></tr>';
+						
+						$sql2 = "SELECT 
+								zw.welle, s.spieler_name, zw.atter_gal, zw.atter_pla, zw.dest_gal, zw.dest_pla, zw.fleet_id,
+								f.ja, f.bo, f.fr, f.ze, f.kr, f.sc, f.tr, f.cl, f.ca
+							FROM gn4massinc_zuweisung zw
+							JOIN gn4massinc_fleets f ON f.project_fk = zw.project_fk AND f.atter_gal = zw.atter_gal AND f.atter_pla = zw.atter_pla AND f.fleet = zw.fleet_id
+							LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.atter_gal AND s.spieler_planet = zw.atter_pla
+							WHERE CONCAT_WS(':', zw.dest_gal, zw.dest_pla) <> CONCAT_WS(':', @gal, @pla) AND zw.project_fk = @project
+							ORDER BY zw.atter_gal, zw.atter_pla, zw.fleet_id";
+
+						if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+						tic_mysql_query($sql1, __FILE__, __LINE__);
+						$woanders = tic_mysql_query($sql2, __FILE__, __LINE__);
+						if(mysql_num_rows($woanders) == 0) {
+							echo '<tr class="fieldnormallight"><td colspan="16">&nbsp;<i>keine</i></td></tr>';
+						}
+						$color2 = false;
+						while(list($zw_welle, $zw_name, $zw_atter_gal, $zw_atter_pla, $zw_dest_gal, $zw_dest_pla, $zw_fleetid, $zw_fja, $zw_fbo, $zw_ffr, $zw_fze, $zw_fkr, $zw_fsc, $zw_ftr, $zw_fcl, $zw_fca) = mysql_fetch_row($woanders))
+						{
+							$color2 = !$color2;
+							echo '				<tr class="fieldnormal'.($color2 ? 'light' : 'dark').'">';
+							echo '					<td colspan="5" align="left" title="'.ZahlZuText($zw_pkt).' Pkt">&nbsp;'.$zw_atter_gal.':'.$zw_atter_pla.' '.$zw_name.'&nbsp;</td>';
+							echo '					<td>&nbsp;Welle #'.$zw_welle.'&nbsp;</td>';
+							echo '					<td>&nbsp;#'.$zw_fleetid.'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fja).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fbo).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_ffr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fze).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fkr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fsc).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_ftr).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fcl).'&nbsp;</td>';
+							echo '					<td>&nbsp;'.ZahlZuText($zw_fca).'&nbsp;</td>';
+							echo '					<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$zw_welle.'&zuweisung=1&koord='.$zw_dest_gal.':'.$zw_dest_pla.'" title="Info">&raquo; ' . $zw_dest_gal . ':' . $zw_dest_pla . '</a>&nbsp;</td>';
+							echo '					<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=1&koord='.postOrGet('koord').'&del_gal='.$zw_atter_gal.'&del_pla='.$zw_atter_pla.'&del_fleet='.$zw_fleetid.'" title="l&ouml;schen" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; X</a>&nbsp;</td>';
+							echo '				</tr>';
+						}
+						
+						echo '			</table>';
+						echo '		</td>';
+						echo '	</tr>';
+					}//spieler gewählt
+				}//first
+				
+				echo '	</tr>';
+			}
+			
+			echo '	<tr>';
+			echo '		<td colspan="5">&nbsp;</td>';
+			echo '	</tr>';
+			echo '</table>';
+			
+			
+			$donotshowdestinations = true;
 		} else {
 			//show wave info
-			$sql = 'SELECT project_fk, t, kommentar FROM gn4massinc_wellen WHERE project_fk = "'.mysql_real_escape_string($project).'" AND t = "'.mysql_real_escape_string($wave).'"';
+			$sql = 'SELECT project_fk, t, kommentar, id FROM gn4massinc_wellen WHERE project_fk = "'.mysql_real_escape_string($project).'" AND id = "'.mysql_real_escape_string($wave).'"';
 			$res = tic_mysql_query($sql, __FILE__, __LINE__);
 			$num = mysql_num_rows($res);
-			list($project, $t, $kommentar) = mysql_fetch_row($res);
+			list($project, $t, $kommentar, $id) = mysql_fetch_row($res);
 
 			if($num == 0) {
 				showError('Welle nicht gefunden.');
 			} else {
 				echo '<table>';
 				echo '<tr class="datatablehead">';
-				echo '	<td width="150">&nbsp;<a href="main.php?modul=massinc&project='.$project.'">&laquo; Zum Projekt</a>&nbsp;</td>';
-				echo '	<td colspan="2">&nbsp;Welle: '.date('Y-m-d H:i', $wave).'&nbsp;</td>';
+				echo '	<td width="160">&nbsp;<a href="main.php?modul=massinc&project='.$project.'">&laquo; Zum Projekt</a>&nbsp;</td>';
+				echo '	<td colspan="2">&nbsp;Welle: #'.$id.' '.date('Y-m-d H:i', $t).'&nbsp;</td>';
 				echo '<td><a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.($tab_ziele ? '&tab_ziele=1' : '').'">&raquo; Refresh</a></td>';
 				echo '</tr>';
 				echo '<tr>';
@@ -660,24 +1732,25 @@ if(empty($project)) {
 
 				//waves
 				$sql1 = "SET @project = '".mysql_real_escape_string($project)."', @g = '".$Benutzer['galaxie']."', @p = '".$Benutzer['planet']."';";
-				$sql2 = "SELECT w.t, count(z.project_fk) flotten
+				$sql2 = "SELECT w.t, count(z.project_fk) flotten, id
 							FROM gn4massinc_wellen w
-							LEFT JOIN gn4massinc_zuweisung z ON z.welle = w.t AND z.project_fk = z.project_fk AND z.atter_gal = @g AND z.atter_pla = @p
+							LEFT JOIN gn4massinc_zuweisung z ON z.welle = w.id AND z.project_fk = z.project_fk AND z.atter_gal = @g AND z.atter_pla = @p
 							WHERE w.project_fk = @project
 							GROUP BY w.t
 							ORDER BY w.t ASC";
 				//if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 				tic_mysql_query($sql1, __FILE__, __LINE__);
 				$res = tic_mysql_query($sql2, __FILE__, __LINE__);
-				while(list($t, $flotten) = mysql_fetch_row($res)) {
+				while(list($t, $flotten, $id) = mysql_fetch_row($res)) {
 					if($flotten > 0) {
 						echo '<b>';
 					}
 
+					if($id == $wave) echo '<table style="background-color: #cccc88; border: 1px dashed red"><tr><td>';
 					echo '&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$t.'">&raquo; '.date('Y-m-d H:i', $t).'</a>&nbsp;<br>';
-					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$t.'">&raquo; Cockpit ('.$flotten.')</a><br/>';
-					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$t.'&tab_ziele=1">&raquo; Ziele</a><br/>';
-
+					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'">&raquo; Cockpit ('.$flotten.')</a><br/>';
+					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&tab_ziele=1">&raquo; Ziele</a><br/>';
+					if($id == $wave) echo '</td></tr></table>';
 					if($flotten > 0) {
 						echo '</b>';
 					}
@@ -710,7 +1783,7 @@ if(empty($project)) {
 														WHERE b2.g = b1.g AND b2.p = b1.p)
 										LIMIT 1				
 										) blocks ON blocks.g = z.dest_gal AND blocks.p = z.dest_pla
-							WHERE z.atter_gal = @g AND z.atter_pla = @p ORDER BY z.welle + z.relative_starttick*15*60";
+							WHERE z.atter_gal = @g AND z.atter_pla = @p AND z.welle = @w ORDER BY z.welle + z.relative_starttick*15*60";
 					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					tic_mysql_query($sql1, __FILE__, __LINE__);
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
@@ -876,11 +1949,12 @@ if(empty($project)) {
 					$timer2 = 0;
 					$sql1 = 'SET @proj = "'.mysql_real_escape_string($project).'", @welle = "'.mysql_real_escape_string($wave).'", @refgal = "'.$Benutzer['galaxie'].'", @refpla="'.$Benutzer['planet'].'";';
 					tic_mysql_query($sql1, __FILE__, __LINE__);
-					$sql2 = 'SELECT z.welle, z.atter_gal, z.atter_pla, z.dest_gal, z.dest_pla, z.fleet_id, z.kommentar, z.relative_starttick, u.name,
+					$sql2 = 'SELECT w.t, z.atter_gal, z.atter_pla, z.dest_gal, z.dest_pla, z.fleet_id, z.kommentar, z.relative_starttick, u.name,
 								f.ja, f.bo, f.fr, f.ze, f.kr, f.sc, f.tr, f.cl, f.ca,
 								s.sf1j, s.sf1b, s.sf1f, s.sf1z, s.sf1kr, s.sf1sa, s.sf1t, s.sf1ka, s.sf1su,
 								s.sf2j, s.sf2b, s.sf2f, s.sf2z, s.sf2kr, s.sf2sa, s.sf2t, s.sf2ka, s.sf2su
 							FROM gn4massinc_zuweisung z
+							LEFT JOIN gn4massinc_wellen w ON w.project_fk = z.project_fk AND z.welle = w.id
 							LEFT JOIN gn4massinc_fleets f ON f.project_fk = z.project_fk AND z.fleet_id = f.fleet AND z.atter_gal = f.atter_gal AND z.atter_pla = f.atter_pla
 							LEFT JOIN gn4gnuser u ON u.gala = z.dest_gal AND u.planet = z.dest_pla
 							LEFT JOIN gn4scans s ON s.rg = @refgal AND s.rp = @refpla AND s.type = 2
@@ -888,6 +1962,9 @@ if(empty($project)) {
 					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 					$color = true;
+					if(mysql_num_rows($res) == 0) {
+						echo '<tr class="fieldnormallight"><td colspan="11">keine</td></tr>';
+					}
 					while(list($t, $atter_g, $atter_p, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name,
 								$fja, $fbo, $ffr, $fze, $fkr, $fsc, $ftr, $fcl, $fca,
 								$sja[1], $sbo[1], $sfr[1], $sze[1], $skr[1], $ssc[1], $str[1], $scl[1], $sca[1],
@@ -954,6 +2031,13 @@ if(empty($project)) {
 						echo '	<td>&nbsp;'.($scl[$fleetid] > 0 ? ZahlZuText($scl[$fleetid]) : '-').'&nbsp;</td>';
 						echo '	<td>&nbsp;'.($sca[$fleetid] > 0 ? ZahlZuText($sca[$fleetid]) : '-').'&nbsp;</td>';
 						echo '</tr>';
+						
+						if(strlen($kommentar) > 0) {
+							echo '<tr class="fieldnormaldark">';
+							echo '	<td bgcolor="white">&nbsp;Anmerkung:&nbsp;</td>';
+							echo '	<td colspan="9" style="font-family: Courier New" align="left">'.$kommentar.'</td>';
+							echo '</tr>';
+						}
 					}
 
 					echo '	<tr class="datatablehead">';
@@ -992,7 +2076,11 @@ if(empty($project)) {
 								 ORDER BY z.welle + z.relative_starttick * 15 * 60, z.atter_gal, z.atter_pla, z.fleet_id';
 					if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 					$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+					if(mysql_num_rows($res) == 0) {
+						echo '<tr class="fieldnormallight"><td colspan="10">&nbsp;keine&nbsp;</td></tr>';
+					}
 					$color = true;
+					$num2 = mysql_num_rows($res);
 					while(list($t, $atter_g, $atter_p, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name, $name2,
 								$fja, $fbo, $ffr, $fze, $fkr, $fsc, $ftr, $fcl, $fca,
 								$sja[1], $sbo[1], $sfr[1], $sze[1], $skr[1], $ssc[1], $str[1], $scl[1], $sca[1],
@@ -1083,11 +2171,422 @@ if(empty($project)) {
 		echo '<br/>';
 
 		if($Benutzer['rang'] >= $Rang_GC && !$donotshowdestinations) {
-			//show destinations
-			echo '<table class="datatable" align="center">';
-			echo '<tr class="datatablehead">';
-			echo '	<td colspan="11">Ziele</td>';
+			//mgmt
+			
+			//wellen management
+			if(postOrGet('atter_wellen')) {
+				$data = postOrGet('atter_welle');
+				/*tic_mysql_query("DELETE FROM gn4massinc_atter_willing aw
+								WHERE aw.project_fk = '".mysql_real_escape_string($project)."'
+									AND EXISTS(
+										SELECT * FROM gn4massinc_atter WHERE a.project_fk = aw.project_fk AND a.gal = aw.atter_gal AND a.pla = aw.atter_pla AND a.external = 1
+									)", __FILE__, __LINE__);
+				*/
+				
+				foreach($data as $gal=>$v1) {
+					foreach($v1 as $pla=>$v2) {
+						foreach($v2 as $welle=>$v3) {
+							tic_mysql_query("INSERT INTO gn4massinc_atter_willing (
+												project_fk, welle, atter_gal, atter_pla, willing
+											) VALUES (
+												'".mysql_real_escape_string($project)."',
+												'".mysql_real_escape_string($welle)."',
+												'".mysql_real_escape_string($gal)."',
+												'".mysql_real_escape_string($pla)."',
+												'".($v3 == "on")."'
+											)
+											ON DUPLICATE KEY UPDATE willing = '".($v3 == "on")."'
+											", __FILE__, __LINE__);
+							
+						}
+					}
+				}
+			}
+			
+			//del external atter
+			if(strlen(postOrGet('del')) > 0) {
+				$todel = postOrGet('atter_del');
+				foreach($todel as $gal=>$v) {
+					foreach($v as $pla=>$v2) {
+						if($v2) {
+							tic_mysql_query("DELETE FROM gn4massinc_atter WHERE project_fk = '".mysql_real_escape_string($project)."' AND gal = '".mysql_real_escape_string($gal)."' AND pla = '".mysql_real_escape_string($pla)."'", __FILE__, __LINE__);
+						}
+
+					}
+				}
+			}
+			
+			//edit number of off fleets for external atter
+			if(postOrGet('editfleets') == 1) {
+				$gal = postOrGet('gal');
+				$pla = postOrGet('pla');
+				
+				$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+								@gal = '".mysql_real_escape_string($gal)."',
+								@pla = '".mysql_real_escape_string($pla)."'";
+				$sql2 = "UPDATE gn4massinc_atter SET off_fleets = MOD(off_fleets, 2) + 1 WHERE project_fk = @project AND gal = @gal AND pla = @pla";
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				tic_mysql_query($sql2, __FILE__, __LINE__);
+			}
+			
+			//add internal atter
+			if(postOrGet('interne_atter_add')) {
+				$re = "/(?P<g>\\d+):(?P<p>\\d+)/";
+				$num = preg_match_all($re, postOrGet('x2'), $atter);
+				
+				for($i = 0; $i < $num; $i++) {
+					$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+						@gal = '".mysql_real_escape_string($atter['g'][$i])."',
+						@pla = '".mysql_real_escape_string($atter['p'][$i])."'";
+					$sql2 = "INSERT IGNORE INTO gn4massinc_atter (
+									project_fk, gal, pla, off_fleets, external
+								) VALUES (
+									@project, @gal, @pla, (SELECT off_fleets FROM gn4accounts WHERE galaxie = @gal AND planet = @pla), NOT(EXISTS(SELECT * FROM gn4accounts WHERE galaxie = @gal AND planet = @pla))
+								)";
+					if($SQL_DEBUG); aprint(join(";\n\n", array($sql1, $sql2)));
+					tic_mysql_query($sql1, __FILE__, __LINE__);
+					tic_mysql_query($sql2, __FILE__, __LINE__);
+				}
+			}
+			
+			//add external atter
+			if(strlen(postOrGet('external')) > 0) {
+				$data = postOrGet('data');
+				$data = explode("\n", $data);
+				$toInsert = array();
+				
+				//gal:pla
+				$re_koords = "/.*\\((?P<gal>\\d+):(?P<pla>\\d+)\\)/"; 
+				$re_pkt = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:punkte|pts|pkt)/";
+				$re_ja = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:j)/"; 
+				$re_bo = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:bo|b)/"; 
+				$re_fr = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:fr|f)/"; 
+				$re_ze = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:ze|z)/"; 
+				$re_kr = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:kr)/"; 
+				$re_sc = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:s|sc|ss|sa)/"; 
+				$re_tr = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:t|tr)/"; 
+				$re_cl = "/.* (?P<num>\\d+(?:.\\d+)?)(?P<num_modifier>[k])?.?(?:cl|ka)/"; 
+				
+				for($i = 0; $i < count($data); $i++) {
+					if(strlen($data[$i]) == 0)
+						continue;
+					
+					$insert = array();
+					
+					//koords
+					preg_match($re_koords, $data[$i], $insert['koords']);
+					//pkt
+					preg_match($re_pkt, $data[$i], $insert['pkt']);
+					//schiffe
+					preg_match($re_ja, $data[$i], $insert['ja']);
+					preg_match($re_bo, $data[$i], $insert['bo']);
+					preg_match($re_fr, $data[$i], $insert['fr']);
+					preg_match($re_ze, $data[$i], $insert['ze']);
+					preg_match($re_kr, $data[$i], $insert['kr']);
+					preg_match($re_sc, $data[$i], $insert['sc']);
+					preg_match($re_tr, $data[$i], $insert['tr']);
+					preg_match($re_cl, $data[$i], $insert['cl']);
+					
+					if(count($insert['koords']) == 0 || count($insert['pkt']) == 0)
+						continue;
+					
+					$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+						@gal = '".mysql_real_escape_string($insert['koords']['gal'])."',
+						@pla = '".mysql_real_escape_string($insert['koords']['pla'])."',
+						@pkt = '".mysql_real_escape_string($insert['pkt']['num'] * ($insert['pkt']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fja = '".mysql_real_escape_string($insert['ja']['num'] * ($insert['ja']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fbo = '".mysql_real_escape_string($insert['bo']['num'] * ($insert['bo']['num_modifier'] == "k" ? 1000 : 1))."',
+						@ffr = '".mysql_real_escape_string($insert['fr']['num'] * ($insert['fr']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fze = '".mysql_real_escape_string($insert['ze']['num'] * ($insert['ze']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fkr = '".mysql_real_escape_string($insert['kr']['num'] * ($insert['kr']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fsc = '".mysql_real_escape_string($insert['sc']['num'] * ($insert['sc']['num_modifier'] == "k" ? 1000 : 1))."',
+						@ftr = '".mysql_real_escape_string($insert['tr']['num'] * ($insert['tr']['num_modifier'] == "k" ? 1000 : 1))."',
+						@fcl = '".mysql_real_escape_string($insert['cl']['num'] * ($insert['cl']['num_modifier'] == "k" ? 1000 : 1))."',
+						@erfasser = '".mysql_real_escape_string($Benutzer['name'])."',
+						@erfasser_g = '".mysql_real_escape_string($Benutzer['galaxie'])."',
+						@erfasser_p = '".mysql_real_escape_string($Benutzer['planet'])."'
+						";
+					$sql2 = "DELETE FROM gn4scans WHERE rg = @gal AND rp = @pla AND `type` IN (0, 1)";
+					$sql3 = "INSERT INTO gn4scans
+								(
+									zeit, type, g, p, rp, rg, gen, pts, erfasser
+								) VALUES (
+									DATE_FORMAT(NOW(), '%H:$i %d.%m.%Y'),
+									0,
+									@erfasser_g,
+									@erfasser_p,
+									@gal,
+									@pla,
+									99,
+									@pkt,
+									@erfasser
+								)";
+					$sql4 = "INSERT INTO gn4scans (
+									zeit, type, g, p, rp, rg, gen, erfasser, sfj, sfb, sff, sfz, sfkr, sfsa, sft, sfka
+								) VALUES (
+									DATE_FORMAT(NOW(), '%H:%i %d.%m.%Y'),
+									1,
+									@erfasser_g,
+									@erfasser_p,
+									@gal,
+									@pla,
+									99,
+									@erfasser,
+									@fja,
+									@fbo,
+									@ffr,
+									@fze,
+									@fkr,
+									@fsc,
+									@ftr,
+									@fcl
+								)";
+					$sql5 = "INSERT IGNORE INTO gn4massinc_atter (
+									project_fk, gal, pla, off_fleets,  external
+								) VALUES (
+									@project, @gal, @pla, 2, NOT(EXISTS(SELECT * FROM gn4accounts WHERE galaxie = @gal AND planet = @pla))
+								)";
+					if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2, $sql3, $sql4, $sql5)));
+					tic_mysql_query($sql1, __FILE__, __LINE__);
+					tic_mysql_query($sql2, __FILE__, __LINE__);
+					tic_mysql_query($sql3, __FILE__, __LINE__);
+					tic_mysql_query($sql4, __FILE__, __LINE__);
+					tic_mysql_query($sql5, __FILE__, __LINE__);
+				}
+			}
+			
+			//display internal atter
+			echo '<table class="datatable" align="center" width="100%">';
+			echo '	<tr class="datatablehead">';
+			echo '		<td colspan="5">&nbsp;Interne Atter&nbsp;</td>';
+			echo '	</tr>';
+			echo '	<tr class="fieldnormaldark" style="font-weight: bold">';
+			echo '		<td>&nbsp;Gal&nbsp;</td>';
+			echo '		<td>&nbsp;Pla&nbsp;</td>';
+			echo '		<td>&nbsp;Spieler&nbsp;</td>';
+			echo '		<td>&nbsp;Offensive Flotten&nbsp;</td>';
+			echo '		<td>&nbsp;del&nbsp;</td>';
+			$sql = "SELECT t FROM gn4massinc_wellen WHERE project_fk = '".$project."' ORDER BY t ASC";
+			$res = tic_mysql_query($sql, __FILE__, __LINE__);
+			$num_wellen = 0;
+			$i = 0;
+			while(list($t) = mysql_fetch_row($res)) {
+				$i++;
+				echo '	<td title="'.date('Y-m-d H:i', $t).'">&nbsp;#'.$i.'&nbsp;</td>';
+				$num_wellen++;
+			}
+			echo '	</tr>';
+			
+			$sql1 = "SET @project = '".mysql_real_escape_string($project)."'";
+			$sql2 = "SELECT a.gal, a.pla, a.off_fleets, s.spieler_name
+						FROM gn4massinc_atter a
+						LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = a.gal AND s.spieler_planet = a.pla
+						WHERE a.external = 0
+						ORDER BY a.gal, a.pla";
+			if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+			tic_mysql_query($sql1,  __FILE__, __LINE__);
+			$res = tic_mysql_query($sql2,  __FILE__, __LINE__);
+			$num = mysql_num_rows($res);
+			$color = false;
+			echo '<form action="main.php?modul=massinc&project='.$project.'" method="post">';
+			while(list($eg, $ep, $efleets, $ename) = mysql_fetch_row($res)) {
+				$color = !$color;
+				echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
+				echo '	<td>&nbsp;'.$eg.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$ep.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$ename.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$efleets.' <a href="main.php?modul=massinc&project='.$project.'&editfleets=1&gal='.$eg.'&pla='.$ep.'">&raquo; &auml;ndern</a>&nbsp;</td>';
+				echo '	<td><input type="checkbox" name="atter_del['.$eg.']['.$ep.']"/></td>';
+				
+				$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+								@gal = '".mysql_real_escape_string($eg)."',
+								@pla = '".mysql_real_escape_string($ep)."'";
+				$sql2 = "SELECT w.id welle, aw.willing, (NOT zw.project_fk IS NULL) AND aw.willing = 0 as error FROM gn4massinc_wellen w
+						LEFT JOIN gn4massinc_atter_willing aw ON aw.project_fk = w.project_fk AND aw.atter_gal = @gal AND aw.atter_pla = @pla AND aw.welle = w.id
+						LEFT JOIN gn4massinc_zuweisung zw ON zw.project_fk = w.project_fk AND zw.welle = w.id AND zw.atter_gal = @gal AND zw.atter_pla = @pla
+						WHERE w.project_fk = @project";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+				while(list($wid, $id, $error) = mysql_fetch_row($res2)) {
+					echo '<td'.($error ? ' title="FEHLER: Zugewiesen, hat aber keine Zeit!" bgcolor="red"' : '').'>&nbsp;<input type="hidden" name="atter_welle['.$eg.']['.$ep.']['.$wid.']" value="off" />';
+					echo '<input type="checkbox" name="atter_welle['.$eg.']['.$ep.']['.$wid.']" '.($id ? ' checked="checked"' : '').'/>&nbsp;</td>';
+				}
+				
+				echo '</tr>';
+			}
+			
+			if($num == 0) {
+				echo '<tr class="fieldnormallight"><td colspan="5" align="center">Keine Eintr&auml;ge</td></tr>';
+			}
+
+			echo '<tr class="fieldnormaldark" style="font-weight: bold">';
+			echo '	<td colspan="4"></td>';
+			echo '	<td><input type="submit" name="del" value="del"/></td>';
+			echo '	<td colspan="'.$num_wellen.'"><input type="submit" name="atter_wellen" value="speichern"/></td>';
 			echo '</tr>';
+			echo '</form>';
+
+			echo '<tr class="fieldnormaldark" style="font-weight: bold" align="center">';
+			echo '	<td colspan="5">&nbsp;Angreifer hinzuf&uuml;gen&nbsp;</td>';
+			echo '</tr>';
+			echo '<tr class="fieldnormallight">';
+			echo '	<td colspan="2">';
+			echo '		<select name="x" id="intern">';
+
+			$lastally = null;
+			$sql = "SELECT a.name, acc.galaxie, acc.planet, acc.name FROM gn4accounts acc
+					JOIN gn4allianzen a ON a.id = acc.allianz
+					ORDER BY a.name, acc.galaxie, acc.planet";
+			$res = tic_mysql_query($sql, __FILE__, __LINE__);
+			while(list($ally, $gal, $pla, $name) = mysql_fetch_row($res)) {
+				if($ally != $lastally) echo '			<optgroup label="'.$ally.'">';
+				echo '	<option value="'.$gal.':'.$pla.'">'.$gal.':'.$pla.' '.$name.'</option>';
+				if($ally != $lastally) echo '			</optgroup">';
+				$lastally = $ally;
+			}
+
+			echo '		</select>';
+			echo '	</td>';
+			echo '	<td><input type="button" value=">>" onclick="document.getElementById(\'interne_atter\').value += (document.getElementById(\'intern\').value + \';\');var tmp = document.getElementById(\'intern\').selectedIndex; document.getElementById(\'intern\').remove(document.getElementById(\'intern\').selectedIndex); document.getElementById(\'intern\').selectedIndex = tmp;"/></td>';
+			echo '	<td><form action="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&interne_atter_add=1" method="post"><textarea name="x2" id="interne_atter"></textarea></td>';
+			echo '	<td><input type="submit" value="speichern"/></form></td>';
+			echo '</tr>';
+			
+			//display external atter
+			echo '	<tr class="datatablehead">';
+			echo '		<td colspan="5">&nbsp;Externe Atter&nbsp;</td>';
+			echo '	</tr>';
+			echo '	<tr class="fieldnormaldark" style="font-weight: bold">';
+			echo '		<td>&nbsp;Gal&nbsp;</td>';
+			echo '		<td>&nbsp;Pla&nbsp;</td>';
+			echo '		<td>&nbsp;Spieler&nbsp;</td>';
+			echo '		<td>&nbsp;Offensive Flotten&nbsp;</td>';
+			echo '		<td>&nbsp;del&nbsp;</td>';
+			$sql = "SELECT t FROM gn4massinc_wellen WHERE project_fk = '".$project."' ORDER BY t ASC";
+			$res = tic_mysql_query($sql, __FILE__, __LINE__);
+			$num_wellen = 0;
+			$i = 0;
+			while(list($t) = mysql_fetch_row($res)) {
+				$i++;
+				echo '	<td title="'.date('Y-m-d H:i', $t).'">&nbsp;#'.$i.'&nbsp;</td>';
+				$num_wellen++;
+			}
+			echo '	</tr>';
+			
+			$sql1 = "SET @project = '".mysql_real_escape_string($project)."'";
+			$sql2 = "SELECT a.gal, a.pla, a.off_fleets, s.spieler_name
+						FROM gn4massinc_atter a
+						LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = a.gal AND s.spieler_planet = a.pla
+						WHERE a.external = 1
+						ORDER BY a.gal, a.pla";
+			tic_mysql_query($sql1,  __FILE__, __LINE__);
+			$res = tic_mysql_query($sql2,  __FILE__, __LINE__);
+			$num = mysql_num_rows($res);
+			$color = false;
+			echo '<form action="main.php?modul=massinc&project='.$project.'" method="post">';
+			while(list($eg, $ep, $efleets, $ename) = mysql_fetch_row($res)) {
+				$color = !$color;
+				echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
+				echo '	<td>&nbsp;'.$eg.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$ep.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$ename.'&nbsp;</td>';
+				echo '	<td>&nbsp;'.$efleets.' <a href="main.php?modul=massinc&project='.$project.'&editfleets=1&gal='.$eg.'&pla='.$ep.'">&raquo; &auml;ndern</a>&nbsp;</td>';
+				echo '	<td><input type="checkbox" name="atter_del['.$eg.']['.$ep.']"/></td>';
+				
+				$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+								@gal = '".mysql_real_escape_string($eg)."',
+								@pla = '".mysql_real_escape_string($ep)."'";
+				$sql2 = "SELECT w.id welle, aw.willing FROM gn4massinc_wellen w
+						LEFT JOIN gn4massinc_atter_willing aw ON aw.project_fk = w.project_fk AND atter_gal = @gal AND atter_pla = @pla
+						WHERE w.project_fk = @project";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+				while(list($wid, $id) = mysql_fetch_row($res2)) {
+					echo '<td>&nbsp;<input type="hidden" name="atter_welle['.$eg.']['.$ep.']['.$wid.']" value="off" />';
+					echo '<input type="checkbox" name="atter_welle['.$eg.']['.$ep.']['.$wid.']" '.($id ? ' checked="checked"' : '').'/>&nbsp;</td>';
+				}
+				
+				echo '</tr>';
+			}
+			
+			if($num == 0) {
+				echo '<tr class="fieldnormallight"><td colspan="5" align="center">Keine Eintr&auml;ge</td></tr>';
+			}
+
+			echo '<tr class="fieldnormaldark" style="font-weight: bold">';
+			echo '	<td colspan="4" align="left">Hinzuf&uuml;gen (auch intern m&ouml;glich):</td>';
+			echo '	<td><input type="submit" name="del" value="del"/></td>';
+			echo '	<td colspan="'.$num_wellen.'"><input type="submit" name="atter_wellen" value="speichern"/></td>';
+			echo '</tr>';
+			echo '</form>';
+			echo '<form method="post" action="main.php?modul=massinc&project='.$project.'">';
+			echo '<tr class="fieldnormallight">';
+			echo '	<td colspan="5" align="left">&nbsp;<b>Format:</b>&nbsp;<br/>';
+			echo '<span style="font-family: Courier New">&nbsp;Name (galaxie:planet), 180k punkte, 2.1k jaeger, 1.5k bomber, 75 fregs, 400 zerris, 20 kreuzer, 110 schlachter, 50 träger, 15.5k cleps&nbsp;<br/>&nbsp;Name (galaxie:planet), 180k punkte, 2k jaeger, 1k bomber, 75 fregs, 400 zerris, 20 kreuzer, 110 schlachter, 50 träger, 15k cleps&nbsp;</span><br/>';
+			echo '<textarea cols="80" rows="5" name="data"></textarea>&nbsp;<input type="submit" name="external" value="best&auml;tigen"/>&nbsp;</td>';
+			echo '</tr>';
+			echo '</form>';
+
+
+			echo '<tr class="fieldnormaldark" style="font-weight: bold">';
+			
+			//scanlist extern
+			$sql = "SELECT z.gal, z.pla
+					FROM gn4massinc_ziele z
+					WHERE z.project_fk = '".$project."' ORDER BY z.gal, z.pla";
+			if($SQL_DEBUG) aprint($sql);
+			$res = tic_mysql_query($sql, __FILE__, __LINE__);
+			$scanlistparams = '';
+			while(list($g, $p) = mysql_fetch_row($res)) {
+				$scanlistparams .= $g . ':' . $p . ';';
+			}
+			echo '	<td colspan="5" align="left">&nbsp;<a href="main.php?modul=scanliste&koords=' . $scanlistparams . '&s=on&g=on&e=on&n=on&b=on&u=on&export=Export">&raquo; Scanexport f&uuml;r Externe</a>&nbsp;</td>';			
+			echo '</tr>';
+			echo '</table>';
+			echo '<br/>';
+		}
+		
+		if($Benutzer['rang'] >= $Rang_GC && !$donotshowdestinations) {
+			if(postOrGet('scansbeantragen2')) {
+				$sql1 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g,  ziel_p, t, scantyp) 
+						(
+						SELECT '".$Benutzer['galaxie']."' requester_g, '".$Benutzer['planet']."' requester_p, z.gal ziel_g, z.pla ziel_p, UNIX_TIMESTAMP(NOW()), 4 FROM gn4massinc_ziele z
+						WHERE z.project_fk = '".$project."' ORDER BY z.gal, z.pla
+						)";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1)));
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+			}
+			if(postOrGet('scansbeantragen1')) {
+				$sql1 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g,  ziel_p, t, scantyp) 
+						(
+						SELECT '".$Benutzer['galaxie']."' requester_g, '".$Benutzer['planet']."' requester_p, z.gal ziel_g, z.pla ziel_p, UNIX_TIMESTAMP(NOW()), 0 FROM gn4massinc_ziele z
+						WHERE z.project_fk = '".$project."' ORDER BY z.gal, z.pla
+						)";
+				$sql2 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g,  ziel_p, t, scantyp) 
+						(
+						SELECT '".$Benutzer['galaxie']."' requester_g, '".$Benutzer['planet']."' requester_p, z.gal ziel_g, z.pla ziel_p, UNIX_TIMESTAMP(NOW()), 1 FROM gn4massinc_ziele z
+						WHERE z.project_fk = '".$project."' ORDER BY z.gal, z.pla
+						)";
+				$sql3 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g,  ziel_p, t, scantyp) 
+						(
+						SELECT '".$Benutzer['galaxie']."' requester_g, '".$Benutzer['planet']."' requester_p, z.gal ziel_g, z.pla ziel_p, UNIX_TIMESTAMP(NOW()), 3 FROM gn4massinc_ziele z
+						WHERE z.project_fk = '".$project."' ORDER BY z.gal, z.pla
+						)";
+				if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2, $sql3)));
+				tic_mysql_query($sql1, __FILE__, __LINE__);
+				tic_mysql_query($sql2, __FILE__, __LINE__);
+				tic_mysql_query($sql3, __FILE__, __LINE__);
+			}
+			
+			//show destinations
+			echo '<table class="datatable" align="center" width="100%">';
+			echo '<tr class="datatablehead">';
+			echo '	<td colspan="11">&nbsp;Ziele&nbsp;</td>';
+			//echo '	<td>&nbsp;<a href="#" onclick="javascript:document.getElementById(\'addfields\').style.display=\'\'">&raquo; show</a>&nbsp;</td>';
+			//echo '</tr><tbody style="display: none;" id="addfields">';
+			echo '</tr><tbody id="addfields">';
 
 			//add dialog
 			echo '<form method="post" action="main.php?modul=massinc&project='.$project.'">';
@@ -1204,14 +2703,14 @@ if(empty($project)) {
 				echo '	<td><input type="checkbox" name="ziele_del['.$g.']['.$p.']"/></td>';
 
 				//wellen
-				$sql = "SELECT z.gal, z.pla, w.t, zw.id FROM gn4massinc_ziele z
+				$sql = "SELECT z.gal, z.pla, w.id welle, zw.id FROM gn4massinc_ziele z
 						JOIN gn4massinc_wellen w ON w.project_fk = '".$project."'
-						LEFT JOIN gn4massinc_ziele_welle zw ON zw.ziel_gal = z.gal AND zw.ziel_pla = z.pla AND zw.welle = w.t
+						LEFT JOIN gn4massinc_ziele_welle zw ON zw.ziel_gal = z.gal AND zw.ziel_pla = z.pla AND zw.welle = w.id
 						WHERE z.gal = '".$g."' AND z.pla = '".$p."'";
 				if($SQL_DEBUG) aprint($sql);
 				$res2 = tic_mysql_query($sql, __FILE__, __LINE__);
-				while(list($g, $p, $t, $id) = mysql_fetch_row($res2)) {
-					echo '<td>&nbsp;<input type="checkbox" name="ziel_welle['.$g.']['.$p.']['.$t.']" '.($id ? ' checked="checked"' : '').'/>&nbsp;</td>';
+				while(list($g, $p, $wid, $id) = mysql_fetch_row($res2)) {
+					echo '<td>&nbsp;<input type="checkbox" name="ziel_welle['.$g.']['.$p.']['.$wid.']" '.($id ? ' checked="checked"' : '').'/>&nbsp;</td>';
 				}
 
 
@@ -1221,7 +2720,7 @@ if(empty($project)) {
  			$short = addShortUrl('main.php?modul=scanliste&koords=' . $scanlistparams);
 			echo '<tr class="fieldnormaldark"><td colspan="11" align="right">&nbsp;' . createCopyLink('&raquo; Scanlistenlink kopieren', $short) . ' | <a href="' . $short . '">&raquo; Scanliste</a>&nbsp;</td><td>&nbsp;<input type="submit" value="del">&nbsp;</td>';
 			echo '<td colspan="'.$num_wellen.'">&nbsp;<input type="submit" name="ziel_welle_update" value="speichern"/>&nbsp;</td>';
-			echo '</tr>';
+			echo '</tr></tbody>';
 			echo '</table>';
 			echo '</form>';
 		}//if GC show destinations

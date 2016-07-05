@@ -127,17 +127,33 @@
 				<td class="menu"><a href="./main.php?modul=profil"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Mein Profil</a></td>
 			</tr>
 			<tr>
-				<td class="menu"><a href="./main.php?modul=massinc"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Att-Planung 2.0</a></td>
+<?php
+	$sql1 = "SET @gal = '".$Benutzer['galaxie']."', @pla = '".$Benutzer['planet']."'";
+	$sql2 = "SELECT	(SELECT COUNT(*) FROM gn4massinc_wellen w
+						WHERE NOT EXISTS(SELECT * FROM gn4massinc_atter_willing aw WHERE aw.project_fk = w.project_fk AND aw.welle = w.id AND aw.atter_gal = @gal AND aw.atter_pla = @pla)
+						AND (SELECT freigegeben FROM gn4massinc_projects WHERE project_id = w.project_fk) > 0) open,
+					(SELECT COUNT(*) FROM gn4massinc_atter_willing aw
+						WHERE aw.atter_gal = @gal AND aw.atter_pla = @pla AND aw.willing = 1 AND NOT EXISTS(SELECT * FROM gn4massinc_zuweisung zw WHERE aw.project_fk = zw.project_fk AND aw.welle = zw.welle AND zw.atter_gal = @gal AND zw.atter_pla = @pla)
+						) decided,
+					(SELECT COUNT(*) FROM gn4massinc_zuweisung zw WHERE zw.atter_gal = @gal AND zw.atter_pla = @pla) assigned";
+	//aprint(join(";\n\n", array($sql1, $sql2)));
+	tic_mysql_query($sql1, __FILE__, __LINE__);
+	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+	list($open, $decided, $assigned) = mysql_fetch_row($res);
+?>
+				<td class="menu"><a href="./main.php?modul=massinc"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Att-Planung <?php
+	echo '(<span title="offen"'.($open > 0 ? ' style="color: red"' : '').'>';
+	echo $open;
+	echo '</span>/<span title="Flotten-Checkin"'.($decided > 0 ? ' style="color: green"' : '').'>';
+	echo $decided;
+	echo '</span>/<span title="zugewiesen"'.($assigned > 0 ? ' style="color: yellow"' : '').'>';
+	echo $assigned;
+	echo '</span>)';
+				
+				?></a></td>
 			</tr>
 			<tr>
-
-<?
-	$attanzahl = AttAnzahl($Benutzer['allianz'],$Benutzer['ticid'],0);
-	echo '			<td class="menu"><a href="./main.php?modul=attplanung"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Att-Planung (';
-	echo '<font color="#'.$ATTSTATUSHTML[1].'">'.$attanzahl.'</font>/';
-	$attanzahl = AttAnzahl($Benutzer['allianz'],$Benutzer['ticid'],1);
-	echo '<font color="#'.$ATTSTATUSHTML[5].'">'.$attanzahl.'</font>)</a></td>';
-?>
+				<td class="menu"><a href="./main.php?modul=scanliste"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Scannerliste</a></td>
 			</tr>
 			<tr>
 				<td class="menu"><a href="./main.php?modul=NWshow"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Nachtwache</a></td>
