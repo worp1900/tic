@@ -418,6 +418,7 @@ if(empty($project)) {
 				echo '			<option value="0"'.($freigegeben == 0 ? ' selected="selected"' : '').'>nicht freigegeben</option>';
 				echo '			<option value="1"'.($freigegeben == 1 ? ' selected="selected"' : '').'>Flotten-Checkin</option>';
 				echo '			<option value="2"'.($freigegeben == 2 ? ' selected="selected"' : '').'>Freigegeben</option>';
+				echo '			<option value="-1"'.($freigegeben == -1 ? ' selected="selected"' : '').'>ausgeblendet</option>';
 				echo '		</select>&nbsp;</td>';
 				echo '	<td colspan="3">&nbsp;<input type="submit" name="proj_edit_ack" value="absenden"/>&nbsp;</td>';
 				echo '</tr>';
@@ -433,6 +434,7 @@ if(empty($project)) {
 					case 0: echo '<span title="Nicht sichtbar f&uuml;r regul&auml;re Mitglieder">nicht freigegeben</span>'; break;
 					case 1: echo '<span title="F&uuml;r alle sichtbar, Spieler tragen ein, ob Sie mitmachen m&ouml;chten">Flotten-Checkin</span>'; break;
 					case 2: echo '<span title="Planung abgeschlossen">freigegeben</span>'; break;
+					case -1: echo '<span title="Beendet">ausgeblendet</span>'; break;
 				}
 				echo '&nbsp;</td>';
 				if($Benutzer['rang'] >= $Rang_GC) {
@@ -520,7 +522,7 @@ if(empty($project)) {
 				FROM gn4massinc_zuweisung z
 				LEFT JOIN gn4massinc_projects p ON p.project_id = z.project_fk
 				LEFT JOIN gn4massinc_wellen w ON w.project_fk = z.project_fk AND w.id = z.welle
-				WHERE z.atter_gal = @g AND z.atter_pla = @p
+				WHERE z.atter_gal = @g AND z.atter_pla = @p AND p.freigegeben > 0
 				ORDER BY z.welle";
 	if($SQL_DEBUG) aprint(join(";\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
