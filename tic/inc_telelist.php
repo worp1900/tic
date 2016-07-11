@@ -37,7 +37,7 @@
                 echo '<td>'.$infotext.'</td>';
                 if ($Benutzer['rang'] > $Rang_GC) { // vize admiral oder mehr
 
-                    echo '<td align="center"><a href="./main.php?modul=telelist&amp;action=deltelentry&amp;teleid='.$teleid.'">löschen</a></td>';
+                    echo '<td align="center"><a href="./main.php?modul=telelist&amp;action=deltelentry&amp;teleid='.$teleid.'">l&ouml;schen</a></td>';
                 }
                 echo '</tr>';
 
