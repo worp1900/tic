@@ -231,8 +231,8 @@ if($data) {
 								'" . str_replace('.', '', $matches['s0k']) . "',
 								'" . str_replace('.', '', $matches['s0s']) . "',
 								'" . str_replace('.', '', $matches['s0t']) . "',
-								'" . str_replace('.', '', $matches['s0ca']) . "',
 								'" . str_replace('.', '', $matches['s0cl']) . "',
+								'" . str_replace('.', '', $matches['s0ca']) . "',
 
 								'" . str_replace('.', '', $matches['s1j']) . "',
 								'" . str_replace('.', '', $matches['s1b']) . "',
@@ -241,8 +241,8 @@ if($data) {
 								'" . str_replace('.', '', $matches['s1k']) . "',
 								'" . str_replace('.', '', $matches['s1s']) . "',
 								'" . str_replace('.', '', $matches['s1t']) . "',
-								'" . str_replace('.', '', $matches['s1ca']) . "',
 								'" . str_replace('.', '', $matches['s1cl']) . "',
+								'" . str_replace('.', '', $matches['s1ca']) . "',
 								'" . $ziel1 . "',
 								'" . $status1 . "',
 
@@ -582,7 +582,13 @@ if($data) {
 								//definition where the fleet has its origin
 								$atter = array($thisgal[0], $thisgal[1]);
 								$deffer = array($othergal[0], $othergal[1]);
+								
 								if($t == 'angegriffen_von' || $t == 'verteidigt_von') {
+									//skip fleet if same gala - already recognized before while atting or deffing.
+									if($thisgal[0] == $othergal[0]) {
+										continue;
+									}
+									
 									$atter = array($othergal[0], $othergal[1]);
 									$deffer = array($thisgal[0], $thisgal[1]);
 								}
