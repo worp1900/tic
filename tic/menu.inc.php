@@ -264,6 +264,10 @@ ORDER BY s.allianz_name";
 
 			echo '<tr><td>'.date('Y-m-d H:i', $t).'</td><td>'.$sg.':'.$sp.'</td><td>'.$g.':'.$p.'</td><td>'.$typ.'</td></tr>';*/
 			$ally = mysql_result($res, $i, 'allianz_name');
+			$tmp = strlen($ally);
+			$ally = substr($ally, 0, 20);
+			if($tmp > 20)
+				$ally .= '...';
 			$blocks = mysql_result($res, $i, 'blocks');
 
 			echo '<tr><td bgcolor="#aaaaaa">'.$ally.'</td><td bgcolor="#aaaaaa" align="right">&nbsp;'.$blocks.'&nbsp;</td></tr>';
