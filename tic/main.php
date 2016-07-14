@@ -185,10 +185,6 @@
 		tic_mysql_query("UPDATE `gn4flottenbewegungen` SET save='1' WHERE verteidiger_galaxie='".$_GET['needno_galaxie']."' AND verteidiger_planet='".$_GET['needno_planet']."'") or die(tic_mysql_error(__FILE__,__LINE__));
 	}
 
-	if (isset($irc_log)) {
-		if ($irc_log)
-			include('irc-scans.inc.php');
-	}
 	// Funktion einbinden
 	if ($action != "")
 		include("./function.".$action.".php");
