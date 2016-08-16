@@ -446,16 +446,17 @@ if(empty($project)) {
 			}
 		}
 	}
-	if($Benutzer['rang'] >= $Rang_GC) {
-		echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
-			echo '<td colspan="7" align="right"><a href="main.php?modul=massinc&proj_neu=1">&raquo; neu erstellen</a></td>';
-		echo '</tr>';
-	}
 
 	if($i == 0) {
 		echo '<tr class="fieldnormallight"><td colspan="7" align="center">Keine Eintr&auml;ge vorhanden.</td></tr>';
 	}
 
+	if($Benutzer['rang'] >= $Rang_GC) {
+		echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
+			echo '<td colspan="7" align="right"><a href="main.php?modul=massinc&proj_neu=1">&raquo; neu erstellen</a></td>';
+		echo '</tr>';
+	}
+	
 	echo '</table>';
 
 
@@ -677,19 +678,21 @@ if(empty($project)) {
 						$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
 									@welle = '".mysql_real_escape_string($id)."',
 									@atter_gal = '".mysql_real_escape_string($Benutzer['galaxie'])."',
-									@atter_pla = '".mysql_real_escape_string($Benutzer['planet'])."'";
-						$sql2 = "SELECT w.willing, (NOT zw.project_fk IS NULL) AND w.willing = 0 as error
+									@atter_pla = '".mysql_real_escape_string($Benutzer['planet'])."';";
+						$sql2 = "SELECT w.willing, (NOT zw.project_fk IS NULL) AND w.willing = 0 as error, zw.project_fk > 0 as zugewiesen
 								FROM gn4massinc_atter_willing w 
 								LEFT JOIN gn4massinc_zuweisung zw ON zw.project_fk = w.project_fk AND zw.welle = w.welle AND zw.atter_gal = @atter_gal AND zw.atter_pla = @pla
-								WHERE w.project_fk=@project AND w.welle=@welle AND w.atter_gal=@atter_gal AND w.atter_pla=@atter_pla";
+								WHERE w.project_fk=@project AND w.welle=@welle AND w.atter_gal=@atter_gal AND w.atter_pla=@atter_pla;";
 						if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 						tic_mysql_query($sql1, __FILE__, __LINE__);
 						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
 						$habeZeit = null;
 						$error = null;
+						$zugewiesen = false;
 						if(mysql_num_rows($res2) > 0) {
 							$habeZeit = mysql_result($res2, 0, 'willing');
 							$error = mysql_result($res2, 0, 'error');
+							$zugewiesen = mysql_result($res2, 0, 'zugewiesen');
 						}
 
 						if(is_null($habeZeit)) {
@@ -700,7 +703,7 @@ if(empty($project)) {
 							echo '	<td>&nbsp;JA<br/>';
 						}
 						if($freigegeben == 1) {
-							echo '<a href="main.php?modul=massinc&project='.$project.'&edit_welle_user_willing_id='.$id.'&edit_welle_user_willing='.($habeZeit ? 0 : 1).'&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'"'.(!$error ? ' onclick="return confirm(\'Du wurdest bereits zugewiesen; Bist Du Dir sicher? - Benachrichte ggf. den Organisator!\')"' : '').'>&raquo; &auml;ndern</a>';
+							echo '<a '.($error ? 'style="background-color: lightred" title="Du wurdest bereits zugewiesen!"' : '').' href="main.php?modul=massinc&project='.$project.'&edit_welle_user_willing_id='.$id.'&edit_welle_user_willing='.($habeZeit ? 0 : 1).'&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'"'.($zugewiesen ? ' onclick="return confirm(\'Du wurdest bereits zugewiesen; Bist Du Dir sicher? - Benachrichte ggf. den Organisator!\')"' : '').'>&raquo; &auml;ndern</a>';
 						}
 						echo '</td>';
 
