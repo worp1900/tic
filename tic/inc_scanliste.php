@@ -247,10 +247,10 @@ if(isset($_GET['export'])) {
 							continue;
 						$align = 9;
 						echo "SEKTOR " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
-						echo "Pkt: " . nformat(round($pts, 0), $align) . "\n";
-						echo "S:     " . nformat($s, $align) .       ";  D:   " . nformat($d, $align) . "\n";
-						echo "ME:    " . nformat($me, $align) .      ";  KE:  " . nformat($ke, $align) . "\n";
-						echo "E-Sum: " . nformat($me+$ke, $align) .  ";  5T:  " . nformat(round(($me+$ke)*pow(.9, 5), 0), $align) . "\n";
+						echo "Punkte:     " . nformat(round($pts, 0), $align) . "\n";
+						echo "Schiffe:     " . nformat($s, $align) .             ";  Defensiv:          " . nformat($d, $align) . "\n";
+						echo "Metall-Exen: " . nformat($me, $align) .            ";  Kristall-Exen:     " . nformat($ke, $align) . "\n";
+						echo "Exen-Summe:  " . nformat($me+$ke, $align) .        ";  Exen nach 5 Ticks: " . nformat(round(($me+$ke)*pow(.9, 5), 0), $align) . "\n";
 						echo "\n";
 						$scans++;
 						break;
@@ -259,11 +259,11 @@ if(isset($_GET['export'])) {
 							continue;
 						$align = 7;
 						echo "EINHEITEN " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
-						echo "Ja: " . nformat($sfj, $align) .  ";  Bo: " . nformat($sfb, $align) . "\n";
-						echo "Fr: " . nformat($sff, $align) .  ";  Ze: " . nformat($sfz, $align) . "\n";
-						echo "Kr: " . nformat($sfkr, $align) . ";  Sc: " . nformat($sfsa, $align) . "\n";
-						echo "Tr: " . nformat($sft, $align) .  ";  Ca: " . nformat($sfka, $align) . "\n";
-						echo "Cl: " . nformat($sfsu, $align) . "\n";
+						echo "Jaeger:    " . nformat($sfj, $align) .  ";  Bomber:     " . nformat($sfb, $align) . "\n";
+						echo "Fregatten: " . nformat($sff, $align) .  ";  Zerstoerer: " . nformat($sfz, $align) . "\n";
+						echo "Kreuzer:   " . nformat($sfkr, $align) . ";  Schlachter: " . nformat($sfsa, $align) . "\n";
+						echo "Traeger:   " . nformat($sft, $align) .  ";  Cancs:      " . nformat($sfka, $align) . "\n";
+						echo "Cleps:     " . nformat($sfsu, $align) . "\n";
 						echo "\n";
 						$scans++;
 						break;
@@ -272,16 +272,16 @@ if(isset($_GET['export'])) {
 							continue;
 						$align = 7;
 						echo "MILITÄR " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
-						echo "      Orbit  Flotte1  Flotte2\n";
-						echo "Ja: " . nformat($sf0j, $align)  . "  " . nformat($sf1j, $align)   . "  " . nformat($sf2j, $align)  . "\n";
-						echo "Bo: " . nformat($sf0b, $align)  . "  " . nformat($sf1b, $align)   . "  " . nformat($sf2b, $align)  . "\n";
-						echo "Fr: " . nformat($sf0f, $align)  . "  " . nformat($sf1f, $align)   . "  " . nformat($sf2f, $align)  . "\n";
-						echo "Ze: " . nformat($sf0z, $align)  . "  " . nformat($sf1z, $align)   . "  " . nformat($sf2z, $align)  . "\n";
-						echo "Kr: " . nformat($sf0kr, $align) . "  " . nformat($sf1kr, $align)  . "  " . nformat($sf2kr, $align)  . "\n";
-						echo "Sc: " . nformat($sf0sa, $align) . "  " . nformat($sf1sa, $align)  . "  " . nformat($sf2sa, $align)  . "\n";
-						echo "Tr: " . nformat($sf0t, $align)  . "  " . nformat($sf1t, $align)   . "  " . nformat($sf2t, $align)  . "\n";
-						echo "Cl: " . nformat($sf0ka, $align) . "  " . nformat($sf1ka, $align)  . "  " . nformat($sf2ka, $align)  . "\n";
-						echo "Ca: " . nformat($sf0su, $align) . "  " . nformat($sf1su, $align)  . "  " . nformat($sf2su, $align)  . "\n";
+						echo "              Orbit  Flotte1  Flotte2\n";
+						echo "Jaeger:     " . nformat($sf0j, $align)  . "  " . nformat($sf1j, $align)   . "  " . nformat($sf2j, $align)  . "\n";
+						echo "Bomber:     " . nformat($sf0b, $align)  . "  " . nformat($sf1b, $align)   . "  " . nformat($sf2b, $align)  . "\n";
+						echo "Fregatten:  " . nformat($sf0f, $align)  . "  " . nformat($sf1f, $align)   . "  " . nformat($sf2f, $align)  . "\n";
+						echo "Zerstoerer: " . nformat($sf0z, $align)  . "  " . nformat($sf1z, $align)   . "  " . nformat($sf2z, $align)  . "\n";
+						echo "Kreuzer:    " . nformat($sf0kr, $align) . "  " . nformat($sf1kr, $align)  . "  " . nformat($sf2kr, $align)  . "\n";
+						echo "Schlachter: " . nformat($sf0sa, $align) . "  " . nformat($sf1sa, $align)  . "  " . nformat($sf2sa, $align)  . "\n";
+						echo "Traeger:    " . nformat($sf0t, $align)  . "  " . nformat($sf1t, $align)   . "  " . nformat($sf2t, $align)  . "\n";
+						echo "Cleps:      " . nformat($sf0ka, $align) . "  " . nformat($sf1ka, $align)  . "  " . nformat($sf2ka, $align)  . "\n";
+						echo "Cancs:      " . nformat($sf0su, $align) . "  " . nformat($sf1su, $align)  . "  " . nformat($sf2su, $align)  . "\n";
 						echo "\n";
 						$scans++;
 						break;
@@ -293,9 +293,9 @@ if(isset($_GET['export'])) {
 						$align = 7;
 						$clepkill = floor($glo * 1.28 + $ga * .32);
 						echo "GESCHÜTZE " . $rg . ":" . $rp . " " . $name . " (" . $gen . "%, " . $zeit . ")\n";
-						echo "AJ: " . nformat($ga, $align) .  ";  LO:       " . nformat($glo, $align) . "\n";
-						echo "LR: " . nformat($glr, $align) . ";  MR:       " . nformat($gmr, $align) . "\n";
-						echo "SR: " . nformat($gsr, $align) . ";  Clepkill: " . nformat($clepkill, $align) . "\n";
+						echo "Abfangjaeger:           " . nformat($ga, $align) .  ";  Leichte Orbitalgeschuetze: " . nformat($glo, $align) . "\n";
+						echo "Leichte Raumgeschuetze: " . nformat($glr, $align) . ";  Mittlere Raumgeschuetze:   " . nformat($gmr, $align) . "\n";
+						echo "Schwere Raumgeschuetze: " . nformat($gsr, $align) . ";  Clepkill pro Tick:         " . nformat($clepkill, $align) . "\n";
 						echo "\n";
 						$scans++;
 						break;
@@ -341,7 +341,7 @@ if(isset($_GET['export'])) {
 			echo "===\n\n";
 		}
 		
-		echo '</textarea>';
+		echo '</textarea><br/><div style="text-align: right;"><a href="http://www.pastebin.com" target="_blank">&raquo; Pastebin</a>&nbsp;</div>';
 	} else {
 		echo 'Dieses Feature steht Dir leider nicht zur Verf&uuml;gung.';
 	}
