@@ -31,7 +31,7 @@
     // Scantypen
     $ScanTyp[0] = 'Sektorscan';
     $ScanTyp[1] = 'Einheitenscan';
-    $ScanTyp[2] = 'Milit&aauml;rscan';
+    $ScanTyp[2] = 'Milit&auml;rscan';
     $ScanTyp[3] = 'Gesch&uuml;tzscan';
     $ScanTyp[4] = 'Nachrichtenscan';
 
