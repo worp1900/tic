@@ -31,8 +31,8 @@ $div_ticks = $null_ticks - $alt_ticks;
 if($div_ticks > 0)
 {
 	//delete scanrequests not successful and old:
-	$days = 2;
-	$sql = "DELETE FROM gn4scanrequests
+	$minutes = 4*60;
+	$sql = "UPDATE gn4scanrequests SET deleted = 1
 				WHERE
 				(
 					(
@@ -52,7 +52,7 @@ if($div_ticks > 0)
 					)
 				)
 				AND
-				t < UNIX_TIMESTAMP(NOW()) - ".$days."*24*60*60";
+				t < UNIX_TIMESTAMP(NOW()) - ".$minutes."*60";
 	tic_mysql_query($sql, __FILE__, __LINE__);
 
 	//30days

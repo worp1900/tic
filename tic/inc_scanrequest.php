@@ -103,7 +103,7 @@ if(!postOrGet('mili') && !postOrGet('gesch') || true) {
 												WHERE b2.g = b1.g AND b2.p = b1.p)
 								) blocks
 						ON blocks.g = r.ziel_g AND blocks.p = r.ziel_p
-					WHERE r.requester_g = @g AND r.requester_p = @p
+					WHERE r.requester_g = @g AND r.requester_p = @p AND deleted = 0
 						AND
 						( r.scantyp IN (0, 1, 2, 3)
 							AND
@@ -190,7 +190,7 @@ if(!postOrGet('mili') && !postOrGet('gesch') || true) {
 								) tmp WHERE rg = r.ziel_g AND rp = r.ziel_p AND type = r.scantyp AND t > r.t - 15 * 60
 							)
 					LEFT JOIN gn_spieler2 s2 ON s2.spieler_galaxie = sc.g AND s2.spieler_planet = sc.p
-					WHERE r.requester_g = @g AND r.requester_p = @p AND (r.bezahlt = 0 OR r.t > UNIX_TIMESTAMP(NOW()) - 24*60*60)
+					WHERE r.requester_g = @g AND r.requester_p = @p AND (r.bezahlt = 0 OR r.t > UNIX_TIMESTAMP(NOW()) - 24*60*60) AND deleted = 0
 					AND (
 						r.scantyp IN (0, 1, 2, 3)
 						AND
@@ -298,7 +298,7 @@ if(!postOrGet('mili') && !postOrGet('gesch') || true) {
 								) tmp WHERE rg = r.ziel_g AND rp = r.ziel_p AND type = r.scantyp AND t > r.t
 							)
 					LEFT JOIN gn_spieler2 s2 ON s2.spieler_galaxie = sc.g AND s2.spieler_planet = sc.p
-					WHERE r.requester_g = @g AND r.requester_p = @p AND r.bezahlt = 0
+					WHERE r.requester_g = @g AND r.requester_p = @p AND r.bezahlt = 0 AND deleted = 0
 					AND
 					(
 						r.scantyp IN (0, 1, 2, 3)
@@ -381,7 +381,7 @@ if((postOrGet('mili') || true) && ($Benutzer['scantyp'] == 0 || $Benutzer['scant
 												WHERE b2.g = b1.g AND b2.p = b1.p)
 								) blocks
 						ON blocks.g = r.ziel_g AND blocks.p = r.ziel_p
-					WHERE r.scantyp IN (0, 1, 2) AND NOT EXISTS(
+					WHERE r.scantyp IN (0, 1, 2) AND deleted = 0 AND NOT EXISTS(
 							SELECT * FROM
 									(SELECT UNIX_TIMESTAMP(STR_TO_DATE(zeit, '%H:%i %d.%m.%Y')) t, `type`, rg, rp, g, p FROM gn4scans
 									UNION
@@ -474,7 +474,7 @@ if((postOrGet('gesch') || true) && ($Benutzer['scantyp'] == 0 || $Benutzer['scan
 												WHERE b2.g = b1.g AND b2.p = b1.p)
 								) blocks
 						ON blocks.g = r.ziel_g AND blocks.p = r.ziel_p
-					WHERE (r.scantyp IN (0, 3) AND NOT EXISTS(
+					WHERE (r.scantyp IN (0, 3) AND deleted = 0 AND NOT EXISTS(
 							SELECT * FROM
 									(SELECT UNIX_TIMESTAMP(STR_TO_DATE(zeit, '%H:%i %d.%m.%Y')) t, `type`, rg, rp, g, p FROM gn4scans
 									UNION
