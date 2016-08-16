@@ -1,6 +1,6 @@
 <?php
 
-@session_start();
+session_start();
 // Session-Registrieren
 if (isset($_SESSION['is_auth']) && $_SESSION['is_auth']==1) {
 	header("Location: ./main.php");
@@ -64,6 +64,7 @@ INPUT.BUTTON {
 <h4>Bei Problemen beim Login bitte an folgende Leute wenden:
 <table border="0" bgcolor="black">
 <?php
+
 include("./accdata.php");
 $DBConn = mysql_connect($db_info['host'], $db_info['user'], $db_info['password']) or die(mysql_errno() . ": " . mysql_error(). "\n");
 mysql_select_db($db_info['dbname'], $DBConn) or die(mysql_errno() . ": " . mysql_error(). "\n");
@@ -74,6 +75,7 @@ while($row = mysql_fetch_object($Result)) {
 	printf ("<tr><td><a href=\"http://www.galaxy-network.net/game/comsys.php?action=sendmsg&toid1=%d&toid2=%d\" target=\"_blank\"><font color=\"#32cd32\">%s (%d:%d)</font></a></td><td><font color=\"white\">%s</font></td><td><font color=\"white\">%s</font></td></tr>", $row->galaxie, $row->planet, $row -> username, $row->galaxie, $row->planet, $row->rang == 4 ? "TIC-Techniker" : "TIC-Administrator", $row->allyname);
 }
 mysql_close($DBConn);
+
 ?>
 </table>
 </h4>

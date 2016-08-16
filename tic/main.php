@@ -99,8 +99,6 @@
 	include("./vars.php");
 	// Pseudo-Cron
 	include("./cron.php");
-	//Nachtwache Kontrolle Laden
-	include("./NWkontrolle.php");
 
 	// Standardmodul wählen falls nicht angegeben
 	if(isset($_POST['modul']) && $_POST['modul'] != "")
@@ -197,6 +195,14 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<meta http-equiv="refresh" content="900; URL=./main.php?<?=(isset($_GET['auto']) ? "" : "auto").($_SERVER['QUERY_STRING'] != "" ? (isset($_GET['auto']) ? "" : "&amp;").str_replace("&", "&amp;", $_SERVER['QUERY_STRING']) : "")?>" />
 		<link rel="stylesheet" href="./tic.css" type="text/css" />
+<!--<script>
+(function(e,c,a,g,f){function d(){var b=c.createElement("script");b.async=!0;
+b.src="//radar.cedexis.com/1/21643/radar.js";c.body.appendChild(b)}
+(function(){for(var b=[/\bMSIE (5|6)/i],a=b.length;a--;)if(b[a]
+.test(navigator.userAgent))return!1;return!0})()
+&&("complete"!==c.readyState?(a=e[a])?a(f,d,!1):(a=e[g])&&a("on"+f,d):d())})
+(window,document,"addEventListener","attachEvent","load");
+</script>-->
 		<script language="javascript" type="text/javascript">
 		<!--
 			function NeuFenster( link ) {
