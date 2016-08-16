@@ -18,9 +18,6 @@
     <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=telelist">Telefonliste</a></td>
   </tr>
   <tr>
-    <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=zielsuche">Zielsuche</a></td>
-  </tr>
-  <tr>
     <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=icq">ICQ Status</a></td>
   </tr>
 </table>

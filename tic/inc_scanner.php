@@ -46,9 +46,9 @@
 			<col width="50">
 		</colgroup>
 		<tr>
-			<th class="datatablehead" colspan="<?= $_SESSION['scanner_filter'] == "all50"?"5":"4" ?>"><?= $ScanTyp[1] ?></th>
-			<td></td>
 			<th class="datatablehead" colspan="<?= $_SESSION['scanner_filter'] == "all50"?"5":"4" ?>"><?= $ScanTyp[2] ?></th>
+			<td></td>
+			<th class="datatablehead" colspan="<?= $_SESSION['scanner_filter'] == "all50"?"5":"4" ?>"><?= $ScanTyp[4] ?></th>
 		</tr>
 		<tr>
 			<?= $_SESSION['scanner_filter'] == "all50"?"<th class=\"datatablehead\">Meta</th>":"" ?>
@@ -73,9 +73,9 @@
 		</tr>
 <?php
 	$sort = $_SESSION['scanner_orderby']." ".$_SESSION['scanner_orderdir'].", ".($_SESSION['scanner_orderby']=="svs"?"scans":"svs")." desc";
-	$SQL_Query = "SELECT galaxie, planet, name, allianz, svs, umod, scans, lastlogin FROM `gn4accounts` WHERE scantyp='1'".($_SESSION['scanner_filter'] == "meta"?" and ticid='".$_SESSION['scanner_meta']."'":"")." AND svs > 0 ORDER BY ".$sort.", galaxie, planet".($_SESSION['scanner_filter'] == "meta"?"":" LIMIT 50").";";
+	$SQL_Query = "SELECT galaxie, planet, name, allianz, svs, umod, scans, lastlogin FROM `gn4accounts` WHERE scantyp='1' OR scantyp='2'".($_SESSION['scanner_filter'] == "meta"?" and ticid='".$_SESSION['scanner_meta']."'":"")." AND svs > 0 ORDER BY ".$sort.", galaxie, planet".($_SESSION['scanner_filter'] == "meta"?"":" LIMIT 50").";";
 	$SQL_Result_Scanner1 = tic_mysql_query($SQL_Query, $SQL_DBConn);
-	$SQL_Query = "SELECT galaxie, planet, name, allianz, svs, umod, scans, lastlogin FROM `gn4accounts` WHERE scantyp='2'".($_SESSION['scanner_filter'] == "meta"?" and ticid='".$_SESSION['scanner_meta']."'":"")." AND svs > 0 ORDER BY ".$sort.", galaxie, planet".($_SESSION['scanner_filter'] == "meta"?"":" LIMIT 50").";";
+	$SQL_Query = "SELECT galaxie, planet, name, allianz, svs, umod, scans, lastlogin FROM `gn4accounts` WHERE scantyp='3' OR scantyp='4'".($_SESSION['scanner_filter'] == "meta"?" and ticid='".$_SESSION['scanner_meta']."'":"")." AND svs > 0 ORDER BY ".$sort.", galaxie, planet".($_SESSION['scanner_filter'] == "meta"?"":" LIMIT 50").";";
 	$SQL_Result_Scanner2 = tic_mysql_query($SQL_Query, $SQL_DBConn);
 
 	$time_online = time() - 300;
