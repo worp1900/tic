@@ -121,6 +121,7 @@ if(!postOrGet('mili') && !postOrGet('gesch') || true) {
 							)
 						)
 						AND s.spieler_name IS NOT NULL
+						AND r.deleted = 0
 					ORDER BY r.t ASC";
 		//aprint(join("\n\n", array($sql1, $sql2)));
 		tic_mysql_query($sql1, __FILE__, __LINE__);
@@ -212,6 +213,7 @@ if(!postOrGet('mili') && !postOrGet('gesch') || true) {
 						)
 					)
 					AND s.spieler_name IS NOT NULL
+					AND r.deleted = 0
 					ORDER BY r.t ASC";
 		//aprint(join("\n\n", array($sql1, $sql2)));
 		tic_mysql_query($sql1, __FILE__, __LINE__);
@@ -389,6 +391,7 @@ if((postOrGet('mili') || true) && ($Benutzer['scantyp'] == 0 || $Benutzer['scant
 							WHERE rg = r.ziel_g AND rp = r.ziel_p AND `type` = r.scantyp AND t > r.t - 15 * 60
 						)
 						AND s.spieler_name IS NOT NULL
+						AND r.deleted = 0
 					ORDER BY r.t ASC";
 		//aprint($sql);
 		$res = tic_mysql_query($sql, __FILE__, __LINE__);
@@ -486,6 +489,7 @@ if((postOrGet('gesch') || true) && ($Benutzer['scantyp'] == 0 || $Benutzer['scan
 						)
 						)
 						AND s.spieler_name IS NOT NULL
+						AND r.deleted = 0
 					ORDER BY r.t ASC";
 		//aprint($sql);
 		$res = tic_mysql_query($sql, __FILE__, __LINE__);

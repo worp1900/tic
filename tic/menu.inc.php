@@ -77,6 +77,7 @@
 									)
 									)
 									AND s.spieler_name IS NOT NULL
+									AND r.deleted = 0
 								) tmp";
 						$num += mysql_result(tic_mysql_query($sql, __FILE__, __LINE__), 0, 0);
 					}
@@ -100,6 +101,7 @@
 										 WHERE rg = r.ziel_g AND rp = r.ziel_p AND `type` = r.scantyp AND t > r.t - 15 * 60
 									)
 									AND s.spieler_name IS NOT NULL
+									AND r.deleted = 0
 								) tmp";
 						$num += mysql_result(tic_mysql_query($sql, __FILE__, __LINE__), 0, 0);
 					}
