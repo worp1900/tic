@@ -34,20 +34,24 @@ table {
 
 a {
 	text-decoration: none;
-	color: #000000;
+	color: #0000cc;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 a:visited {
-    text-decoration: none; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: -1: #ffffff
+    text-decoration: none; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: -1;
+	color: #0000cc;
+
 }
 a:active {
-    text-decoration: none; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: -1: ##ffffff
+    text-decoration: none; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: -1;
+	color: #0000cc;
 }
 a:hover {
     color: #ff0000;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: -1
+	font-size: -1;
+	text-decoration: underline;
 }
 .normal {  font-family: Verdana; font-size: small}
 .normalrechts { font-family: Verdana; font-size: x-small; text-align: right}
