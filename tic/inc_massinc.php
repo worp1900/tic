@@ -1,8 +1,7 @@
 <h2>Angriffsplanung 2.0</h2>
 <!--<p style="background-color: rgb(200, 200, 0)">Dieser Bereich befindet sich noch in Entwicklung. /dv</p>-->
 <?php
-//$Benutzer['rang'] = 0;
-
+$Benutzer['rang'] = 0;
 
 function createSimuLink($project, $wave, $gal, $pla, $linkName) {
 	global $SQL_DBConn;
@@ -87,6 +86,13 @@ $SQL_DEBUG = false;
 //general vars
 $project = postOrGet('project');
 
+function isUserCreator($project, $id) {
+	global $SQL_DBConn;
+	$sql = 'SELECT * FROM gn4massinc_projects WHERE project_id = "'.mysql_real_escape_string($project).'" AND erstellt_von = "'.mysql_real_escape_string($id).'"';
+	$res = tic_mysql_query($sql);
+	return mysql_num_rows($res);
+}
+
 //project mgmt
 $proj_edit;
 $proj_del;
@@ -95,6 +101,82 @@ $proj_neu;
 //aprint(array('POST' => $_POST, 'GET' => $_GET,));
 
 //for all.
+if(postOrGet('getical')) {
+	ob_end_clean();
+	ob_start();
+	
+	$project = postOrGet('project');
+	$wave = postOrGet('wave');
+	
+	$sql1 = 'SET @proj = "'.mysql_real_escape_string($project).'", @welle = "'.mysql_real_escape_string($wave).'", @refgal = "'.$Benutzer['galaxie'].'", @refpla="'.$Benutzer['planet'].'";';
+	tic_mysql_query($sql1, __FILE__, __LINE__);
+	$sql2 = 'SELECT w.t, z.dest_gal, z.dest_pla, z.fleet_id, z.kommentar, z.relative_starttick, u.spieler_name, u.spieler_punkte, u.allianz_name
+			FROM gn4massinc_zuweisung z
+			LEFT JOIN gn4massinc_wellen w ON w.project_fk = z.project_fk AND z.welle = w.id
+			LEFT JOIN gn4massinc_fleets f ON f.project_fk = z.project_fk AND z.fleet_id = f.fleet AND z.atter_gal = f.atter_gal AND z.atter_pla = f.atter_pla
+			LEFT JOIN gn_spieler2 u ON u.spieler_galaxie = z.dest_gal AND u.spieler_planet = z.dest_pla
+			LEFT JOIN gn4scans s ON s.rg = @refgal AND s.rp = @refpla AND s.type = 2
+			WHERE z.project_fk = @proj AND z.welle = @welle AND z.atter_gal = @refgal AND z.atter_pla = @refpla ORDER BY z.welle + z.relative_starttick * 15 * 60';
+	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
+	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
+	$color = true;
+
+	$fleets = null;
+	
+	//header
+	header('Content-Description: File Transfer');
+	header('Content-Disposition: attachment; filename="GN_att'.time().'.ics"');
+	header('Content-Type: text/calendar');
+	
+	echo 'BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:http://gntic.de
+X-WR-CALNAME:Galaxy Network
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+END:STANDARD
+END:VTIMEZONE'."\r\n";
+	
+	while(list($t, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name, $pkt, $ally
+				) = mysql_fetch_row($res)) {
+		echo 'BEGIN:VEVENT
+LOCATION:https://gntic.de/tic/main.php?modul=massinc&project='.$project.'&wave='.$wave.'&besoffski=2
+SUMMARY:[GN] Angriff Fleet #'.$fleetid.' auf '.$dest_g.':'.$dest_p.' '.$name.' ('.$kommentar.')
+DESCRIPTION:Zielinfo: https://gntic.de/tic/main.php?modul=massinc&project='.$project.'&wave='.$wave.'&tab_ziele=1
+CLASS:PUBLIC
+DTSTART;TZID=Europe/Berlin:'.date("Ymd\THis", $t + $relative_start * 15 * 60).'
+DTEND;TZID=Europe/Berlin:'.date("Ymd\THis", $t + $relative_start * 15 * 60 + 7 * 60).'
+DTSTAMP:'.date("Ymd\THis").'
+BEGIN:VALARM
+TRIGGER:-PT15M
+REPEAT:1
+DURATION:PT15M
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
+END:VEVENT'."\r\n";
+	}
+	
+	echo 'END:VCALENDAR'."\r\n".'';
+	
+	ob_flush();
+	exit();
+}
+
 if(postOrGet('wave_askonline')) {
 	ob_end_clean();
 	ob_start();
@@ -114,14 +196,17 @@ if(postOrGet('wave_askfleet')) {
 	$started_p = postOrGet('started_p');
 	$started_f = postOrGet('started_f');
 
-	$sql = "SELECT count(b.id) = 1 AS ok FROM gn4massinc_zuweisung z
+	$sql = "SELECT COALESCE(b.ankunft = (floor(w.t / 15 / 60) + z.relative_starttick + 30) * 15 * 60, -1) AS ok
+			FROM gn4massinc_zuweisung z
+			JOIN gn4massinc_wellen w ON w.id = z.welle AND w.project_fk = z.project_fk
 			LEFT JOIN gn4flottenbewegungen b
 			ON b.angreifer_galaxie = z.atter_gal
 				AND b.angreifer_planet = z.atter_pla
 				AND b.verteidiger_galaxie = z.dest_gal
 				AND b.verteidiger_planet = z.dest_pla
 				AND b.modus = 1
-				AND b.ankunft = (floor(z.welle / 15 / 60) + z.relative_starttick + 30) * 15 * 60
+				AND b.flottennr = z.fleet_id
+				AND ABS(b.ankunft - (floor(w.t / 15 / 60) + z.relative_starttick + 30) * 15 * 60) < 2 * 60 * 15
 			WHERE
 				z.project_fk = '".mysql_real_escape_string($project)."'
 				AND z.welle = '".mysql_real_escape_string($wave)."'
@@ -131,8 +216,9 @@ if(postOrGet('wave_askfleet')) {
 			GROUP BY z.project_fk";
 	if($SQL_DEBUG) aprint($sql);
 	list($started) = mysql_fetch_row(tic_mysql_query($sql, __FILE__, __LINE__));
+	
 	echo '<html><head><meta http-equiv="refresh" content="'.$refresh.'"/></head><body style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px;
-padding: 0; font-family: helvetica; font-size: 9pt; font-weight: bold; text-align: center; background-color: '.($started ? '55ff55' : '#ff5555').'">'.($started ? 'JA' : 'NEIN').'</body></html>';
+padding: 0; font-family: helvetica; font-size: 9pt; font-weight: bold; text-align: center; background-color: '.($started == 1 ? '55ff55' : ($started == -1 ? '#ff5555' : '#ffff55')).'">'.($started == 1 ? 'JA' : ($started == -1 ? 'NEIN' : 'Jein')).'</body></html>';
 	ob_flush();
 	exit();
 }
@@ -141,17 +227,20 @@ padding: 0; font-family: helvetica; font-size: 9pt; font-weight: bold; text-alig
 if(postOrGet('start_f')) {
 	$f = postOrGet('start_f');
 	$sql1 = "SET @g = '".mysql_real_escape_string($Benutzer['galaxie'])."', @p = '".mysql_real_escape_string($Benutzer['planet'])."', @f = '".mysql_real_escape_string($f)."';";
-	$sql2 = "SELECT atter_gal, atter_pla, dest_gal, dest_pla, fleet_id, welle, relative_starttick FROM gn4massinc_zuweisung WHERE atter_gal = @g AND atter_pla = @p AND fleet_id = @f";
+	$sql2 = "SELECT zw.atter_gal, zw.atter_pla, zw.dest_gal, zw.dest_pla, zw.fleet_id, zw.welle, w.t, zw.relative_starttick
+			FROM gn4massinc_zuweisung zw
+			JOIN gn4massinc_wellen w ON w.project_fk = zw.project_fk AND w.id = zw.welle
+			WHERE atter_gal = @g AND atter_pla = @p AND fleet_id = @f";
 	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$num = mysql_num_rows($res);
 
 	if($num == 1) {
-		list($atter_gal, $atter_pla, $dest_gal, $dest_pla, $fleet_id, $welle, $relative_starttick) = mysql_fetch_row($res);
-		$welle = floor($welle / 60 / 15);
+		list($atter_gal, $atter_pla, $dest_gal, $dest_pla, $fleet_id, $welle, $t, $relative_starttick) = mysql_fetch_row($res);
+		$t = floor($t / 60 / 15);
 		//valid, now create fleet.
-		$ankunft = ($welle + $relative_starttick + 30) * 15 * 60;
+		$ankunft = ($t + $relative_starttick + 30) * 15 * 60;
 		$flugzeit_ende = $ankunft + 5 * 15 * 60;
 		$rueckflug_ende = $flugzeit_ende + 30 * 15 * 60;
 		$sql1 = "SET @atter_gal = ".$atter_gal.", @atter_pla = ".$atter_pla.", @dest_gal = ".$dest_gal.", @dest_pla = ".$dest_pla.", @fleet_id = ".$fleet_id.",
@@ -199,7 +288,7 @@ if(postOrGet('edit_welle_user_willing_g') && postOrGet('edit_welle_user_willing_
 
 	$freigabestatus = mysql_result(tic_mysql_query("SELECT freigegeben FROM gn4massinc_projects WHERE project_id = '".mysql_real_escape_string($project)."'", __FILE__, __LINE__), 0, 0);
 
-	if($Benutzer['rang'] >= $Rang_GC || $g == $Benutzer['galaxie'] && $p == $Benutzer['planet'] && $freigabestatus == 1) {
+	if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id']) || $g == $Benutzer['galaxie'] && $p == $Benutzer['planet'] && $freigabestatus == 1) {
 		$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
 					@welle = '".mysql_real_escape_string($id)."',
 					@atter_gal = '".mysql_real_escape_string($g)."',
@@ -224,7 +313,7 @@ if(postOrGet('edit_welle_user_willing_g') && postOrGet('edit_welle_user_willing_
 	}
 }
 
-if($Benutzer['rang'] >= $Rang_GC) {
+if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 	$proj_edit = postOrGet('proj_edit');
 	$proj_edit_ack = postOrGet('proj_edit_ack');
 	$proj_del = postOrGet('proj_del');
@@ -236,14 +325,15 @@ if($Benutzer['rang'] >= $Rang_GC) {
 		tic_mysql_query($sql, __FILE__, __LINE__);
 	}
 	if($proj_neu) {
-		$sql = "INSERT INTO gn4massinc_projects (erstellt_von) VALUES ('".mysql_real_escape_string($Benutzer['name'])."')";
+		$sql = "INSERT INTO gn4massinc_projects (erstellt_von) VALUES ('".mysql_real_escape_string($Benutzer['id'])."')";
 		if($SQL_DEBUG) aprint($sql);
 		tic_mysql_query($sql, __FILE__, __LINE__);
 	}
 	if($proj_edit && $proj_edit_ack) {
 		$proj_edit_name = postOrGet('proj_edit_name');
 		$proj_edit_freigabe = postOrGet('proj_edit_freigabe');
-		$sql = "UPDATE gn4massinc_projects SET name = '".mysql_real_escape_string($proj_edit_name)."', freigegeben = '".mysql_real_escape_string($proj_edit_freigabe)."' WHERE project_id = '".mysql_real_escape_string($proj_edit)."'";
+		$proj_edit_zielwahl = postOrGet('proj_edit_zielwahl');
+		$sql = "UPDATE gn4massinc_projects SET name = '".mysql_real_escape_string($proj_edit_name)."', freigegeben = '".mysql_real_escape_string($proj_edit_freigabe)."', freie_zielwahl = '".$proj_edit_zielwahl."' WHERE project_id = '".mysql_real_escape_string($proj_edit)."'";
 		if($SQL_DEBUG) aprint($sql);
 		tic_mysql_query($sql, __FILE__, __LINE__);
 		$proj_edit = null;
@@ -379,10 +469,10 @@ if(empty($project)) {
 	//show projects
 	echo '<table class="datatable" align="center">';
 	echo '<tr class="datatablehead">';
-	if($Benutzer['rang'] >= $Rang_GC) {
-		echo '	<td colspan="8">Projekte</td>';
+	if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
+		echo '	<td colspan="9">Projekte</td>';
 	} else {
-		echo '	<td colspan="6">Projekte</td>';
+		echo '	<td colspan="7">Projekte</td>';
 	}
 	echo '</tr>';
 	echo '<tr class="fieldnormaldark" style="font-weight: bold">';
@@ -391,24 +481,25 @@ if(empty($project)) {
 	echo '	<td>&nbsp;Ersteller&nbsp;</td>';
 	echo '	<td>&nbsp;Datum&nbsp;</td>';
 	echo '	<td>&nbsp;Freigabe&nbsp;</td>';
-	if($Benutzer['rang'] >= $Rang_GC) {
+	echo '	<td>&nbsp;Zielauswahl&nbsp;</td>';
+	if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 		echo '	<td>&nbsp;&nbsp;</td>';
 	}
 	echo '	<td>&nbsp;&nbsp;</td>';
 	echo '</tr>';
 
-	$sql = "SELECT project_id, name, freigegeben, erstellt_von, erstellt_am FROM gn4massinc_projects ORDER BY project_id";
+	$sql = "SELECT p.project_id, p.name, p.freigegeben, u.name, p.erstellt_am, p.freie_zielwahl FROM gn4massinc_projects p LEFT JOIN gn4accounts u ON u.id = p.erstellt_von ORDER BY p.project_id";
 	if($SQL_DEBUG) aprint($sql);
 	$res = tic_mysql_query($sql, __FILE__, __LINE__);
 	$num = mysql_num_rows($res);
 
 	$color = false;
 	$i = 0;
-	while(list($project_id, $name, $freigegeben, $erstellt_von, $erstellt_am) = mysql_fetch_row($res)) {
+	while(list($project_id, $name, $freigegeben, $erstellt_von, $erstellt_am, $wahl) = mysql_fetch_row($res)) {
 		$color = !$color;
-		if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC) {
+		if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 			$i++;
-			if($proj_edit == $project_id && $Benutzer['rang'] >= $Rang_GC) {
+			if($proj_edit == $project_id && ($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id']))) {
 				echo '<form method="post" action="main.php?modul=massinc"><input type="hidden" name="proj_edit" value="'.$proj_edit.'"/>';
 				echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
 				echo '	<td>&nbsp;'.$project_id.'&nbsp;</td>';
@@ -420,6 +511,10 @@ if(empty($project)) {
 				echo '			<option value="1"'.($freigegeben == 1 ? ' selected="selected"' : '').'>Flotten-Checkin</option>';
 				echo '			<option value="2"'.($freigegeben == 2 ? ' selected="selected"' : '').'>Freigegeben</option>';
 				echo '			<option value="-1"'.($freigegeben == -1 ? ' selected="selected"' : '').'>ausgeblendet</option>';
+				echo '		</select>&nbsp;</td>';
+				echo '	<td>&nbsp;<select name="proj_edit_zielwahl">';
+				echo '			<option value="'.(!$wahl ? ' selected="selected"' : '').'">Organisator</option>';
+				echo '			<option value="1"'.($wahl ? ' selected="selected"' : '').'>frei</option>';
 				echo '		</select>&nbsp;</td>';
 				echo '	<td colspan="3">&nbsp;<input type="submit" name="proj_edit_ack" value="absenden"/>&nbsp;</td>';
 				echo '</tr>';
@@ -438,7 +533,8 @@ if(empty($project)) {
 					case -1: echo '<span title="Beendet">ausgeblendet</span>'; break;
 				}
 				echo '&nbsp;</td>';
-				if($Benutzer['rang'] >= $Rang_GC) {
+				echo '	<td>&nbsp;'.($wahl ? 'frei' : 'Organisator').'&nbsp;</td>';
+				if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 					echo '	<td>&nbsp;<a href="main.php?modul=massinc&proj_edit='.$project_id.'">&raquo; editieren</a>&nbsp;<br/>';
 					echo '	&nbsp;<a href="main.php?modul=massinc&proj_del='.$project_id.'" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; l&ouml;schen</a>&nbsp;</td>';
 				}
@@ -449,12 +545,12 @@ if(empty($project)) {
 	}
 
 	if($i == 0) {
-		echo '<tr class="fieldnormallight"><td colspan="7" align="center">Keine Eintr&auml;ge vorhanden.</td></tr>';
+		echo '<tr class="fieldnormallight"><td colspan="8" align="center">Keine Eintr&auml;ge vorhanden.</td></tr>';
 	}
 
-	if($Benutzer['rang'] >= $Rang_GC) {
+	if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 		echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
-			echo '<td colspan="7" align="right"><a href="main.php?modul=massinc&proj_neu=1">&raquo; neu erstellen</a></td>';
+			echo '<td colspan="8" align="right"><a href="main.php?modul=massinc&proj_neu=1">&raquo; neu erstellen</a></td>';
 		echo '</tr>';
 	}
 	
@@ -473,18 +569,19 @@ if(empty($project)) {
 	echo '	<td>&nbsp;&nbsp;</td>';
 	echo '</tr>';
 	$sql1 = "SET @g = '".mysql_real_escape_string($Benutzer['galaxie'])."', @p = '".mysql_real_escape_string($Benutzer['planet'])."'";
-	$sql2 = "SELECT w.project_fk, p.name, w.t, a.willing, w.id
+	$sql2 = "SELECT w.project_fk, p.name, w.t, a.willing, w.id, p.freie_zielwahl
 				FROM gn4massinc_wellen w
 				LEFT JOIN gn4massinc_projects p ON p.project_id = w.project_fk
 				LEFT JOIN gn4massinc_atter_willing a ON a.project_fk = w.project_fk AND a.welle = w.id AND a.atter_gal = @g AND a.atter_pla = @p
 				WHERE (SELECT freigegeben FROM gn4massinc_projects WHERE project_id = w.project_fk) > 0
+				AND w.t > UNIX_TIMESTAMP()
 				ORDER BY w.t";
 	if($SQL_DEBUG) aprint(join("\n\n", array($sql1, $sql2)));
 	tic_mysql_query($sql1, __FILE__, __LINE__);
 	$res = tic_mysql_query($sql2, __FILE__, __LINE__);
 	$color = true;
 	$i = 0;
-	while(list($project_id, $project_name, $welle, $willing, $welle_id) = mysql_fetch_row($res)) {
+	while(list($project_id, $project_name, $welle, $willing, $welle_id, $freie_zielwahl) = mysql_fetch_row($res)) {
 		$i++;
 		$color = !$color;
 		echo '<tr class="fieldnormal'.($color ? 'dark' : 'light').'">';
@@ -499,7 +596,8 @@ if(empty($project)) {
 		} else if($willing) {
 			echo 'JA&nbsp;';
 			echo '<br>';
-			echo '&nbsp;<a onclick="return confirm(\'Beachte: Bestehende Flottenzuweisungen werden nicht gel&ouml;scht. Bitte kontaktiere den Organisator!\')" href="main.php?modul=massinc&project='.$project_id.'&edit_welle_user_willing_id='.$welle_id.'&edit_welle_user_willing=0&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'">Doch nicht :-(</a>';
+			echo '&nbsp;<a title="Bitte melde Dich bei dem Organisator, falls Du doch nicht teilnehmen kannst." onclick="return confirm(\'Beachte: Bestehende Flottenzuweisungen werden nicht gel&ouml;scht. Bitte kontaktiere den Organisator!\')" href="main.php?modul=massinc&project='.$project_id.'&edit_welle_user_willing_id='.$welle_id.'&edit_welle_user_willing=0&edit_welle_user_willing_g='.$Benutzer['galaxie'].'&edit_welle_user_willing_p='.$Benutzer['planet'].'">Doch nicht</a>';
+			if($freie_zielwahl == 1) echo '&nbsp;<br/>&nbsp;<a href="main.php?modul=massinc&project='.$project_id.'&wave='.$welle_id.'&zuweisung=2" style="font-weight: bold;">&raquo; Ziel w&auml;hlen</a>';
 		} else {
 			echo 'Nein&nbsp;';
 			echo '<br>';
@@ -554,7 +652,7 @@ if(empty($project)) {
 	echo '</table>';
 
 } else {
-	if($Benutzer['rang'] >= $Rang_GC) {
+	if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 		$status = postOrGet('status');
 		if(!empty($status) && ($status == 0 ||$status == 1 || $status == 2 || $status == -1)) {
 			$sql1 = 'SET @project = "'.$project.'", @status = "'.$status.'";';
@@ -600,7 +698,7 @@ if(empty($project)) {
 
 		//show waves
 		if(empty($wave)) {
-			if($Benutzer['rang'] >= $Rang_GC) {
+			if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 				echo '<table class="datatable" align="center" width="100%">';
 				echo '<tr class="datatablehead">';
 				echo '<td'.($freigegeben == 0 ? ' bgcolor="red"' : '').'>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&status=0" target="_self">&raquo; nicht freigegeben</a>&nbsp;</td>';
@@ -612,7 +710,7 @@ if(empty($project)) {
 			}
 			echo '<table class="datatable" align="center" width="100%">';
 			echo '<tr class="datatablehead">';
-			if($Benutzer['rang'] >= $Rang_GC) {
+			if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 				echo '	<td colspan="9">Wellen</td>';
 			} else {
 				echo '	<td colspan="6">Wellen</td>';
@@ -622,12 +720,12 @@ if(empty($project)) {
 			echo '	<td>&nbsp;#&nbsp;</td>';
 			echo '	<td>&nbsp;Sart&nbsp;</td>';
 			echo '	<td>&nbsp;Kommentar&nbsp;</td>';
-			if($Benutzer['rang'] >= $Rang_GC) {
+			if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 				echo '	<td>&nbsp;&nbsp;</td>';
 			}
 			echo '	<td>&nbsp;Habe Zeit&nbsp;</td>';
 			echo '	<td>&nbsp;Zugeteilt&nbsp;</td>';
-			if($Benutzer['rang'] >= $Rang_GC) {
+			if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 				echo '	<td>&nbsp;#Zeit Spieler&nbsp;<br/>&nbsp;(Flotten)&nbsp;</td>';
 				echo '	<td>&nbsp;#zugewiesen Spieler&nbsp;<br/>&nbsp;(Flotten)&nbsp;</td>';
 			}
@@ -683,8 +781,8 @@ if(empty($project)) {
 				$distinct_fleets = $d_fleets;
 				$i++;
 				$color = !$color;
-				if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC) {
-					if($wave_edit == $id && $Benutzer['rang'] >= $Rang_GC) {
+				if($freigegeben > 0 || $Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
+					if($wave_edit == $id && ($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id']))) {
 						echo '<form method="post" action="main.php?modul=massinc&project='.$project.'">';
 						echo '<input type="hidden" name="wave_edit" value="'.$id.'"/>';
 						echo '<tr class="fieldnormal'.($color ? 'light' : 'dark').'">';
@@ -699,7 +797,7 @@ if(empty($project)) {
 						echo '	<td>&nbsp;'.$i.'&nbsp;</td>';
 						echo '	<td>&nbsp;'.date('Y-m-d H:i', $t).'&nbsp;</td>';
 						echo '	<td>&nbsp;'.$kommentar.'&nbsp;</td>';
-						if($Benutzer['rang'] >= $Rang_GC) {
+						if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 							echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_edit='.$id.'">&raquo; editieren</a>&nbsp;<br/>';
 							echo '	&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave_del='.$id.'" onclick="return confirm(\'Bist Du Dir sicher?\')">&raquo; l&ouml;schen</a>&nbsp;</td>';
 						}
@@ -745,18 +843,18 @@ if(empty($project)) {
 							echo '	<td>&nbsp;<i>noch keine Freigabe</i>'.($zugeteilt ? '<br/>(JA)' : '').'&nbsp;</td>';
 						}
 
-						if($Benutzer['rang'] >= $Rang_GC) {
+						if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 							echo '	<td>&nbsp;'.$zeit_spieler .'&nbsp;<br/>&nbsp;('.$zeit_fleets.')&nbsp;</td>';
 							echo '	<td>&nbsp;'.$spieler_zugewiesen.'&nbsp;<br/>&nbsp;('.$fleets_zugewiesen.')&nbsp;</td>';
 						}
 
-						echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&zuweisung=1">'.($Benutzer['rang'] >= $Rang_GC ? '&raquo; Zuweisung' : '&raquo; Cockpit').'</a>&nbsp;</td>';
+						echo '	<td>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&zuweisung=1">'.(($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) ? '&raquo; Zuweisung' : '&raquo; Cockpit').'</a>&nbsp;</td>';
 						echo '</tr>';
 					}
 				}
 
 			}
-			if($Benutzer['rang'] >= $Rang_GC) {
+			if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 				echo '<tr class="fieldnormaldark" style="font-weight: bold;">';
 				echo '	<td colspan="6">&nbsp;&nbsp;</td>';
 				echo '	<td colspan="2">&nbsp;Spieler (Flotten): '.$distinct_spieler.' ('.$distinct_fleets.')&nbsp;</td>';
@@ -768,7 +866,66 @@ if(empty($project)) {
 				echo '</td></tr>';
 			}
 			echo '</table>';
-		} else if (postOrGet('zuweisung') AND $Benutzer['rang'] >= $Rang_GC) {
+		} else if(postOrGet('zuweisung') == 2 
+					&& mysql_result(tic_mysql_query('SELECT freie_zielwahl FROM gn4massinc_projects WHERE project_id = "'.mysql_real_escape_string($project).'"'), 0, 'freie_zielwahl') == 1) {
+			$detail = postOrGet('koord');
+			if($detail) $detail = explode(':', $detail);
+			
+			//dummy.
+			//echo 'alle so: yeah.</br>';
+			$c_blue = 'rgb(150,150,255)';
+			$c_yellow = 'rgb(255,255,150)';
+			$c_red = 'rgb(255,150,150)';
+			
+			$sql1 = "SET @project = '".mysql_real_escape_string($project)."',
+						@welle = '".mysql_real_escape_string($wave)."'";
+			$sql2 = "SELECT zw.ziel_gal, zw.ziel_pla, 
+							s.spieler_name, s.spieler_punkte,
+							s0.me + s0.ke, 
+							s3.ga, s3.glo, s3.glr, s3.gmr, s3.gsr,
+							s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu,
+							(	SELECT count(distinct(concat_ws(':', zws.atter_gal, zws.atter_pla))) FROM gn4massinc_zuweisung zws WHERE zws.project_fk = @project AND zws.welle = @welle AND zws.dest_gal = zw.ziel_gal AND zws.dest_pla = zw.ziel_pla
+							) fleets
+						FROM gn4massinc_ziele_welle zw
+						LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = ziel_pla AND s0.type = 0
+						LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = ziel_pla AND s1.type = 1
+						LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = ziel_pla AND s3.type = 3
+						LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.ziel_gal AND s.spieler_planet = zw.ziel_pla
+						WHERE zw.project_fk = @project AND zw.welle = @welle
+						ORDER BY s.spieler_punkte DESC, zw.ziel_gal, zw.ziel_pla";
+			tic_mysql_query($sql1, __FILE__, __LINE__);
+			$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
+			
+			$num = mysql_num_rows($res2);
+			if($num == 0) {
+				echo 'Keine Eintr&auml;ge';
+			}
+			echo '<table style="border-spacing: 10px;"><tr><td></td><td rowspan="'.($num+1).'" style="padding-left: 40px; padding-top: 20px; vertical-align: top;">';
+			if(count($detail) > 1) {
+				echo 'Detailinformation:';
+			} else {
+				echo '<i>Bitte w&auml;hle ein Ziel, um Details einzusehen.</i>';
+			}
+			echo '</td></tr>';
+			
+			while(list($zg, $zp, $zs, $zpkt, $zexen, $zgaj, $zglo, $zglr, $zgmr, $zgsr, $zfja, $zfbo, $zffr, $zfze, $zfkr, $zfsc, $zftr, $zfcl, $zfca, $fleets) = mysql_fetch_row($res2)) {
+				//aprint(array($zg, $zp, $zs, $zpkt, $zexen, $zgaj, $zglo, $zglr, $zgmr, $zgsr, $zfja, $zfbo, $zffr, $zfze, $zfkr, $zfsc, $zftr, $zfcl, $zfca, $fleets));
+				$color = $c_blue;
+				if($fleets > 0) $color = $c_yellow;
+				if($fleets > 1) $color = $c_red;
+				echo '<tr>';
+				echo '	<td style="'.((count($detail) > 1 && $detail[0] == $zg && $detail[1] == $zp) ? 'border: 4px green solid; ' : '').'border-radius: 50%; width: 250px; height: 150px; background-color: '.$color.'; vertical-align: middle; align: center;"><p style="font-size: 16px; font-weight: bold;"><a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&zuweisung=2&koord='.$zg.':'.$zp.'" title="Details">&raquo; '.$zg.':'.$zp.' '.$zs.'</a></p>'.ZahlZuText($zpkt).' Punkte<br/>'.ZahlZuText($zexen).' Exen</td>';
+				echo '</tr>';
+			}
+			echo '</table>';
+			
+			//disable destination selection.
+			$donotshowdestinations = 1;
+		} else if(postOrGet('zuweisung') == 1 
+						AND ($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id']) || 
+							false //mysql_result(tic_mysql_query('SELECT freie_zielwahl FROM gn4massinc_projects WHERE project_id = "'.mysql_real_escape_string($project).'"'), 0, 'freie_zielwahl') == 1
+						)
+		) {
 			$koords_g = explode(':', postOrGet('koord'))[0];
 			$koords_p = explode(':', postOrGet('koord'))[1];
 			
@@ -1809,6 +1966,8 @@ if(empty($project)) {
 					//echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a '.($mode==1 ? 'style="color: red" ' : '').'href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&besoffski=1">&raquo; Cockpit</a><br/>';
 					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a '.((!$mode && !$tab_ziele) ? 'style="color: red" ' : '').'href="main.php?modul=massinc&project='.$project.'&wave='.$id.'">&raquo; Cockpit Details</a><br/>';
 					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a '.($tab_ziele ? 'style="color: red" ' : '').'href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&tab_ziele=1">&raquo; Zielinformationen</a><br/>';
+					echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$id.'&getical=1">&raquo; Kalendereintrag</a><br/>';
+					
 					if($id == $wave) echo '</td></tr></table>';
 					if($flotten > 0) {
 						echo '</b>';
@@ -1872,6 +2031,11 @@ if(empty($project)) {
 						tic_mysql_query($sql1, __FILE__, __LINE__);
 						$res2 = tic_mysql_query($sql2, __FILE__, __LINE__);
 						$num2 = mysql_num_rows($res2);
+						
+						if(time() - mysql_result($res2, 0, 't') > 270*60 - 10*15*60) {
+							echo '<td class="fieldnormallight">&nbsp;<a href="'.makeRequestScanLink($g, $p, 4, 'modul=massinc&project='.$project.'&wave='.$wave.'&tab_ziele=1').'" style="font-weight: bold;">&raquo; Jetzt News beantragen!</a>&nbsp;</td></tr><tr>';
+						}
+						
 						if($num2 == 0) {
 							echo '<td class="fieldnormallight" style="font-weight: normal">&nbsp;keine Eintr&auml;ge&nbsp;</td>';
 						} else {
@@ -1999,9 +2163,10 @@ if(empty($project)) {
 						$color = true;
 
 						$fleets = null;
-						
+						$tmp_t;
 						while(list($t, $dest_g, $dest_p, $fleetid, $kommentar, $relative_start, $name, $pkt, $ally
 									) = mysql_fetch_row($res)) {
+								$tmp_t = $t;
 								$fleets[$dest_g . ':' . $dest_p][] = array(
 									't' => $t,
 									'dest_g' => $dest_g,
@@ -2014,8 +2179,13 @@ if(empty($project)) {
 									'ziel_ally' => $ally
 									);
 						}
-						//aprint($fleets);
-						echo '<div onclick="location.href=\'main.php?modul=massinc&project='.$project.'&wave='.$wave.'\'"><br/><br/>';
+						
+						$gone = $tmp_t < time();
+						if($gone) {
+							echo '<p style="font-size: 15px">Der Start liegt in der Vergangenheit. <a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&tab_ziele=1" style="font-weight: bold;">&raquo; HIER</a> geht es zu den Zielinformationen (News).</p>';
+						}
+						
+						echo '<div onclick="location.href=\'main.php?modul=massinc&project='.$project.'&wave='.$wave.'\'" style="'.($gone ? 'opacity: 0.5;' : '').'"><br/><br/>';
 						if(count($fleets) == 0) {
 							echo 'keine Starts geplant.';
 						} else {
@@ -2024,7 +2194,7 @@ if(empty($project)) {
 							foreach($fleets as $ziel) {
 								$circle_dimension = '300';
 								//grafik
-								echo '<div style="position: relative">';
+								echo '<div style="position: relative; left: 10px;">';
 								echo '	<svg xmlns="http://www.w3.org/2000/svg" style="width: 900px; height: ' . ($circle_dimension+4) . 'px; z-index: 1; position: absolute; top: 0px; left: 0px">';
 								echo '  <defs>';
 								echo '    <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">';
@@ -2084,7 +2254,7 @@ if(empty($project)) {
 									echo '</div>';
 								}
 								
-								echo '<div style="width: 750px; height: 330px">&nbsp;</div>';
+								echo '<div style="width: 770px; height: 320px">&nbsp;</div>';
 							}//foreach
 
 							//timer
@@ -2287,7 +2457,7 @@ if(empty($project)) {
 							echo '	<td rowspan="3">&nbsp;<span id="timer'.$fleetid.'" style="font-size: 12pt; font-weight: bold"><br/>';
 							if($fleetid == 1 && $timer1 < 0) echo 'bereits vergangen';
 							if($fleetid == 2 && $timer2 < 0) echo 'bereits vergangen';
-							echo '</span>&nbsp;<br/><br/>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&start_f='.$fleetid.'" title="Du kannst Deinen Flottenstart hier ins TIC eintragen.">&raquo; Flottenstart im TIC melden</a>&nbsp;</td>';
+							echo '</span>&nbsp;<br/><br/>&nbsp;<a href="main.php?modul=massinc&project='.$project.'&wave='.$wave.'&start_f='.$fleetid.'" title="Du kannst Deinen Flottenstart hier ins TIC eintragen.">&raquo; Korrekten Start im TIC melden</a>&nbsp;</td>';
 							echo '</tr>';
 							echo '<tr class="fieldnormaldark" style="font-weight: bold">';
 							echo '	<td bgcolor="white">&nbsp;</td>';
@@ -2456,7 +2626,7 @@ if(empty($project)) {
 							</script>";
 
 						//ADMIN
-						if($Benutzer['rang'] >= $Rang_GC) {
+						if($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) {
 						}
 
 						echo '</td></tr></table>';
@@ -2470,7 +2640,7 @@ if(empty($project)) {
 		echo '<br/>';
 
 		//edit number of off fleets for external atter
-		if($Benutzer['rang'] >= $Rang_GC && postOrGet('editfleets') == 1) {
+		if(($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) && postOrGet('editfleets') == 1) {
 			$gal = postOrGet('gal');
 			$pla = postOrGet('pla');
 			
@@ -2482,7 +2652,7 @@ if(empty($project)) {
 			tic_mysql_query($sql2, __FILE__, __LINE__);
 		}
 		
-		if($Benutzer['rang'] >= $Rang_GC && !$donotshowdestinations) {
+		if(($Benutzer['rang'] >= $Rang_GC  || isUserCreator($project, $Benutzer['id'])) && !$donotshowdestinations) {
 			//mgmt
 			
 			//wellen management
@@ -2858,7 +3028,7 @@ if(empty($project)) {
 			echo '<br/>';
 		}
 		
-		if($Benutzer['rang'] >= $Rang_GC && !$donotshowdestinations) {
+		if(($Benutzer['rang'] >= $Rang_GC || isUserCreator($project, $Benutzer['id'])) && !$donotshowdestinations) {
 			if(postOrGet('scansbeantragen2')) {
 				$sql1 = "INSERT INTO gn4scanrequests (requester_g, requester_p, ziel_g,  ziel_p, t, scantyp) 
 						(

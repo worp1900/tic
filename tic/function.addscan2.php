@@ -784,7 +784,7 @@ if($data) {
 											"' . $v['atter'][1] . '",
 											"' . $v['deffer'][0] . '",
 											"' . $v['deffer'][1] . '",
-											"0",
+											/*important, 1 == unsafe!*/ "1",
 											"' . $v['eta'] . '",
 											"' . $flugzeit . '",
 											"' . $v['flottennr'] . '",

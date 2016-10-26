@@ -235,7 +235,7 @@
 				<td class="menu"><a href="./main.php?modul=logout"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Logout</a></td>
 			</tr>
 			<tr>
-				<td class="menu"><a href="http://home.in.tum.de/~steilm/forschungsplan.htm" target="_blank"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Bauplan</a></td>
+				<td class="menu"><a href="Bauplan_GN_R48.html" target="_blank" style="color: red;"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px" />Bauplan R48</a></td>
 			</tr>
 		</table>
 	</td></tr>
