@@ -1,5 +1,8 @@
 <!-- START: inc_allifleets -->
 <?php
+	//für farben.
+	$hours = 36;
+
 	$allianz = isset($_GET['allianz'])?$_GET['allianz']:$Benutzer['allianz'];
 ?>
 <center>
@@ -24,7 +27,7 @@
 			if ($AllianzNummer == $allianz)
 				echo "<h3>[ ".$AllianzInfo[$AllianzNummer]['tag']." ] ".$AllianzNummerName."</h3>\n";
 			else
-				echo "<h3><a href=\"./main.php?modul=allifleets&allianz=".$AllianzNummer."\">[ ".$AllianzTag[$AllianzNummer]." ]</h3>\n";
+				echo "<h3><a href=\"./main.php?modul=allifleets&allianz=".$AllianzNummer."\">[ ".$AllianzTag[$AllianzNummer]." ]</a></h3>\n";
 		}
 	}
 ?>
@@ -48,45 +51,63 @@
 			<col width="6%" />
 		</colgroup>
 		<tr class="datatablehead">
-			<th>Sektor</th>
-			<th>Name</th>
-			<th colspan="5">Deffensiv</th>
-			<th colspan="9">Offensiv</th>
+			<th>&nbsp;Sektor&nbsp;</th>
+			<th>&nbsp;Name&nbsp;</th>
+			<th colspan="6">&nbsp;Defensiv&nbsp;</th>
+			<th colspan="10">&nbsp;Offensiv&nbsp;</th>
+			<th colspan="2">&nbsp;Clepdeff&nbsp;</th>
 		</tr>
 		<tr class="datatablehead">
 			<th>&nbsp;</th>
 			<th>&nbsp;</th>
-			<th title="Leichtes Orbitalgesch&uuml;tz">LO</th>
-			<th title="Leichtes Raumgesch&uuml;tz">LR</th>
-			<th title="Mittleres Raumgesch&uuml;tz">MR</th>
-			<th title="Schweres Raumgesch&uuml;tz">SR</th>
-			<th title="Abfangj&auml;ger">AJ</th>
-			<th title="J&auml;ger">J&auml;</th>
-			<th title="Bomber">Bo</th>
-			<th title="Fregatten">Fr</th>
-			<th title="Zerst&ouml;rer">Ze</th>
-			<th title="Kreuzer">Kr</th>
-			<th title="Schlachtschiffe">SS</th>
-			<th title="Tr&auml;ger">Tr</th>
-			<th title="Kaperschiffe">Ka</th>
-			<th title="Schildschiffe">Sch</th>
+			<th>&nbsp;Alter&nbsp;</th>
+			<th title="Leichtes Orbitalgesch&uuml;tz">&nbsp;LO&nbsp;</th>
+			<th title="Leichtes Raumgesch&uuml;tz">&nbsp;LR&nbsp;</th>
+			<th title="Mittleres Raumgesch&uuml;tz">&nbsp;MR&nbsp;</th>
+			<th title="Schweres Raumgesch&uuml;tz">&nbsp;SR&nbsp;</th>
+			<th title="Abfangj&auml;ger">&nbsp;AJ&nbsp;</th>
+
+			<th>&nbsp;Alter&nbsp;</th>
+			<th title="J&auml;ger">&nbsp;J&auml;&nbsp;</th>
+			<th title="Bomber">&nbsp;Bo&nbsp;</th>
+			<th title="Fregatten">&nbsp;Fr&nbsp;</th>
+			<th title="Zerst&ouml;rer">&nbsp;Ze&nbsp;</th>
+			<th title="Kreuzer">&nbsp;Kr&nbsp;</th>
+			<th title="Schlachtschiffe">&nbsp;SS&nbsp;</th>
+			<th title="Tr&auml;ger">&nbsp;Tr&nbsp;</th>
+			<th title="Kaperschiffe">&nbsp;Ka&nbsp;</th>
+			<th title="Schildschiffe">&nbsp;Sch&nbsp;</th>
+			<th>&nbsp;Schrott&nbsp;</th>
+			<th>&nbsp;Gesamt&nbsp;</th>
 		</tr>
 <?php
-    $gja = 0;
-    $gbo = 0;
-    $gfr = 0;
-    $gze = 0;
-    $gkr = 0;
-    $gsl = 0;
-    $gtr = 0;
-    $gka = 0;
-    $gca = 0;
-    $glo = 0;
-    $gro = 0;
-    $gmr = 0;
-    $gsr = 0;
-    $gaj = 0;
-	$SQL_Result2 = tic_mysql_query('SELECT a.id, a.name, a.galaxie, a.planet, b.sfj, b.sfb, b.sff, b.sfz, b.sfkr, b.sfsa, b.sft, b.sfka, b.sfsu, c.glo, c.glr, c.gmr, c.gsr, c.ga FROM `gn4accounts` AS a LEFT JOIN `gn4scans` AS b ON(a.galaxie = b.rg AND a.planet = b.rp AND b.type = 1) LEFT JOIN `gn4scans` AS c ON(a.galaxie = c.rg AND a.planet = c.rp AND c.type = 3) WHERE a.allianz="'.$allianz.'" order by a.galaxie, a.planet', $SQL_DBConn);
+	$gja = 0;
+	$gbo = 0;
+	$gfr = 0;
+	$gze = 0;
+	$gkr = 0;
+	$gsl = 0;
+	$gtr = 0;
+	$gka = 0;
+	$gca = 0;
+	$glo = 0;
+	$gro = 0;
+	$gmr = 0;
+	$gsr = 0;
+	$gaj = 0;
+	$gschrott = 0;
+	
+	$sql = "	SELECT 
+	a.id, a.name, a.galaxie, a.planet, 
+	b.sfj, b.sfb, b.sff, b.sfz, b.sfkr, b.sfsa, b.sft, b.sfka, b.sfsu, 
+	c.glo, c.glr, c.gmr, c.gsr, c.ga,
+	UNIX_TIMESTAMP(STR_TO_DATE(b.zeit, '%H:%i %d.%m.%Y')) t1, UNIX_TIMESTAMP(STR_TO_DATE(c.zeit, '%H:%i %d.%m.%Y')) t2 
+FROM `gn4accounts` AS a
+LEFT JOIN `gn4scans` AS b 
+	ON(a.galaxie = b.rg AND a.planet = b.rp AND b.type = 1) 
+LEFT JOIN `gn4scans` AS c 
+	ON(a.galaxie = c.rg AND a.planet = c.rp AND c.type = 3) WHERE a.allianz='".$allianz."' order by a.galaxie, a.planet";
+	$SQL_Result2 = tic_mysql_query($sql);
 	$color = 0;
 	if(mysql_num_rows($SQL_Result2) > 0)
 	{
@@ -127,82 +148,119 @@
 			$gmr += $mr;
 			$gsr += $sr;
 			$gaj += $aj;
+			
+			//geschütze
+			$t1 = mysql_result($SQL_Result2, $i, 't1' );
+			$alter1 = round((time() - $t1) / 60, 0);
+			$farbe1 = 255 - round((1 - $alter1 / 60 / $hours) * 255);
+			//einheiten
+			$t2 = mysql_result($SQL_Result2, $i, 't2' );
+			$alter2 = round((time() - $t2) / 60, 0);
+			$farbe2 = 255 - round((1 - $alter2 / 60 / $hours) * 255);
+
+			
 			echo "		<tr class=\"field".$ftype.($color ? "dark" : "light")."\">\n";
-			echo "			<td align=\"center\">".$gala.":".$planet."</td>\n";
-			echo "			<td>".$name."</td>\n";
-			echo "			<td title=\"Leichtes Orbitalgesch&uuml;tz\" align=\"right\">".IntVal($lo)."</td>\n";
-			echo "			<td title=\"Leichtes Raumgesch&uuml;tz\" align=\"right\">".IntVal($ro)."</td>\n";
-			echo "			<td title=\"Mittleres Raumgesch&uuml;tz\" align=\"right\">".IntVal($mr)."</td>\n";
-			echo "			<td title=\"Schweres Raumgesch&uuml;tz\" align=\"right\">".IntVal($sr)."</td>\n";
-			echo "			<td title=\"Abfangj&auml;ger\" align=\"right\">".IntVal($aj)."</td>\n";
-			echo "			<td title=\"J&auml;ger\" align=\"right\">".IntVal($ja)."</td>\n";
-			echo "			<td title=\"Bomber\" align=\"right\">".IntVal($bo)."</td>\n";
-			echo "			<td title=\"Fregatten\" align=\"right\">".IntVal($fr)."</td>\n";
-			echo "			<td title=\"Zerst&ouml;rer\" align=\"right\">".IntVal($ze)."</td>\n";
-			echo "			<td title=\"Kreuzer\" align=\"right\">".IntVal($kr)."</td>\n";
-			echo "			<td title=\"Schlachtschiffe\" align=\"right\">".IntVal($sl)."</td>\n";
-			echo "			<td title=\"Tr&auml;ger\" align=\"right\">".IntVal($tr)."</td>\n";
-			echo "			<td title=\"Kaperschiffe\" align=\"right\">".IntVal($ka)."</td>\n";
-			echo "			<td title=\"Schildschiffe\" align=\"right\">".IntVal($ca)."</td>\n";
-			echo "		</tr>\n";
-			}
-			$color = !$color;
-			echo "		<tr class=\"fieldnormal".($color ? "dark" : "light")."\" style=\"font-weight:bold;\">\n";
-			echo "			<td align=\"center\">Allianz</td>\n";
-			echo "			<td>Gesammt</td>\n";
-			echo "			<td title=\"Leichtes Orbitalgesch&uuml;tz\" align=\"right\">".IntVal($glo)."</td>\n";
-			echo "			<td title=\"Leichtes Raumgesch&uuml;tz\" align=\"right\">".IntVal($gro)."</td>\n";
-			echo "			<td title=\"Mittleres Raumgesch&uuml;tz\" align=\"right\">".IntVal($gmr)."</td>\n";
-			echo "			<td title=\"Schweres Raumgesch&uuml;tz\" align=\"right\">".IntVal($gsr)."</td>\n";
-			echo "			<td title=\"Abfangj&auml;ger\" align=\"right\">".IntVal($gaj)."</td>\n";
-			echo "			<td title=\"J&auml;ger\" align=\"right\">".IntVal($gja)."</td>\n";
-			echo "			<td title=\"Bomber\" align=\"right\">".IntVal($gbo)."</td>\n";
-			echo "			<td title=\"Fregatten\" align=\"right\">".IntVal($gfr)."</td>\n";
-			echo "			<td title=\"Zerst&ouml;rer\" align=\"right\">".IntVal($gze)."</td>\n";
-			echo "			<td title=\"Kreuzer\" align=\"right\">".IntVal($gkr)."</td>\n";
-			echo "			<td title=\"Schlachtschiffe\" align=\"right\">".IntVal($gsl)."</td>\n";
-			echo "			<td title=\"Tr&auml;ger\" align=\"right\">".IntVal($gtr)."</td>\n";
-			echo "			<td title=\"Kaperschiffe\" align=\"right\">".IntVal($gka)."</td>\n";
-			echo "			<td title=\"Schildschiffe\" align=\"right\">".IntVal($gca)."</td>\n";
-			echo "		</tr>\n";
-			$gja = IntVal($gja/mysql_num_rows($SQL_Result2));
-			$gbo = IntVal($gbo/mysql_num_rows($SQL_Result2));
-			$gfr = IntVal($gfr/mysql_num_rows($SQL_Result2));
-			$gze = IntVal($gze/mysql_num_rows($SQL_Result2));
-			$gkr = IntVal($gkr/mysql_num_rows($SQL_Result2));
-			$gsl = IntVal($gsl/mysql_num_rows($SQL_Result2));
-			$gtr = IntVal($gtr/mysql_num_rows($SQL_Result2));
-			$gka = IntVal($gka/mysql_num_rows($SQL_Result2));
-			$gca = IntVal($gca/mysql_num_rows($SQL_Result2));
-			$glo = IntVal($glo/mysql_num_rows($SQL_Result2));
-			$gro = IntVal($gro/mysql_num_rows($SQL_Result2));
-			$gmr = IntVal($gmr/mysql_num_rows($SQL_Result2));
-			$gsr = IntVal($gsr/mysql_num_rows($SQL_Result2));
-			$gaj = IntVal($gaj/mysql_num_rows($SQL_Result2));
-			$color = !$color;
-			echo "		<tr class=\"fieldnormal".($color ? "dark" : "light")."\" style=\"font-weight:bold;\">\n";
-			echo "			<td align=\"center\">Allianz</td>\n";
-			echo "			<td>Durchschnitt</td>\n";
-			echo "			<td title=\"Leichtes Orbitalgesch&uuml;tz\" align=\"right\">".$glo."</td>\n";
-			echo "			<td title=\"Leichtes Raumgesch&uuml;tz\" align=\"right\">".$gro."</td>\n";
-			echo "			<td title=\"Mittleres Raumgesch&uuml;tz\" align=\"right\">".$gmr."</td>\n";
-			echo "			<td title=\"Schweres Raumgesch&uuml;tz\" align=\"right\">".$gsr."</td>\n";
-			echo "			<td title=\"Abfangj&auml;ger\" align=\"right\">".$gaj."</td>\n";
-			echo "			<td title=\"J&auml;ger\" align=\"right\">".$gja."</td>\n";
-			echo "			<td title=\"Bomber\" align=\"right\">".$gbo."</td>\n";
-			echo "			<td title=\"Fregatten\" align=\"right\">".$gfr."</td>\n";
-			echo "			<td title=\"Zerst&ouml;rer\" align=\"right\">".$gze."</td>\n";
-			echo "			<td title=\"Kreuzer\" align=\"right\">".$gkr."</td>\n";
-			echo "			<td title=\"Schlachtschiffe\" align=\"right\">".$gsl."</td>\n";
-			echo "			<td title=\"Tr&auml;ger\" align=\"right\">".$gtr."</td>\n";
-			echo "			<td title=\"Kaperschiffe\" align=\"right\">".$gka."</td>\n";
-			echo "			<td title=\"Schildschiffe\" align=\"right\">".$gca."</td>\n";
+			echo "			<td align=\"center\">&nbsp;".$gala.":".$planet."&nbsp;</td>\n";
+			echo "			<td>&nbsp;".$name."&nbsp;</td>\n";
+			echo "			<td align='right' style='color: white; background-color: rgb(".$farbe1.", 0, 0)'>&nbsp;".ZahlZuText($alter2)."&nbsp;</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($lo)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($ro)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($mr)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($sr)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($aj)."</td>\n";
+
+			echo "			<td align='right' style='color: white; background-color: rgb(".$farbe2.", 0, 0)'>&nbsp;".ZahlZuText($alter1)."&nbsp;</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($ja)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($bo)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($fr)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($ze)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($kr)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($sl)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($tr)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($ka)."</td>\n";
+			echo "			<td align=\"right\">".ZahlZuText($ca)."</td>\n";
+			
+			$schrott = $lo * 1.28 + $aj * 0.32 + $tr * 25;
+			$gschrott += $schrott;
+			echo '<td align="right">&nbsp;'.ZahlZuText($schrott).'&nbsp;</td>';
+			echo '<td align="right">&nbsp;'.ZahlZuText($schrott + $ca).'&nbsp;</td>';
 			echo "		</tr>\n";
 		}
-		else
-		{
-			echo "<tr class=\"datatablefoot\" style=\"font-weight:bold;\"><td>Diese Allianz hat keine Mitglieder</td></tr>";
-		}
+			
+		$color = !$color;
+		echo "		<tr class=\"fieldnormal".($color ? "dark" : "light")."\" style=\"font-weight:bold;\">\n";
+		echo "			<td align=\"center\">Allianz</td>\n";
+		echo "			<td>Gesammt</td>\n";
+		echo '<td>&nbsp;</td>';
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($glo)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gro)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gmr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gsr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gaj)."&nbsp;</td>\n";
+
+		echo '<td>&nbsp;</td>';
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gja)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gbo)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gfr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gze)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gkr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gsl)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gtr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gka)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gca)."&nbsp;</td>\n";
+
+		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott).'&nbsp;</td>';
+		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott + $gca).'&nbsp;</td>';
+		echo "		</tr>\n";
+		
+		$num = mysql_num_rows($SQL_Result2);
+		$gschrott = round(($glo * 1.28 + $gaj * 0.32 + $gtr * 25)/$num, 0);
+		$gja = round($gja/$num, 0);
+		$gbo = round($gbo/$num, 0);
+		$gfr = round($gfr/$num, 0);
+		$gze = round($gze/$num, 0);
+		$gkr = round($gkr/$num, 0);
+		$gsl = round($gsl/$num, 0);
+		$gtr = round($gtr/$num, 0);
+		$gka = round($gka/$num, 0);
+		$gca = round($gca/$num, 0);
+		$glo = round($glo/$num, 0);
+		$gro = round($gro/$num, 0);
+		$gmr = round($gmr/$num, 0);
+		$gsr = round($gsr/$num, 0);
+		$gaj = round($gaj/$num, 0);
+		
+		$color = !$color;
+		echo "		<tr class=\"fieldnormal".($color ? "dark" : "light")."\" style=\"font-weight:bold;\">\n";
+		echo "			<td align=\"center\">Allianz</td>\n";
+		echo "			<td>Durchschnitt</td>\n";
+		echo '<td>&nbsp;</td>';
+		echo "			<td align=\"right\">".ZahlZuText($glo)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gro)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gmr)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gsr)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gaj)."</td>\n";
+
+		echo '<td>&nbsp;</td>';
+		echo "			<td align=\"right\">".ZahlZuText($gja)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gbo)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gfr)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gze)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gkr)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gsl)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gtr)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gka)."</td>\n";
+		echo "			<td align=\"right\">".ZahlZuText($gca)."</td>\n";
+
+		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott).'&nbsp;</td>';
+		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott + $gca).'&nbsp;</td>';
+
+		echo "		</tr>\n";
+	}
+	else
+	{
+		echo "<tr class=\"datatablefoot\" style=\"font-weight:bold;\"><td>Diese Allianz hat keine Mitglieder</td></tr>";
+	}
 
 ?>
 	</table>
