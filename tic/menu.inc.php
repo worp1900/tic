@@ -184,13 +184,6 @@
 		echo "			<tr>\n";
 		echo "				<td class=\"menu\"><a href=\"./main.php?modul=management_meta\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Meta-Management</a></td>\n";
 		echo "			</tr>\n";
-		/*
-		if ($Benutzer['rang'] >= $Rang_Techniker) {
-			echo "			<tr>\n";
-			echo "				<td class=\"menu\"><a href=\"./main.php?modul=management_channels\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Channel-Management</a></td>\n";
-			echo "			</tr>\n";
-		}
-		*/
 		echo "			<tr>\n";
 		echo "				<td class=\"menu\"><a href=\"./main.php?modul=userman\"><img src=\"bilder/skin/menu_item_icon.bmp\" alt=\"\" style=\"padding:0px 5px 0px 5px;\" />Benutzerverwaltung</a></td>\n";
 		echo "			</tr>\n";
@@ -235,7 +228,7 @@
 				<td class="menu"><a href="./main.php?modul=logout"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px;" />Logout</a></td>
 			</tr>
 			<tr>
-				<td class="menu"><a href="Bauplan_GN_R48.html" target="_blank" style="color: red;"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px" />Bauplan R48</a></td>
+				<td class="menu"><a href="Bauplan_GN_R48.html" target="_blank"><img src="bilder/skin/menu_item_icon.bmp" alt="" style="padding:0px 5px 0px 5px" />Bauplan R48</a></td>
 			</tr>
 		</table>
 	</td></tr>
