@@ -1,7 +1,7 @@
 <h2>Angriffsplanung 2.0</h2>
 <!--<p style="background-color: rgb(200, 200, 0)">Dieser Bereich befindet sich noch in Entwicklung. /dv</p>-->
 <?php
-$Benutzer['rang'] = 0;
+//$Benutzer['rang'] = 0;
 
 function createSimuLink($project, $wave, $gal, $pla, $linkName) {
 	global $SQL_DBConn;
