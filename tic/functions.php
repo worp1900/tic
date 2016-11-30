@@ -323,8 +323,24 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$link .= '&g[0]='.$rg.'&rp[0]='.$rp;
 	}
 	*/
-	$link .= '&g[0]='.$rg.'&p[0]='.$rp;
+	
+	//home fleet - quick & dirty
 	$offset = 1;
+	$sql = 'SELECT (SELECT count(1) FROM gn4flottenbewegungen WHERE angreifer_galaxie = "' . $rg . '" AND angreifer_planet = "' . $rp . '" AND flottennr = 1) as f1, (SELECT count(1) FROM gn4flottenbewegungen WHERE angreifer_galaxie = "' . $rg . '" AND angreifer_planet = "' . $rp . '" AND flottennr = 2) as f2';
+	$res2 = tic_mysql_query($sql) or die(tic_mysql_error(__FILE__,__LINE__));
+	
+	list($f1OnTour, $f2OnTour) = mysql_fetch_row($res2);
+	
+	$link .= '&g[0]='.$rg.'&p[0]='.$rp.'&typ[0]=d&f[0]=3';
+	
+	if(!$f1OnTour) {
+		$link .= '&g['.($offset).']='.$rg.'&p['.($offset).']='.$rp.'&typ['.($offset).']=d&f['.($offset).']=1';
+		$offset++;
+	}
+	if(!$f2OnTour) {
+		$link .= '&g['.($offset).']='.$rg.'&p['.($offset).']='.$rp.'&typ['.($offset).']=d&f['.($offset).']=2';
+		$offset++;
+	}
 
 	//deffer & atter
 	$ticks = 0;
