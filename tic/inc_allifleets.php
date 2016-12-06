@@ -32,24 +32,6 @@
 	}
 ?>
 	<table width="100%">
-		<colgroup>
-			<col width="55" />
-			<col width="*" />
-			<col width="6%" />
-			<col width="6%" />
-			<col width="5%" />
-			<col width="5%" />
-			<col width="6%" />
-			<col width="6%" />
-			<col width="6%" />
-			<col width="6%" />
-			<col width="5%" />
-			<col width="5%" />
-			<col width="5%" />
-			<col width="5%" />
-			<col width="6%" />
-			<col width="6%" />
-		</colgroup>
 		<tr class="datatablehead">
 			<th>&nbsp;Sektor&nbsp;</th>
 			<th>&nbsp;Name&nbsp;</th>
@@ -60,14 +42,14 @@
 		<tr class="datatablehead">
 			<th>&nbsp;</th>
 			<th>&nbsp;</th>
-			<th>&nbsp;Alter&nbsp;</th>
+			<th title="letzter Import in Minuten">&nbsp;Alter&nbsp;</th>
 			<th title="Leichtes Orbitalgesch&uuml;tz">&nbsp;LO&nbsp;</th>
 			<th title="Leichtes Raumgesch&uuml;tz">&nbsp;LR&nbsp;</th>
 			<th title="Mittleres Raumgesch&uuml;tz">&nbsp;MR&nbsp;</th>
 			<th title="Schweres Raumgesch&uuml;tz">&nbsp;SR&nbsp;</th>
 			<th title="Abfangj&auml;ger">&nbsp;AJ&nbsp;</th>
 
-			<th>&nbsp;Alter&nbsp;</th>
+			<th title="letzter Import in Minuten">&nbsp;Alter&nbsp;</th>
 			<th title="J&auml;ger">&nbsp;J&auml;&nbsp;</th>
 			<th title="Bomber">&nbsp;Bo&nbsp;</th>
 			<th title="Fregatten">&nbsp;Fr&nbsp;</th>
@@ -161,7 +143,7 @@ LEFT JOIN `gn4scans` AS c
 			
 			echo "		<tr class=\"field".$ftype.($color ? "dark" : "light")."\">\n";
 			echo "			<td align=\"center\">&nbsp;".$gala.":".$planet."&nbsp;</td>\n";
-			echo "			<td>&nbsp;".$name."&nbsp;</td>\n";
+			echo "			<td>&nbsp;<a href='main.php?modul=showgalascans&xgala=".$gala."&xplanet=".$planet."&displaytype=0'>&raquo; ".$name."</a>&nbsp;</td>\n";
 			echo "			<td align='right' style='color: white; background-color: rgb(".$farbe1.", 0, 0)'>&nbsp;".ZahlZuText($alter2)."&nbsp;</td>\n";
 			echo "			<td align=\"right\">".ZahlZuText($lo)."</td>\n";
 			echo "			<td align=\"right\">".ZahlZuText($ro)."</td>\n";
@@ -235,22 +217,22 @@ LEFT JOIN `gn4scans` AS c
 		echo "			<td align=\"center\">Allianz</td>\n";
 		echo "			<td>Durchschnitt</td>\n";
 		echo '<td>&nbsp;</td>';
-		echo "			<td align=\"right\">".ZahlZuText($glo)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gro)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gmr)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gsr)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gaj)."</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($glo)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gro)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gmr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gsr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gaj)."&nbsp;</td>\n";
 
 		echo '<td>&nbsp;</td>';
-		echo "			<td align=\"right\">".ZahlZuText($gja)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gbo)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gfr)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gze)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gkr)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gsl)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gtr)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gka)."</td>\n";
-		echo "			<td align=\"right\">".ZahlZuText($gca)."</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gja)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gbo)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gfr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gze)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gkr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gsl)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gtr)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gka)."&nbsp;</td>\n";
+		echo "			<td align=\"right\">&nbsp;".ZahlZuText($gca)."&nbsp;</td>\n";
 
 		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott).'&nbsp;</td>';
 		echo '<td align="right">&nbsp;'.ZahlZuText($gschrott + $gca).'&nbsp;</td>';
@@ -259,7 +241,7 @@ LEFT JOIN `gn4scans` AS c
 	}
 	else
 	{
-		echo "<tr class=\"datatablefoot\" style=\"font-weight:bold;\"><td>Diese Allianz hat keine Mitglieder</td></tr>";
+		echo "<tr class=\"datatablefoot\" style=\"font-weight:bold;\"><td>&nbsp;Diese Allianz hat keine Mitglieder&nbsp;</td></tr>";
 	}
 
 ?>
