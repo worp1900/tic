@@ -318,7 +318,7 @@ class GNSimu_Multi
 		for($i = 0;$i < count($this->AttFleets);$i++)
 		{
 			if($this->AttFleets[$i]->ArrivalTick == $this->currentTick + $tick) {
-				for($j = 0;$j < 9;$j++)
+				for($j = 0; $j < 9;$j++)
 					$TotalAtt[$j] += $this->AttFleets[$i]->Ships[$j];
 				$this->AttFleets[$i]->OldShips = $this->AttFleets[$i]->Ships;
 			}
@@ -352,7 +352,13 @@ class GNSimu_Multi
 								continue;
 							$t = 0;
 							if($this->AttFleets[$k]->Ships[$j] > 0)
-								$t = round($TotalAtt[$j] / $this->AttFleets[$k]->Ships[$j] * $todel[$j]);
+								$t = round($this->AttFleets[$k]->Ships[$j] / $TotalAtt[$j] * $todel[$j]);
+							/*aprint(array(
+								'$t' => $t,
+								'$TotalAtt[$j]' => $TotalAtt[$j],
+								'$this->AttFleets[$k]->Ships[$j]' => $this->AttFleets[$k]->Ships[$j],
+								'$todel[$j]' => $todel[$j]
+							));*/
 							$this->AttFleets[$k]->LostShips[$j] += $t;
 							$this->AttFleets[$k]->Ships[$j] -= $t;
 							$abschuesse[$j] += $t;
