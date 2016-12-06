@@ -267,12 +267,16 @@ function aprint($val, $txt = null) {
 }
 
 function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
+	//deffer hat orbbash?
+	list($pretick_einschalten) = mysql_fetch_row(tic_mysql_query("SELECT s.glr + s.gmr + s.gsr > 0 FROM gn4scans s WHERE s.type = 3 AND s.rg = '".$rg."' AND s.rp = '".$rp."'"));
+	
+	//modus=1 att; modus=2 deff
 	$sql = 'SELECT
 			angreifer_galaxie g,
 			angreifer_planet p,
 			flugzeit,
 			flottennr,
-			floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2))) / (15*60)) as tick,
+			floor((ankunft - (SELECT MIN(ankunft) FROM gn4flottenbewegungen WHERE ankunft > UNIX_TIMESTAMP(NOW()) AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1))) / (15*60)) as tick,
 			IF(modus = 1, "a", "d") typ
 		FROM gn4flottenbewegungen
 		WHERE ankunft > UNIX_TIMESTAMP(NOW()) - flugzeit * 15 * 60 AND (verteidiger_galaxie = "'.$rg.'" and verteidiger_planet = "'.$rp.'") AND modus IN (1, 2)';
@@ -349,14 +353,17 @@ function getKampfSimuLinksForTarget($rg, $rp, $linkName) {
 		$g = mysql_result($res, $i, "g");
 		$p = mysql_result($res, $i, "p");
 		$typ = mysql_result($res, $i, "typ");
-		$ankunft = mysql_result($res, $i, "tick") + 1;
+		
+		$tmptick = mysql_result($res, $i, "tick");
+		$ankunft = ($tmptick < 0 ? 0 : $tmptick) + 1;
+		
 		$dauer = mysql_result($res, $i, "flugzeit");
 		$link .= '&g['.($i+$offset).']='.$g.'&p['.($i+$offset).']='.$p.'&typ['.($i+$offset).']='.$typ.'&f['.($i+$offset).']='.$f.'&ankunft['.($i+$offset).']='.$ankunft.'&aufenthalt['.($i+$offset).']='.$dauer;
 
 		$ticks = ($typ == 'a' && ($ankunft + $dauer > $ticks)) ? $ankunft + $dauer -1 : $ticks;
 	}
 
-	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks=1&ticks='.$ticks.'&num_flotten='.($num + $offset - 1).$link.'#oben">'.$linkName.'</a>';
+	return '<a href="main.php?modul=kampf&referenz=eintragen&compute=Berechnen&preticks='.$pretick_einschalten.'&ticks='.$ticks.'&num_flotten='.($num + $offset - 1).$link.'#FIGHT">'.$linkName.'</a>'; //oben wäre andrer anker.
 }
 
 function GetScans($SQL_DBConn, $galaxie, $planet) {

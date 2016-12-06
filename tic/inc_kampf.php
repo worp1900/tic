@@ -502,7 +502,7 @@ echo '<tr><td colspan="'.($num_flotten+2).'" align="center"><input tabindex="150
 if($ticks<1)
 	$ticks=1;
 
-
+echo '<a name="FIGHT"></a>';
 if(postOrGet('compute')) {
 	//sort gnsimu-
 	$gnsimu_m->sortFleets();
