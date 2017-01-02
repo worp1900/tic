@@ -9,6 +9,9 @@
     <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=allianz">Alli-&Uuml;bersicht</a></td>
   </tr>
   <tr>
+    <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=updatehist">Taktikupdates</a></td>
+  </tr>
+  <tr>
     <td bgcolor="#6490BB" class="fieldnormallight" width="137"><a href="./main.php?modul=scanner">Scanner</a></td>
   </tr>
   <tr>
