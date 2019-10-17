@@ -1,6 +1,6 @@
 <!-- START: inc_summary -->
 <?php
-	$SQL_Query = "SELECT id, tag, ticid FROM `gn4allianzen`;";
+	$SQL_Query = "SELECT id, tag, ticid FROM `gn4allianzen` order by display_pos desc;";
 	$SQL_Result_Alli = tic_mysql_query($SQL_Query) or die(tic_mysql_error(__FILE__,__LINE__));
 	$alli_anzahl=mysql_num_rows($SQL_Result_Alli);
 	if ($alli_anzahl<8) {

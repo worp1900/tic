@@ -824,54 +824,6 @@ function OnMouseFlotte($galaxie, $planet, $punkte, $stype) {
 }
 
 
-function check_attflottenstatus($id,$flnr,$rg,$rp,$AttStatus,$lfd) {
-  // 0 Vorbereitung gelb
-  // 1 abgeflogen / gestartert gruen
-  // 2 rueckflug / Abbruch rot
-  global $ATTETA;
-  global $tick_abzug;
-
-  $ret =0;
-  $SQL = 'SELECT * FROM `gn4accounts` WHERE id ="'.$id.'";';
-	  $SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
-	  $SQL_Num = mysql_num_rows($SQL_Result);
-
-	  if ($SQL_Num != 0) {
-		  $ug = mysql_result($SQL_Result, 0, 'galaxie');
-	$up = mysql_result($SQL_Result, 0, 'planet');
-
-	$SQL = 'SELECT * FROM gn4flottenbewegungen WHERE angreifer_galaxie='.$ug.' AND angreifer_planet='.$up.' AND verteidiger_galaxie='.$rg.' AND verteidiger_planet='.$rp.' and (flottennr = '.$flnr.' or flottennr =0);';
-	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
-	$SQL_Num = mysql_num_rows($SQL_Result);
-	  if ($SQL_Num != 0) {
-		// 1 angriff
-		// 2 deff rueckflug
-		// 3 rueckflug att
-		// 4 rueckflug deff
-		$modus = mysql_result($SQL_Result, 0, 'modus');
-		$flottennr = mysql_result($SQL_Result, 0, 'flottennr');
-		if ($modus == 1 ) {
-// Eta ermitteln
-				 $time1 = mysql_result($SQL_Result, 0, 'ankunft');
-				 $time2 = mysql_result($SQL_Result, 0, 'flugzeit_ende');
-				 $time3 = mysql_result($SQL_Result, 0, 'ruckflug_ende');
-					 $ATTETA = getime4display(eta($time1) * $Ticks['lange'] - $tick_abzug);
-
-		   $ret = 1;
-		   if ($AttStatus < 2) {
-			   // eine flotte ist gestaret .. Status wird geaendert
-			  $SQL = 'UPDATE gn4attplanung set attstatus = 2 where lfd='.$lfd.';';
-			  $SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));
-		   }
-
-		} else if ($modus == 3) {
-		   $ret = 2;
-		}
-	}
- }
- return $ret;
-}
-
 function del_attplanlfd($lfd) {
 	$SQL = 'DELETE FROM gn4attflotten WHERE lfd ='.$lfd.';';
 	$SQL_Result = tic_mysql_query($SQL) or die(tic_mysql_error(__FILE__,__LINE__));

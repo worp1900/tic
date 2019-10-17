@@ -583,14 +583,15 @@ class GNSimu_Multi
 					$t = 0;
 					if($this->AttFleets[$j]->Ships[$i] > 0)
 						$t = round($this->AttFleets[$j]->Ships[$i] / $ref * $ToDestroyAtt[$i], 0);
-					/*aprint(array(
+/*					
+					aprint(array(
 						'$i' => $i,
 						'$this->AttFleets[$j]->Ships[$i]' => $this->AttFleets[$j]->Ships[$i],
 						'$TotalAtt[$i]' => $TotalAtt[$i],
 						'$ToDestroyAtt[$i]' => $ToDestroyAtt[$i],
 						'$t' => $t
-					), 'ToDestroy');*/
-
+					), 'ToDestroy');
+*/
 					if($t > 0) {
 						$this->AttFleets[$j]->LostShips[$i] += $t;
 						$this->AttFleets[$j]->Ships[$i] -= $t;
@@ -598,6 +599,7 @@ class GNSimu_Multi
 							$this->AttFleets[$j]->Ships[$i] = 0;
 						$TotalAtt[$i] -= $t;
 					}
+//aprint($TotalAtt);
 				}
 			}
 			if($TotalDeff[$i] > 0 && $ToDestroyDeff[$i] > 0)
@@ -722,6 +724,8 @@ aprint(array(
 		$this->finalize();
 
 		//aprint($this->DeffFleets);
+		//aprint($TotalDeff);
+		//aprint($TotalAtt);
 
 		//Dann noch mal eben schnell paar exen klauen
 		//Erstmall ausrechnen, wie viele maximal mitgenommen werden k?nen, bin der Meinung mal Iregndwo im Forum gelesen zu haben, dass Metall- auf- und Kristallexen abgerundet werden

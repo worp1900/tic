@@ -503,7 +503,7 @@ if(isset($_GET['displaytype']) && $_GET['displaytype'] === 'news') {
 			<td class="fieldnormaldark"><b>Schiffe</b></td>
 			<td class="fieldnormaldark"><b>Defensiv</b></td>
 			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for IRC</b></td>
-			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for Slack</b></td>
+			<td colspan="2" bgcolor="#dbdbbb"><b>Copy for WA/Slack</b></td>
 			<td class="fieldnormaldark"><b>Genauigkeit</b></td>
 			<td class="fieldnormaldark"><b>SVS</b></td>
 			<td class="fieldnormaldark"><b>Datum</b></td>

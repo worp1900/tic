@@ -903,6 +903,99 @@ if(empty($project)) {
 			echo '<table style="border-spacing: 10px;"><tr><td></td><td rowspan="'.($num+1).'" style="padding-left: 40px; padding-top: 20px; vertical-align: top;">';
 			if(count($detail) > 1) {
 				echo 'Detailinformation:';
+				
+				if(postOrGet('koord')) {
+					$tmp = explode(':', postOrGet('koord'));
+					if(count($tmp) == 2) {
+
+						$sql3 = "SET @project = '".mysql_real_escape_string($project)."',
+									@welle = '".mysql_real_escape_string($wave)."',
+									@gal = '".mysql_real_escape_string($tmp[0])."',
+									@pla = '".mysql_real_escape_string($tmp[1])."'";
+						$sql4 = "SELECT s.spieler_name, s.spieler_punkte,
+										s0.me,
+										s0.ke, 
+										s3.ga, s3.glo, s3.glr, s3.gmr, s3.gsr,
+										s1.sfj, s1.sfb, s1.sff, s1.sfz, s1.sfkr, s1.sfsa, s1.sft, s1.sfka, s1.sfsu
+									FROM gn4massinc_ziele_welle zw
+									LEFT JOIN gn4scans s0 ON s0.rg = zw.ziel_gal AND s0.rp = ziel_pla AND s0.type = 0
+									LEFT JOIN gn4scans s1 ON s1.rg = zw.ziel_gal AND s1.rp = ziel_pla AND s1.type = 1
+									LEFT JOIN gn4scans s3 ON s3.rg = zw.ziel_gal AND s3.rp = ziel_pla AND s3.type = 3
+									LEFT JOIN gn_spieler2 s ON s.spieler_galaxie = zw.ziel_gal AND s.spieler_planet = zw.ziel_pla
+									WHERE zw.project_fk = @project AND zw.welle = @welle AND zw.ziel_gal = @gal AND zw.ziel_pla = @pla
+									ORDER BY s.spieler_punkte DESC, zw.ziel_gal, zw.ziel_pla";
+						if($SQL_DEBUG) aprint(join(';', array($sql3, $sql4)));
+						tic_mysql_query($sql3, __FILE__, __LINE__);
+						$res3 = tic_mysql_query($sql4, __FILE__, __LINE__);
+						$num2 = mysql_num_rows($res3);
+						if($num2 == 1) {
+							$res3 = mysql_fetch_array($res3);
+							
+							echo '<table>';
+							echo '  <tr class="datatablehead">';
+							echo '    <td colspan="5">'.$tmp[0].':'.$tmp[1].' '.$res3['spieler_name'].'</td>';
+							echo '  </tr>';
+							echo '  <tr class="fieldnormaldark" style="font-weight: bold;">';
+							echo '    <td>Punkte</td>';
+							echo '    <td>MetExen</td>';
+							echo '    <td>KrisExen</td>';
+							echo '    <td>Schiffe</td>';
+							echo '    <td>Defensiv</td>';
+							echo '  </tr>';
+							echo '  <tr class="fieldnormallight">';
+							echo '    <td>'.($res3['spieler_punkte'] ? ZahlZuText($res3['spieler_punkte']) : '-').'</td>';
+							echo '    <td>'.($res3['me'] ? ZahlZuText($res3['me']) : '-').'</td>';
+							echo '    <td>'.($res3['ke'] ? ZahlZuText($res3['ke']) : '-').'</td>';
+							echo '    <td><i>tba</i></td>';
+							echo '    <td><i>tba</i></td>';
+							echo '  <tr class="fieldnormaldark" style="font-weight: bold;">';
+							echo '    <td>LO</td>';
+							echo '    <td>LR</td>';
+							echo '    <td>MR</td>';
+							echo '    <td>SR</td>';
+							echo '    <td>AJ</td>';
+							echo '  </tr>';
+							echo '  <tr class="fieldnormallight">';
+							echo '    <td>'.($res3['glo'] ? ZahlZuText($res3['glo']) : '-').'</td>';
+							echo '    <td>'.($res3['glr'] ? ZahlZuText($res3['glr']) : '-').'</td>';
+							echo '    <td>'.($res3['gmr'] ? ZahlZuText($res3['gmr']) : '-').'</td>';
+							echo '    <td>'.($res3['gsr'] ? ZahlZuText($res3['gsr']) : '-').'</td>';
+							echo '    <td>'.($res3['ga'] ? ZahlZuText($res3['ga']) : '-').'</td>';
+							echo '  </tr>';
+							echo '  <tr>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">J&auml;ger</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfj'] ? ZahlZuText($res3['sfj']) : '-').'</td>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Bomber</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfb'] ? ZahlZuText($res3['sfb']) : '-').'</td>';
+							echo '  </tr>';
+							echo '  <tr>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Fregatten</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sff'] ? ZahlZuText($res3['sff']) : '-').'</td>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Zerst&ouml;rer</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfz'] ? ZahlZuText($res3['sfz']) : '-').'</td>';
+							echo '  </tr>';
+							echo '  <tr>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Kreuzer</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfkr'] ? ZahlZuText($res3['sfkr']) : '-').'</td>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Schlachschiffe</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfsa'] ? ZahlZuText($res3['sfsa']) : '-').'</td>';
+							echo '  </tr>';
+							echo '  <tr>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Tr&auml;ger</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sft'] ? ZahlZuText($res3['sft']) : '-').'</td>';
+							echo '  </tr>';
+							echo '  <tr>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Cleps</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfka'] ? ZahlZuText($res3['sfka']) : '-').'</td>';
+							echo '    <td class="fieldnormaldark" style="font-weight: bold;">Cancs</td>';
+							echo '    <td class="fieldnormallight">'.($res3['sfsu'] ? ZahlZuText($res3['sfsu']) : '-').'</td>';
+							echo '  </tr>';
+							echo '</table>';
+						} else {
+							showError('Interner Fehler.');
+						}
+					}//is valid koord
+				}//koord
 			} else {
 				echo '<i>Bitte w&auml;hle ein Ziel, um Details einzusehen.</i>';
 			}
