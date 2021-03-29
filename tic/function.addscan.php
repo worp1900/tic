@@ -125,7 +125,7 @@ function parseLine( $line_in) {
 			$daten = explode(' ', trim($zeilen[0]));		// Sektorscan Ergebnis (Genauigkeit:100%)
 			$scan_typ = trim($daten[0]);
 
-			if (preg_match("/(Flottenbewegungen[^路]*路  Nachricht an die gesamte Galaxie senden 路路禄)/u", $txtScanOrg, $ereg_tmp) or preg_match('/DC.Publisher/', urldecode($txtScanOrg))) { // 3
+			if (preg_match("/(Flottenbewegungen[^脗路]*脗路  Nachricht an die gesamte Galaxie senden 脗路脗路脗禄)/u", $txtScanOrg, $ereg_tmp) or preg_match('/DC.Publisher/', urldecode($txtScanOrg))) { // 3
 				$html = urldecode($txtScanOrg);
 				$flottenbewegungen = array();
 				if (preg_match('/DC.Publisher/', $html)) { // 4: Wir haben HTML-Code bekommen!
@@ -216,7 +216,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace( "Greift an", "Greift_an", $text_in );
 					$text_in = str_replace( "Wird angegriffen von", "Wird_angegriffen_von", $text_in );
 					$text_in = str_replace( "Wird verteidigt von", "Wird_verteidigt_von", $text_in );
-					$text_in = str_replace( "路  Nachricht an die gesamte Galaxie senden 路路禄", "路__Nachricht_an_die_gesamte_Galaxie_senden_路路禄", $text_in );
+					$text_in = str_replace( "脗路  Nachricht an die gesamte Galaxie senden 脗路脗路脗禄", "脗路__Nachricht_an_die_gesamte_Galaxie_senden_脗路脗路脗禄", $text_in );
 					$text_in = str_replace( " *", "", $text_in );
 					$text_in = str_replace( " Min", "m", $text_in );
 					$text_in = str_replace( " Std", "s", $text_in );
@@ -226,7 +226,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace(chr(32).chr(13).chr(10).chr(32).chr(13).chr(10), chr(32).chr(13).chr(10), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10), chr(13).chr(10), $text_in );
 					$text_in = preg_replace( "/(\d+\:\d+)[ ".chr(9)."]([^".chr(10).chr(13)."])/", "$1-$2", $text_in );
-					$text_in = preg_replace( "/R眉ckflug".chr(13).chr(10)."\((\d+\:\d+)-([^".chr(10).chr(13)."]*)\)/", "R眉ckflug-$1-$2", $text_in );
+					$text_in = preg_replace( "/R脙录ckflug".chr(13).chr(10)."\((\d+\:\d+)-([^".chr(10).chr(13)."]*)\)/", "R脙录ckflug-$1-$2", $text_in );
 					$text_in = str_replace(chr(32), chr(9), $text_in );
 					$text_in = str_replace(chr(13).chr(10).chr(9), chr(9), $text_in );
 					$text_in = str_replace("-".chr(9), chr(9), $text_in );
@@ -308,8 +308,8 @@ function parseLine( $line_in) {
 								} // 8
 								for ($ii = 0; $ii < sizeof($flotten); $ii++) { // 8
 									$modus = 1;
-									if ( ereg ( "R眉ckflug-", $flotten[$ii]) ) { // 9
-										$flotten[$ii] = str_replace("R眉ckflug-", "", $flotten[$ii]);
+									if ( ereg ( "R脙录ckflug-", $flotten[$ii]) ) { // 9
+										$flotten[$ii] = str_replace("R脙录ckflug-", "", $flotten[$ii]);
 										$modus += 2;
 									} // 9
 									if ( ereg ( "([^:]*):([^-]*)-(.*)", $flotten[$ii], $ftemp) ) { // 9
@@ -338,8 +338,8 @@ function parseLine( $line_in) {
 								} // 8
 								for ($ii = 0; $ii < sizeof($flotten); $ii++) { // 8
 									$modus = 2;
-									if ( ereg ( "R眉ckflug-", $flotten[$ii]) ) { // 9
-										$flotten[$ii] = str_replace("R眉ckflug-", "", $flotten[$ii]);
+									if ( ereg ( "R脙录ckflug-", $flotten[$ii]) ) { // 9
+										$flotten[$ii] = str_replace("R脙录ckflug-", "", $flotten[$ii]);
 										$modus += 2;
 									} // 9
 									if ( ereg ( "([^:]*):([^-]*)-(.*)", $flotten[$ii], $ftemp) ) { // 9
@@ -465,7 +465,7 @@ function parseLine( $line_in) {
 
 			} // 3
 
-			if (ereg("(Galaxiemitglieder[^路]*路  Nachricht an die gesamte Galaxie senden 路路禄)", $txtScanOrg, $ereg_tmp) || 
+			if (ereg("(Galaxiemitglieder[^脗路]*脗路  Nachricht an die gesamte Galaxie senden 脗路脗路脗禄)", $txtScanOrg, $ereg_tmp) || 
 					ereg("Galaxiemitglieder.*Nachricht an die gesamte Galaxie senden", urldecode($txtScanOrg), $throwaway)) { // 3
 					$text_in = $ereg_tmp[1];
 				$html = urldecode($txtScanOrg);
@@ -528,7 +528,7 @@ function parseLine( $line_in) {
 					$text_in = str_replace( "Extraktoren [Metall/Kristall]", "Extraktoren", $text_in );
 					$text_in = str_replace( " / ", "/", $text_in );
 					$text_in = str_replace( " *", "", $text_in );
-					$text_in = str_replace( "路  Nachricht an die gesamte Galaxie senden 路路禄", "路__Nachricht_an_die_gesamte_Galaxie_senden_路路禄", $text_in );
+					$text_in = str_replace( "脗路  Nachricht an die gesamte Galaxie senden 脗路脗路脗禄", "脗路__Nachricht_an_die_gesamte_Galaxie_senden_脗路脗路脗禄", $text_in );
 					$text_in = str_replace(chr(32).chr(9), chr(9), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10).chr(32).chr(13).chr(10), chr(32).chr(13).chr(10), $text_in );
 					$text_in = str_replace(chr(32).chr(13).chr(10), chr(13).chr(10), $text_in );
@@ -551,7 +551,9 @@ function parseLine( $line_in) {
 								array_shift($temparray);
 								array_push($galaxie, $temparray);
 							} // 7
-							$text_reg = ereg_replace( quotemeta($line_reg[1]).chr(13).chr(10), "", $text_reg);
+							#$text_reg = preg_replace( "/".quotemeta($line_reg[1]).chr(13).chr(10)."/", "", $text_reg);
+							#fixed this line
+							$text_reg = str_replace($line_reg[1], "", $text_reg);
 							$break = false;
 						} // 6
 						$break_it++;
@@ -567,9 +569,13 @@ function parseLine( $line_in) {
 							$local_galaxy = $temp[1];
 							$local_planet = $temp[2];
 							$local_name = $temp[3];
-							ereg ( "([^/]*)/(.*)", $galaxie[$i][4], $temp);
-							$mex = $temp[1];
-							$kex = $temp[2];
+							#fixed this line
+							#preg_match ( "/([^/]*)/(.*)/", $galaxie[$i][4], $temp);
+							#$mex = $temp[1];
+							#$kex = $temp[2];
+							$teile = explode ("/", $galaxie[$i][4]);
+							$mex = $teile[0];
+							$kex = $teile[1];
 							array_push($galaxiemitglieder, array("galaxie" => $local_galaxy, "planet" => $local_planet, "name" => $local_name, "punkte" => str_replace(".", "", $galaxie[$i][1]), "flotte" => $galaxie[$i][2], "geschuetze" => $galaxie[$i][3], "mextraktoren" => $mex, "kextraktoren" => $kex, "asteroiden" => $galaxie[$i][5]));
 						} // 6
 					} // 5
@@ -599,7 +605,7 @@ function parseLine( $line_in) {
                     $idx = 2;   // opera
                 } // 4
 
-                $daten = parseLine( $zeilen[$idx] );            // J鋑er
+                $daten = parseLine( $zeilen[$idx] );            // J盲ger
                 $scan_sf0j = trim(   $daten[1]);
                 $scan_sf1j = trim(   $daten[2]);
                 $scan_sf2j = trim(   $daten[3]);
@@ -635,7 +641,7 @@ function parseLine( $line_in) {
                 $scan_sf2sa = trim(   $daten[3]);
 
                 $idx++;
-                $daten = parseLine( $zeilen[$idx] );            // tr鋑er
+                $daten = parseLine( $zeilen[$idx] );            // tr盲ger
                 $scan_sf0t  = trim(   $daten[1]);
                 $scan_sf1t  = trim(   $daten[2]);
                 $scan_sf2t  = trim(   $daten[3]);
@@ -673,7 +679,7 @@ function parseLine( $line_in) {
 
                 // insert unit  ............................................
                 $scan_type = 1;
-                // j鋑er
+                // j盲ger
                 $scan_sfj = $scan_sf0j + $scan_sf1j +$scan_sf2j;
 
                 // bomber
@@ -691,7 +697,7 @@ function parseLine( $line_in) {
                 // schlachter
                 $scan_sfsa = $scan_sf0sa + $scan_sf1sa + $scan_sf2sa;
 
-                // tr鋑er
+                // tr盲ger
                 $scan_sft  = $scan_sf0t  + $scan_sf1t + $scan_sf2t;
 
                 // komisches ding
@@ -733,23 +739,23 @@ function parseLine( $line_in) {
                 } // 4
                 if ( strstr( $zeilen[$idx2], 'Verteidigungseinheiten') ){ // Verteidigungseinheiten sind vorhanden // 4
                     $scan_type = 3;
-                    $daten = strchr( $zeilen[$idx] , ':' );            // Leichtes Orbitalgesch黷z 400
+                    $daten = strchr( $zeilen[$idx] , ':' );            // Leichtes Orbitalgesch眉tz 400
                     $daten = substr( $daten, 1 );
                     $scan_glo = trim($daten);
                     $idx++;
-                    $daten = strchr( $zeilen[$idx] , ':' );            // Leichtes Raumgesch黷z 0
+                    $daten = strchr( $zeilen[$idx] , ':' );            // Leichtes Raumgesch眉tz 0
                     $daten = substr( $daten, 1 );
                     $scan_glr = trim($daten);
                     $idx++;
-                    $daten = strchr( $zeilen[$idx] , ':' );            // Mittleres Raumgesch黷z 0
+                    $daten = strchr( $zeilen[$idx] , ':' );            // Mittleres Raumgesch眉tz 0
                     $daten = substr( $daten, 1 );
                     $scan_gmr = trim($daten);
                     $idx++;
-                    $daten = strchr( $zeilen[$idx] , ':' );            // Schweres Raumgesch黷z 0
+                    $daten = strchr( $zeilen[$idx] , ':' );            // Schweres Raumgesch眉tz 0
                     $daten = substr( $daten, 1 );
                     $scan_gsr = trim($daten);
                     $idx++;
-                    $daten = strchr( $zeilen[$idx] , ':' );            // Abfangj鋑er 1000
+                    $daten = strchr( $zeilen[$idx] , ':' );            // Abfangj盲ger 1000
                     $daten = substr( $daten, 1 );
                     $scan_ga = trim($daten);
                     $scan_gr = 0;                                 // raumbasis
@@ -797,19 +803,19 @@ aprint($sql);
             } // 3
             if ($scan_typ == 'Einheitenscan') { // 3
                 $scan_type = 1;
-                $daten = parseLine( $zeilen[3]);            // J鋑er 0
+                $daten = parseLine( $zeilen[3]);            // J盲ger 0
                 $scan_sfj = trim($daten[3]);
                 $daten = parseLine( $zeilen[4]);            // Bomber 0
                 $scan_sfb = trim($daten[3]);
                 $daten = parseLine( $zeilen[5]);            // Fregatte 0
                 $scan_sff = trim($daten[3]);
-                $daten = parseLine( $zeilen[6]);            // Zerst鰎er 0
+                $daten = parseLine( $zeilen[6]);            // Zerst枚rer 0
                 $scan_sfz = trim($daten[3]);
                 $daten = parseLine( $zeilen[7]);            // Kreuzer 0
                 $scan_sfkr = trim($daten[3]);
                 $daten = parseLine( $zeilen[8]);            // Schlachtschiff 0
                 $scan_sfsa = trim($daten[3]);
-                $daten = parseLine( $zeilen[9]);            // Tr鋑erschiff 0
+                $daten = parseLine( $zeilen[9]);            // Tr盲gerschiff 0
                 $scan_sft = trim($daten[3]);
 //                $daten = explode(' ', trim($zeilen[10]));           // Kommandoschiff 0
                 $scan_sfko = 0;
@@ -824,14 +830,14 @@ aprint($sql);
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
             } // 3
 
-			if ($scan_typ == 'Milit盲can') { // 3
+			if ($scan_typ == 'Milit脙陇can') { // 3
 				$scan_type = 2;
 					for($n = 0; $n <= 50; $n++) { // 4
 						if (!isset($zeilen[$n])) $zeilen[$n] = '0';
 						$zeilen[$n] = str_replace(',', '', $zeilen[$n]);
 					} // 4
 
-					$daten = parseLine( $zeilen[4]);            // J鋑er
+					$daten = parseLine( $zeilen[4]);            // J盲ger
 					$scan_sf0j = trim(   $daten[3]);
 					$scan_sf1j = trim(   $daten[4]);
 					$scan_sf2j = trim(   $daten[5]);
@@ -861,7 +867,7 @@ aprint($sql);
 					$scan_sf1sa = trim(   $daten[4]);
 					$scan_sf2sa = trim(   $daten[5]);
 
-					$daten = parseLine( $zeilen[10]);            // tr鋑er
+					$daten = parseLine( $zeilen[10]);            // tr盲ger
 					$scan_sf0t  = trim(   $daten[3]);
 					$scan_sf1t  = trim(   $daten[4]);
 					$scan_sf2t  = trim(   $daten[5]);
@@ -889,7 +895,7 @@ aprint($sql);
 						case 'Im': // orbit
 							$scan_status1 = 0;
 							break;
-						case 'R眉ckflug':
+						case 'R脙录ckflug':
 							$scan_status1 = 3 ;
 							break;
 						case 'Angriffsflug':
@@ -906,7 +912,7 @@ aprint($sql);
 						case 'Im': // orbit
 							$scan_status2 = 0;
 							break;
-						case 'R眉ckflug':
+						case 'R脙录ckflug':
 							$scan_status2 = 3;
 							break;
 						case 'Angriffsflug':
@@ -958,13 +964,13 @@ aprint($sql);
 
 					// insert unit  ............................................
 					$scan_type = 1;
-					$scan_sfj = $scan_sf0j + $scan_sf1j + $scan_sf2j; // j鋑er
+					$scan_sfj = $scan_sf0j + $scan_sf1j + $scan_sf2j; // j盲ger
 					$scan_sfb = $scan_sf0b + $scan_sf1b + $scan_sf2b; // bomber
 					$scan_sff = $scan_sf0f + $scan_sf1f + $scan_sf2f; // fregs
 					$scan_sfz = $scan_sf0z + $scan_sf1z + $scan_sf2z; // zerries
 					$scan_sfkr = $scan_sf0kr + $scan_sf1kr + $scan_sf2kr; // kreuzer
 					$scan_sfsa = $scan_sf0sa + $scan_sf1sa + $scan_sf2sa; // schlachter
-					$scan_sft  = $scan_sf0t  + $scan_sf1t + $scan_sf2t; // tr鋑er
+					$scan_sft  = $scan_sf0t  + $scan_sf1t + $scan_sf2t; // tr盲ger
 					$sfko = 0; // komisches ding
 					$scan_sfka = $scan_sf0ka + $scan_sf1ka + $scan_sf2ka; // Kaper
 					$scan_sfsu = $scan_sf0su + $scan_sf1su +$scan_sf2su; // schutzies
@@ -974,24 +980,24 @@ aprint($sql);
 					$insert_values = '"'.$scan_sfj.'", "'.$scan_sfb.'", "'.$scan_sff.'", "'.$scan_sfz.'", "'.$scan_sfkr.'", "'.$scan_sfsa.'", "'.$scan_sft.'", "'.$scan_sfko.'", "'.$scan_sfka.'", "'.$scan_sfsu.'"';
 					$SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
 				} // 2
-            if ($scan_typ == 'Gesch眉tzscan') { // 2
+            if ($scan_typ == 'Gesch脙录tzscan') { // 2
                 $scan_type = 3;
-                $daten = parseLine( $zeilen[3]);            // Leichtes Orbitalgesch黷z 400
+                $daten = parseLine( $zeilen[3]);            // Leichtes Orbitalgesch眉tz 400
                 $scan_glo = trim($daten[4]);
-                $daten = parseLine( $zeilen[4]);            // Leichtes Raumgesch黷z 0
+                $daten = parseLine( $zeilen[4]);            // Leichtes Raumgesch眉tz 0
                 $scan_glr = trim($daten[4]);
-                $daten = parseLine( $zeilen[5]);            // Mittleres Raumgesch黷z 0
+                $daten = parseLine( $zeilen[5]);            // Mittleres Raumgesch眉tz 0
                 $scan_gmr = trim($daten[4]);
-                $daten = parseLine( $zeilen[6]);            // Schweres Raumgesch黷z 0
+                $daten = parseLine( $zeilen[6]);            // Schweres Raumgesch眉tz 0
                 $scan_gsr = trim($daten[4]);
-                $daten = parseLine( $zeilen[7]);            // Abfangj鋑er 1000
+                $daten = parseLine( $zeilen[7]);            // Abfangj盲ger 1000
                 $scan_ga = trim($daten[3]);
                 addgnuser($scan_rg, $scan_rp, $scan_rn);
                 $SQL_Result = tic_mysql_query('DELETE FROM `gn4scans` WHERE rg="'.$scan_rg.'" and rp="'.$scan_rp.'" AND type="'.$scan_type.'";', $SQL_DBConn);
                 $insert_names = 'glo, glr, gmr, gsr, ga';
                 $insert_values = '"'.$scan_glo.'", "'.$scan_glr.'", "'.$scan_gmr.'", "'.$scan_gsr.'", "'.$scan_ga.'"';
                 $SQL_Result = tic_mysql_query('INSERT INTO `gn4scans` (type, zeit, g, p, rg, rp, gen, '.$insert_names.') VALUES ("'.$scan_type.'", "'.date("H:i d.m.Y").'", "'.$Benutzer['galaxie'].'", "'.$Benutzer['planet'].'", "'.$scan_rg.'", "'.$scan_rp.'", "'.$scan_gen.'", '.$insert_values.');', $SQL_DBConn) or die('ERROR 2 Konnte Datensatz nicht schreiben');
-            } // 2 scantyp gesch黷ze
+            } // 2 scantyp gesch眉tze
 
 			//aprint($zeilen);
 			if(strpos(trim($zeilen[0]), 'Scan Block') !== false) {
